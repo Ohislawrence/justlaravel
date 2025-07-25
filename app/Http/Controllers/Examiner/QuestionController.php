@@ -81,6 +81,8 @@ class QuestionController extends Controller
         }
 
         $question = $quiz->questions()->create($validated);
+
+       // ActivityService::logQuizCreated($pool, auth()->user());
         
         return redirect()->route('examiner.quizzes.questions.index', $quiz)
                          ->with('success', 'Question created successfully.');

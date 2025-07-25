@@ -42,6 +42,12 @@ class Question extends Model
         return $this->belongsToMany(QuestionPool::class, 'question_pool_items')
                     ->withTimestamps();
     }
+    
+    public function poolItems()
+    {
+        return $this->hasMany(QuestionPoolItem::class);
+    }
+
 
     public function responses()
     {

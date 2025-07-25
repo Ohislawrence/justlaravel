@@ -148,14 +148,25 @@ const deleteQuiz = (quiz) => {
                                             {{ quiz.quiz_type }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <Link 
-                                                :href="route('examiner.quizzes.questions.index', { quiz: quiz.id })" 
-                                                class="text-blue-600 hover:text-blue-800 font-medium"
-                                                title="Manage Questions"
-                                            >
-                                                {{ quiz.questions_count }} 
-                                                <i class="fas fa-list-ul ml-1"></i>
-                                            </Link>
+                                            <div class="group relative inline-block">
+                                                <Link 
+                                                    :href="route('examiner.quizzes.questions.index', { quiz: quiz.id })" 
+                                                    class="text-blue-600 hover:text-blue-800 font-medium"
+                                                >
+                                                    <span v-if="quiz.questions_count === quiz.total_questions">
+                                                        {{ quiz.questions_count }}
+                                                    </span>
+                                                    <span v-else>
+                                                        {{ quiz.questions_count }} ({{ quiz.total_questions }} total)
+                                                    </span>
+                                                    <i class="fas fa-list-ul ml-1"></i>
+                                                </Link>
+                                                <span v-if="quiz.questions_count !== quiz.total_questions" 
+                                                    class="absolute z-10 hidden group-hover:block w-64 p-2 text-sm bg-gray-800 text-white rounded shadow-lg">
+                                                    {{ quiz.questions_count }} direct questions + 
+                                                    {{ quiz.total_questions - quiz.questions_count }} from pools
+                                                </span>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ quiz.attempts_count }}

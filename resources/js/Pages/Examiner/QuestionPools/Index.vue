@@ -98,7 +98,7 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-900">{{ pool.questions_count }}</span>
+                      <span class="text-sm font-medium text-gray-900">{{ pool.questions.count }}</span>
                       <span class="ml-2 text-xs text-gray-500">
                         {{ pool.questions_count === 1 ? 'question' : 'questions' }}
                       </span>

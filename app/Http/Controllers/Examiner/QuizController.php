@@ -25,11 +25,31 @@ class QuizController extends Controller
     public function index()
     {
         $organization = auth()->user()->organizations()->first();
+        
         $quizzes = $organization->quizzes()
+            ->with(['questions', 'questionPools' => function($query) {
+                $query->withCount('questions');
+            }])
             ->withCount(['questions', 'attempts'])
             ->latest()
             ->paginate(10);
-
+    
+        // Transform the collection to include total_questions
+        $quizzes->getCollection()->transform(function($quiz) {
+            // Calculate total questions (direct + from pools)
+            $directQuestions = $quiz->questions_count;
+            $poolQuestions = $quiz->questionPools->sum(function($pool) {
+                return min(
+                    $pool->questions_count, 
+                    $pool->pivot->questions_to_show ?? $pool->questions_count
+                );
+            });
+            
+            //$quiz->questions_count = $directQuestions ;
+            $quiz->total_questions = $directQuestions + $poolQuestions;
+            return $quiz;
+        });
+    
         return inertia('Examiner/Quizzes/Index', [
             'organization' => $organization,
             'quizzes' => $quizzes->withQueryString(),
@@ -107,66 +127,45 @@ class QuizController extends Controller
             'passing_score' => ['nullable', 'integer', 'min:0', 'max:100'],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
-            'settings' => ['nullable', 'array'],
-            'pools' => 'nullable|array',
-            'pools.*.name' => 'required|string',
-            'pools.*.description' => 'nullable|string', // Added description validation
-            'pools.*.questions_to_show' => 'required|integer|min:1',
-            'pools.*.questions' => 'required|array|min:1'
+            'settings' => ['nullable', 'array']
+            // Removed pools validation
         ]);
-
+    
         $organization = auth()->user()->organizations()->first();
-
-        // Use transaction to ensure data consistency
-        return DB::transaction(function () use ($validated, $organization, $request) {
-            // Handle empty values conversion
-            $quizData = [
-                'user_id' => auth()->id(),
-                'slug' => Str::slug($validated['title']),
-                'title' => $validated['title'],
-                'description' => $validated['description'] ?? null,
-                'instructions' => $validated['instructions'] ?? null,
-                'quiz_type' => $validated['quiz_type'],
-                'industry' => $validated['industry'] ?? null,
-                'is_published' => $validated['is_published'] ?? false,
-                'is_public' => $validated['is_public'] ?? false,
-                'randomize_questions' => $validated['randomize_questions'] ?? false,
-                'randomize_answers' => $validated['randomize_answers'] ?? false,
-                'show_correct_answers' => $validated['show_correct_answers'] ?? false,
-                'show_leaderboard' => $validated['show_leaderboard'] ?? false,
-                'enable_discussions' => $validated['enable_discussions'] ?? false,
-                'max_attempts' => $validated['max_attempts'] ? (int)$validated['max_attempts'] : null,
-                'max_participants' => $validated['max_participants'] ? (int)$validated['max_participants'] : null,
-                'time_limit' => $validated['time_limit'] ? (int)$validated['time_limit'] : null,
-                'passing_score' => $validated['passing_score'] ? (int)$validated['passing_score'] : null,
-                'starts_at' => !empty($validated['starts_at']) ? Carbon::parse($validated['starts_at']) : null,
-                'ends_at' => !empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null,
-                'settings' => $validated['settings'] ?? [],
-            ];
-
-            $quiz = $organization->quizzes()->create($quizData);
-
-            // Create pools and attach questions
-           // if (!empty($validated['pools'])) {
-           //     foreach ($validated['pools'] as $poolData) {
-           //         $pool = $quiz->pools()->create([
-            //            'name' => $poolData['name'],
-            //            'description' => $poolData['description'] ?? null,
-            //            'questions_to_show' => (int)$poolData['questions_to_show'],
-            //            'organization_id' => $organization->id // Ensure organization_id is set
-            //        ]);
-
-             //       // Ensure questions are integers and exist
-             //       $questionIds = array_map('intval', $poolData['questions']);
-            //        $pool->questions()->sync($questionIds);
-            //    }
-           // }
-
-            ActivityService::logQuizCreated($quiz, auth()->user());
-
-            return redirect()->route('examiner.quizzes.index', $organization->id)
-                ->with('success', 'Quiz created successfully!');
-        });
+    
+        $quizData = [
+            'user_id' => auth()->id(),
+            'slug' => Str::slug($validated['title']),
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'instructions' => $validated['instructions'] ?? null,
+            'quiz_type' => $validated['quiz_type'],
+            'industry' => $validated['industry'] ?? null,
+            'is_published' => $validated['is_published'] ?? false,
+            'is_public' => $validated['is_public'] ?? false,
+            'randomize_questions' => $validated['randomize_questions'] ?? false,
+            'randomize_answers' => $validated['randomize_answers'] ?? false,
+            'show_correct_answers' => $validated['show_correct_answers'] ?? false,
+            'show_leaderboard' => $validated['show_leaderboard'] ?? false,
+            'enable_discussions' => $validated['enable_discussions'] ?? false,
+            'max_attempts' => $validated['max_attempts'] ? (int)$validated['max_attempts'] : null,
+            'max_participants' => $validated['max_participants'] ? (int)$validated['max_participants'] : null,
+            'time_limit' => $validated['time_limit'] ? (int)$validated['time_limit'] : null,
+            'passing_score' => $validated['passing_score'] ? (int)$validated['passing_score'] : null,
+            'starts_at' => !empty($validated['starts_at']) ? Carbon::parse($validated['starts_at']) : null,
+            'ends_at' => !empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null,
+            'settings' => $validated['settings'] ?? [],
+        ];
+    
+        $quiz = $organization->quizzes()->create($quizData);
+    
+        ActivityService::logQuizCreated($quiz, auth()->user());
+    
+        //return redirect()->route('examiner.quizzes.edit', $quiz->id)
+         //   ->with('success', 'Quiz created successfully! You can now add question pools.');
+        return redirect()->route('examiner.quizzes.show', $quiz)
+            ->with('success', 'Quiz created successfully! You can now add questions from pools or create new ones for this quiz.');
+            
     }
 
     /**
@@ -174,18 +173,31 @@ class QuizController extends Controller
      */
     public function show(Quiz $quiz)
     {
-        //$this->authorize('view', $quiz);
+        $organization = auth()->user()->organizations()->first();
 
         $quiz->load([
             'organization',
             'user',
             'questions',
-            'questionPools',
+            'questionPools' => function($query) {
+                $query->withCount('questions')
+                      ->withPivot('questions_to_show');
+            },
             'groups'
         ]);
 
+        $availablePools = $organization->questionPools()
+        ->whereDoesntHave('quiz', function($q) use ($quiz) {
+            $q->where('id', $quiz->id);
+        })
+        ->withCount('questions')
+        ->get();
+        $quizPools = $quiz->questionPools()->withCount('questions')->get();
+
         return inertia('Examiner/Quizzes/Show', [
             'quiz' => $quiz,
+            'availablePools' => $availablePools,
+            'quizPools' => $quizPools,
             'stats' => [
                 'attempts_count' => $quiz->attempts()->count(),
                 'average_score' => $quiz->attempts()->avg('score'),
@@ -369,5 +381,35 @@ class QuizController extends Controller
                 $q->where('attempt_id', $attempt->id);
             }])->get()
         ]);
+    }
+
+    public function attachPool(Request $request, Quiz $quiz)
+    {
+        $request->validate([
+            'pool' => 'required|exists:question_pools,id',
+            'questions_to_show' => 'nullable|integer|min:1' // Add if you want to customize
+        ]);
+
+        $pool = QuestionPool::findOrFail($request->pool);
+
+        // Check if pool belongs to same organization
+        if ($pool->organization_id !== $quiz->organization_id) {
+            return back()->with('error', 'Invalid question pool');
+        }
+
+        // Attach with pivot data
+        $quiz->questionPools()->syncWithoutDetaching([
+            $pool->id => [
+                'questions_to_show' => $request->questions_to_show ?? $pool->questions_to_show
+            ]
+        ]);
+
+        return back()->with('success', 'Question pool added successfully');
+    }
+
+    public function detachPool(Quiz $quiz, QuestionPool $pool)
+    {
+        $quiz->questionPools()->detach($pool->id);
+        return back()->with('success', 'Question pool removed successfully');
     }
 }

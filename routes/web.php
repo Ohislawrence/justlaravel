@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Examinee\ExamineeAuthController;
 use App\Http\Controllers\Examinee\QuizAttemptController;
 use App\Http\Controllers\Examinee\QuizController as ExamineeQuizController;
 use App\Http\Controllers\Examiner\DashboardController;
 use App\Http\Controllers\Examiner\GroupController;
+use App\Http\Controllers\Examiner\PoolQuestionController;
 use App\Http\Controllers\Examiner\QuestionController;
 use App\Http\Controllers\Examiner\QuestionPoolController;
 use App\Http\Controllers\Examiner\QuizAnalysisController;
@@ -11,27 +13,33 @@ use App\Http\Controllers\Examiner\QuizController;
 use App\Http\Controllers\Examiner\ReportController;
 use App\Http\Controllers\Examiner\SettingController;
 use App\Http\Controllers\Examiner\UserController;
+use App\Http\Controllers\FrontPageController;
+use App\Http\Controllers\Landlord\BlogController;
+use App\Http\Controllers\Landlord\CategoryController;
+use App\Http\Controllers\Landlord\OrganizationController;
+use App\Http\Controllers\Landlord\OrganizationUserController;
+use App\Http\Controllers\Landlord\SubscriptionController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaystackWebhookController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [FrontPageController::class, 'index'])->name('home');
+Route::get('about-us', [FrontPageController::class, 'aboutUs'])->name('aboutus');
+Route::get('contact', [FrontPageController::class, 'contact'])->name('contact');
+Route::get('privacy-policy', [FrontPageController::class, 'policy'])->name('policy');
+Route::get('terms-of-service', [FrontPageController::class, 'tos'])->name('tos');
+Route::get('cookie-policy', [FrontPageController::class, 'cookie'])->name('cookie');
+Route::get('/blogs', [FrontPageController::class, 'allBlogs'])->name('blogs.index');
+Route::get('/blogs/{blog:slug}', [FrontPageController::class, 'show'])->name('blogs.show');
 
 //sample quiz link
 //Route::get('exam/{organization}/{quiz}/{uniquecode}');
 Route::get('/quizzes/{quiz}/{token?}', [ExamineeQuizController::class, 'show'])
     ->name('quiz.show');
 
-
-
-
+Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handleWebhook']);
 
 Route::middleware([
     'auth:sanctum',
@@ -86,6 +94,29 @@ Route::middleware([
         Route::get('dashboard', function () {
             return Inertia::render('Dashboard');
         })->name('dashboard');
+        Route::resource('users', OrganizationUserController::class);
+        Route::resource('plans', OrganizationUserController::class);
+        Route::resource('settings', OrganizationUserController::class);
+        //Create Organization/user
+        Route::resource('organizations', OrganizationController::class);
+        Route::resource('organizations.users', OrganizationUserController::class);
+
+        //blogs
+        Route::resource('blogs', BlogController::class);
+        Route::resource('categories', CategoryController::class);
+        //Subscriptions
+        Route::resource('subscriptions', SubscriptionController::class);
+        // Subscription assignment routes
+        Route::get('/organizations/{organization}/assign', [SubscriptionController::class, 'showAssignForm'])
+            ->name('subscriptions.assign.show');
+        Route::put('/organizations/{organization}/assign', [SubscriptionController::class, 'assign'])
+            ->name('subscriptions.assign');
+
+        Route::get('/organizations/select', [OrganizationController::class, 'select'])
+        ->name('organizations.select');
+        Route::post('/organizations/switch', [OrganizationController::class, 'switch'])
+            ->name('organizations.switch');
+
     });
 
     //admin
@@ -94,7 +125,7 @@ Route::middleware([
     //examiner
     Route::group([
         'prefix' => 'examiner',
-        'middleware' => 'role:examiner',
+        'middleware' => ['role:examiner','subscription'],
         'as' => 'examiner.',
     ], function () {
         //Route::view('dashboard', 'dashboard')->name('dashboard');
@@ -113,12 +144,28 @@ Route::middleware([
         Route::resource('reports', ReportController::class);
         Route::resource('settings', SettingController::class);
         Route::resource('quizzes', QuizController::class);
+
+        //designation
+        Route::get('users/designations', [UserController::class, 'designations'])->name('users.designations');
+        Route::post('users/designations', [UserController::class, 'storeDesignation'])->name('users.designations.store');
+
+        //Add new question pool
+        Route::get('pools/{pool}/questions', [PoolQuestionController::class, 'create'])->name('pools.questions.create');
+        Route::post('pools/{pool}/post/questions', [PoolQuestionController::class, 'store'])->name('pools.questions.store');
+
+        //addRemove pool to quiz
+        Route::post('/quizzes/{quiz}/pools', [QuizController::class, 'attachPool'])
+            ->name('quizzes.attach-pool');
+
+        Route::delete('/quizzes/{quiz}/pools/{pool}', [QuizController::class, 'detachPool'])
+            ->name('quizzes.detach-pool');
+
         Route::post('/quizzes/{quiz}/toggle-publish', [QuizController::class, 'togglePublish'])
         ->name('quizzes.toggle-publish');
         Route::get('/quizzes/{quiz}/pools/{pool}/questions', [QuizController::class, 'getPoolQuestions']);
          Route::resource('quizzes.questions', QuestionController::class);
         //get Quiz Link
-        Route::get('/quizz/{quiz}/share-link', [QuizController::class, 'shareLink'])->name('quizz.share-link');
+        Route::get('/quizz/{quiz}/share-link', [QuizController::class, 'shareLink'])->name('quizzes.share-link');
 
         //attempt details
         Route::get('examiner/quizzes/{quiz}/attempts/{attempt}', [QuizController::class, 'showAttempts'])
@@ -146,8 +193,15 @@ Route::middleware([
         Route::post('/quizzes/{quiz}/analysis/export/{group}', [QuizAnalysisController::class, 'export'])
             ->name('examiner.quizzes.analysis.export');
     
+        //subcribe
+        Route::get('/subscription', [PaymentController::class, 'index'])->name('subscription.plans');
+        Route::post('/subscribe', [PaymentController::class, 'initializeSubscription'])->name('subscribe');
+        Route::get('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
+
         
     });
+
+    
 
     //examinee
     Route::group([
@@ -160,11 +214,15 @@ Route::middleware([
         Route::get('dashboard', function () {
             return Inertia::render('Dashboard');
         })->name('dashboard');
+        //login
+        
+        Route::post('/logout', [ExamineeAuthController::class, 'logout'])->name('logout');
         // Route::get('profile' , [ProfileController::class, 'index'])->name('myprofile');
         Route::post('/quiz/{quiz}/start', [QuizAttemptController::class, 'start'])->name('start');
+        Route::get('/quiz/{quiz}/attempt', [QuizAttemptController::class, 'showAttempt'])->middleware('throttle:3,1')->name('attempt');
         Route::post('/quiz/{quiz}/submit', [QuizAttemptController::class, 'submit'])->name('submit');
 
-        Route::get('/quiz/{quiz}/attempt', [QuizAttemptController::class, 'start'])->name('attempt');
+        
 
         Route::get('/quiz/{quiz}/{attemptId}/result', [QuizAttemptController::class, 'result'])->name('quiz.results');
         

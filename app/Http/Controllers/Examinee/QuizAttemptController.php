@@ -38,13 +38,29 @@ class QuizAttemptController extends Controller
         ]);
 
         // Prepare questions
-        $questions = $this->prepareQuestions($quiz);
+        //$questions = $this->prepareQuestions($quiz);
         
         // Return Inertia response
+        // Redirect to the attempt page
+        return redirect()->route('examinee.attempt', [
+            'quiz' => $quiz->id,
+            'attempt' => $attempt->id
+        ]);
+    }
+
+    public function showAttempt(Quiz $quiz, Request $request)
+    {
+        // Get the latest in-progress attempt or 404
+        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', $request->user()->id)
+            ->whereNull('completed_at')
+            ->latest()
+            ->firstOrFail();
+
         return Inertia::render('Examinee/QuizPlayer', [
             'quiz' => $quiz->only('id', 'title', 'time_limit'),
             'attempt' => $attempt,
-            'questions' => $questions,
+            'questions' => $this->prepareQuestions($quiz),
             'time_limit' => $quiz->time_limit
         ]);
     }
@@ -60,11 +76,11 @@ class QuizAttemptController extends Controller
     {
         $questions = collect();
         
-        // Process question pools
+        // Process question pools first
         foreach ($quiz->questionPools as $pool) {
             $poolQuestions = $pool->questions()
                 ->inRandomOrder()
-                ->take($pool->questions_to_show)
+                ->take($pool->pivot->questions_to_show)
                 ->get()
                 ->map(function ($question) {
                     return $this->formatQuestion($question);
@@ -73,12 +89,17 @@ class QuizAttemptController extends Controller
             $questions = $questions->merge($poolQuestions);
         }
         
-        // Add regular questions
-        $questions = $questions->merge(
-            $quiz->questions->map(function ($question) {
-                return $this->formatQuestion($question);
+        // Add regular questions (those not belonging to any pool in this quiz)
+        $regularQuestions = $quiz->questions()
+            ->whereDoesntHave('pools', function($query) use ($quiz) {
+                $query->where('quiz_id', $quiz->id);
             })
-        );
+            ->get()
+            ->map(function ($question) {
+                return $this->formatQuestion($question);
+            });
+        
+        $questions = $questions->merge($regularQuestions);
         
         // Randomize if needed
         if ($quiz->randomize_questions) {
@@ -90,20 +111,32 @@ class QuizAttemptController extends Controller
 
     protected function formatQuestion($question)
     {
+        // Ensure options and correct_answers are properly formatted
+        $options = $question->options;
+        $correctAnswers = $question->correct_answers;
+        
+        if (is_string($options)) {
+            $options = json_decode($options, true) ?? [];
+        }
+        
+        if (is_string($correctAnswers)) {
+            $correctAnswers = json_decode($correctAnswers, true) ?? [];
+        }
+    
         return [
             'id' => $question->id,
-            'question' => $question->question,
+            'pool_id' => $question->pivot->question_pool_id ?? null, // Track pool questions
             'type' => $question->type,
+            'question' => $question->question,
+            'options' => $options,
+            'correct_answers' => $correctAnswers,
             'points' => $question->points,
             'time_limit' => $question->time_limit,
-            'options' => $question->options,
-            'correct_answers' => $question->correct_answers,
-            'image'  => $question->image,
-            'audio'  => $question->audio,
-            'video'  => $question->video,
-            'order'  => $question->order,
-            'is_required'  => $question->is_required,
-            'settings'  => $question->settings,
+            'settings' => array_merge([
+                'show_feedback' => false,
+                'randomize_options' => false
+            ], $question->settings ?? []),
+            'is_required' => $question->is_required ?? true
         ];
     }
 

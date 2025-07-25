@@ -185,6 +185,16 @@ const updateSetting = (key, value) => {
   });
 };
 
+const updateOption = (index, value) => {
+  const newOptions = [...localValue.value.options];
+  newOptions[index] = value;
+  
+  emit('update:modelValue', {
+    ...props.modelValue,
+    options: newOptions
+  });
+};
+
 const toggleMultipleSelection = (isMultiple) => {
   // Always keep correct_answers as an array
   let newCorrectAnswers = Array.isArray(localValue.value.correct_answers)

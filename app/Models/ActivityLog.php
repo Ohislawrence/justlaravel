@@ -14,12 +14,18 @@ class ActivityLog extends Model
         'subject_type',
         'causer_id',
         'ip_address',
-        'user_agent'
+        'user_agent',
+        'organization_id'
     ];
 
     protected $casts = [
         'data' => 'array',
     ];
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
 
     public function subject()
     {

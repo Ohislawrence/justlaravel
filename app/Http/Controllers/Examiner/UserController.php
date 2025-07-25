@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Examiner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Designation;
 use App\Models\Group;
 use App\Models\Organization;
 use App\Models\OrganizationMember;
@@ -10,6 +11,7 @@ use App\Models\Quiz;
 use App\Models\User;
 use App\Notifications\NewUserAccountNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -25,7 +27,7 @@ class UserController extends Controller
     {
         $organizationId  = auth()->user()->organizations()->first()->id ;
         $users = User::query()
-            ->with(['organizations', 'groups', 'roles']) // Eager load relationships
+            ->with(['organizations', 'groups', 'roles','organizationMember.designation']) // Eager load relationships
             ->whereHas('organizations', function($query) use ($organizationId) {
                 $query->where('organizations.id', $organizationId);
             })
@@ -47,7 +49,8 @@ class UserController extends Controller
             ->paginate(10);
 
         return Inertia::render('Examiner/User/User', [
-        'users' => $users
+        'users' => $users,
+        'organization_id' => $organizationId,
         ]);
     }
 
@@ -56,12 +59,17 @@ class UserController extends Controller
         $organization = auth()->user()->organizations()->first();
         
         // Remove ->get() to return a collection that Inertia can properly handle
-        $quizzes = $organization->quizzes()->paginate(10); // or just get() if no pagination
-        $groups = $organization->groups()->paginate(10); // or just get() if no pagination
+        //$quizzes = $organization->quizzes()->paginate(10); 
+        $groups = $organization->groups()->get(); 
+        $designations = $organization->designation ()->get();
+        
         
         return Inertia::render('Examiner/User/Create', [
-            'groups' => $groups,
-            'quizzes' => $quizzes,
+            'groups' => [
+            'data' => $groups,
+            'total' => $groups->count(),
+        ],
+        'designations' => $designations,
         ]);
     }
 
@@ -69,117 +77,209 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
-            'email'      => 'required|string|email|max:255|unique:users',
-            'password'   => 'required|string|min:6',
+            'email'      => 'required|string|email|max:255',
+            'password'   => 'sometimes|required|string|min:6',
             'user_type'  => 'required|in:admin,examiner,examinee',
             'groups'     => 'nullable|array',
             'groups.*'   => 'exists:groups,id',
             'quizzes'    => 'nullable|array',
             'quizzes.*'  => 'exists:quizzes,id',
             'notify_user' => ['boolean'],
-        ]);
-    
-        // Create the user
-        $user = User::create([
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
+            'unique_code' => 'nullable|string|unique:organization_members,unique_code',
+            'designation_id' => 'nullable',
         ]);
 
-        $organization = OrganizationMember::where('user_id', auth()->user()->id)->first();
+        // Get current user's organization
+        $organizationId = auth()->user()->organizations()->first()->id;
+        
+        // Check if user already exists
+        $user = User::where('email', $validated['email'])->first();
 
-        $user->assignRole([$validated['user_type']]);
+        if (!$user) {
+            // Create new user if doesn't exist
+            $user = User::create([
+                'name'      => $validated['name'],
+                'email'     => $validated['email'],
+                'password'  => Hash::make($validated['password']),
+            ]);
+
+            // Assign role
+            $user->assignRole([$validated['user_type']]);
+            
+            // Only notify if it's a new user
+            if ($validated['notify_user'] ?? false) {
+                $user->notify(new NewUserAccountNotification());
+            }
+        } else {
+            // Check if user is already in this organization
+            $existingMember = OrganizationMember::where('user_id', $user->id)
+                ->where('organization_id', $organizationId)
+                ->exists();
+                
+            if ($existingMember) {
+                return redirect()->back()->with('error', 'This user is already a member of your organization.');
+            }
+        }
+
+        // Create organization membership with designation
         OrganizationMember::create([
-            'organization_id' => $organization->id,
+            'organization_id' => $organizationId,
             'user_id' => $user->id,
             'role' => $validated['user_type'],
-            'permissions' => null ,
+            'unique_code' => $validated['unique_code'] ?? null,
+            'designation_id' => $validated['designation_id'] ?? null,
         ]);
 
-        // Attach groups (assuming many-to-many)
+        // Attach groups if provided
         if (!empty($validated['groups'])) {
-            $user->groups()->sync($validated['groups']);
+            $user->groups()->syncWithoutDetaching($validated['groups']);
         }
-    
-        // Attach quizzes (assuming many-to-many)
+
+        // Attach quizzes if provided
         if (!empty($validated['quizzes'])) {
-            $user->assignedQuizzes()->syncWithoutDetaching([
-                $validated['quizzes'] => [
-                    'assigned_at' => now(),
-                    'due_date' => $validated['due_date'] ?? null,
-                    'is_passed' => 0,
-                    'attempt_number' =>0,
-                ]
-            ]);
+            $user->assignedQuizzes()->syncWithoutDetaching(
+                collect($validated['quizzes'])->mapWithKeys(function ($quizId) {
+                    return [
+                        $quizId => [
+                            'assigned_at' => now(),
+                            'due_date' => null,
+                            'is_passed' => false,
+                            'attempt_number' => 0
+                        ]
+                    ];
+                })
+            );
         }
 
-        if ($validated['notify_user'] ?? false) {
-            $user->notify(new NewUserAccountNotification());
-        }
-
-    
-        return redirect()->back()->with('success', 'User created successfully.');
+        return redirect()->route('examiner.user.index')->with('success', 'User created successfully.');
     }
 
     public function edit(User $user)
     {
-        $roles = ModelsRole::all()->pluck('name');
-        $groups = Group::all();
-        $quizzes = Quiz::all();
-        $userType = $user->getRoleNames()->first();
-        return Inertia::render('Examiner/User/Edit', ['groups' => $groups, 'quizzes' => $quizzes, 'user' => $user, 'roles' => $roles,'userType'=> $userType]);
+        $organization = auth()->user()->organizations()->first();
+        $organizationId = $organization->id;
+    
+        // Load necessary relationships
+        $user->load([
+            'groups',
+            'assignedQuizzes',
+            'roles',
+            'organizationMember.designation' // Load designation through organization member
+        ]);
+    
+        return Inertia::render('Examiner/User/Edit', [
+            'user' => $user,
+            'groups' => Group::where('organization_id', $organizationId)->get(),
+            'quizzes' => Quiz::where('organization_id', $organizationId)->get(),
+            'roles' => ModelsRole::all()->pluck('name'),
+            'designations' => $organization->designations()->get(), // Corrected relationship
+            'initialUserType' => $user->getRoleNames()->first(),
+            'initialGroups' => $user->groups->pluck('id')->toArray(),
+            'organizationMember' => $user->organizationMember, // Pass the full member record
+        ]);
     }
 
     public function update(Request $request, User $user)
     {
+        //dd($request->designation_id);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'user_type' => ['sometimes'],
-            'password' => ['nullable', 'confirmed'],
+            'user_type' => ['sometimes', 'in:admin,examiner,examinee'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'groups' => ['sometimes', 'array'],
             'groups.*' => ['exists:groups,id'],
             'quizzes' => ['sometimes', 'array'],
             'quizzes.*' => ['exists:quizzes,id'],
+            'designation_id' => ['nullable' ],
+            'unique_code' => ['nullable'],
         ]);
-
     
-        $user->update([
-            'name' => $validated['name'],
-        ]);
-
-        if (!empty([$request->user_type])) {
-            $user->assignRole([$request->user_type]);
-        }
-
-        if (!empty($validated['password'])) {
+        // Get the current organization ID
+        $organizationId = auth()->user()->organizations()->first()->id;
+    
+        DB::transaction(function () use ($validated, $request, $user, $organizationId) {
+            // Update basic user info
             $user->update([
-                'password' => Hash::make($validated['password']),
+                'name' => $validated['name'],
             ]);
-        }
     
-        if (isset($validated['groups'])) {
-            $user->groups()->sync($validated['groups']);
-        }
+            // Update password if provided
+            if (!empty($validated['password'])) {
+                $user->update([
+                    'password' => Hash::make($validated['password']),
+                ]);
+            }
     
-        // Attach quizzes (assuming many-to-many)
-        if (!empty($validated['quizzes'])) {
-            $user->assignedQuizzes()->syncWithoutDetaching([
-                $validated['quizzes'] => [
-                    'assigned_at' => now(),
-                    'due_date' => $validated['due_date'] ?? null,
-                    'is_passed' => 0,
-                    'attempt_number' =>0,
-                ]
+            // Update role if provided
+            if (!empty($validated['user_type'])) {
+                // Remove all current roles first
+                $user->syncRoles([$validated['user_type']]);
+            }
+    
+            // Update organization member details
+            $user->organizationMember()->update([
+                'designation_id' => $validated['designation_id'] ?? null,
+                'unique_code' => $validated['unique_code'] ?? null
             ]);
-        }
     
-        return redirect()->back()
+            // Sync groups if provided
+            if (isset($validated['groups'])) {
+                $user->groups()->sync($validated['groups']);
+            }
+    
+        });
+    
+        return redirect()->route('examiner.user.index')
             ->with('success', 'User updated successfully');
     }
 
     public function destroy(User $user)
     {
-        $user->delete();
-        return redirect()->back()->with('success', 'User deleted.');
+        // Get the current user's organization
+        $currentOrganization = OrganizationMember::where('user_id', auth()->id())->firstOrFail();
+        
+        // Find the organization membership to remove
+        $membership = OrganizationMember::where('user_id', $user->id)
+            ->where('organization_id', $currentOrganization->organization_id)
+            ->firstOrFail();
+
+        // Prevent removing yourself
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot remove yourself from the organization.');
+        }
+
+            // Prevent removing last admin
+        
+    
+        // Remove the user from the organization
+        $membership->delete();
+    
+        // Optionally: Remove the user from organization-specific groups
+        //$user->groups()->wherePivot('organization_id', $currentOrganization->organization_id)->detach();
+    
+        // Optionally: Remove organization-specific quiz assignments
+        //$user->assignedQuizzes()
+         //   ->wherePivot('organization_id', $currentOrganization->organization_id)
+         //   ->detach();
+    
+        return redirect()->back()->with('success', 'User removed from organization successfully.');
+    }
+
+    public function designations()
+    {
+        $organizationId = auth()->user()->organization_id;
+        return Designation::where('organization_id', $organizationId)->get();
+    }
+
+    public function storeDesignation(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        
+        Designation::create([
+            'organization_id' => auth()->user()->organizations()->first()->id,
+            'name' => $request->name
+        ]);
+
+        return redirect()->back()->with('success', 'Designation created successfully');
     }
 }

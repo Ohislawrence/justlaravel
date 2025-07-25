@@ -10,7 +10,6 @@ import Checkbox from '@/Components/Checkbox.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import DateTimePicker from '@/Components/DateTimePicker.vue';
 import RichTextArea from '@/Components/RichTextArea.vue';
-import QuestionPoolManager from '@/Components/QuestionPoolManager.vue';
 
 const props = defineProps({
     quiz: Object,
@@ -60,7 +59,7 @@ const submit = () => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
                         <form @submit.prevent="submit">
                             <div class="grid grid-cols-1 gap-6">
@@ -93,7 +92,7 @@ const submit = () => {
                                     </div>
 
                                     <div>
-                                        <InputLabel for="instructions" value="Instructionsn" />
+                                        <InputLabel for="instructions" value="Instructions" />
                                         <RichTextArea
                                             id="instructions"
                                             v-model="form.instructions"
@@ -248,7 +247,7 @@ const submit = () => {
                                     <h3 class="text-lg font-medium">Schedule</h3>
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
+                                        <div class="relative">
                                             <InputLabel for="starts_at" value="Start Date & Time" />
                                             <DateTimePicker
                                                 id="starts_at"
@@ -258,7 +257,7 @@ const submit = () => {
                                             <InputError class="mt-2" :message="form.errors.starts_at" />
                                         </div>
 
-                                        <div>
+                                        <div class="relative">
                                             <InputLabel for="ends_at" value="End Date & Time" />
                                             <DateTimePicker
                                                 id="ends_at"
@@ -269,13 +268,8 @@ const submit = () => {
                                         </div>
                                     </div>
                                 </div>
-                                </div>
-                                <QuestionPoolManager 
-                                    :quiz="quiz"
-                                    :initial-pools="quiz.pools || []"
-                                    :questions="availableQuestions"
-                                    ref="poolManager"
-                                />
+                            </div>
+                            
                             <div class="flex items-center justify-end mt-6">
                                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                     Update Quiz
@@ -288,3 +282,29 @@ const submit = () => {
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Custom styles for date picker dropdowns */
+.relative {
+    position: relative;
+}
+
+/* Override parent container overflow for date picker dropdowns */
+.relative :deep(.date-picker-dropdown),
+.relative :deep(.datepicker-dropdown),
+.relative :deep(.flatpickr-calendar) {
+    z-index: 50;
+}
+
+/* If using a specific date picker library, adjust the selector accordingly */
+.relative :deep(.date-picker-wrapper) {
+    position: relative;
+}
+
+/* Ensure dropdown doesn't get clipped by parent containers */
+.relative :deep(.dropdown) {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+}
+</style>

@@ -1,4 +1,5 @@
 <template>
+  <Head :title="title" />
     <div class="min-h-screen bg-gray-50 flex flex-col">
       <!-- Navigation Bar -->
       <header class="bg-white shadow-sm">

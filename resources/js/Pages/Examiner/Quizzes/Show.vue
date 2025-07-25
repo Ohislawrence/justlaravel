@@ -1,16 +1,22 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'; 
-import { router, Link } from '@inertiajs/vue3';
+import { ref, onMounted, watch, computed } from 'vue'; 
+import { router, Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
     quiz: Object,
     stats: Object,
+    availablePools: Array,
+    quizPools: Object,
 });
 
 const shareLink = ref('');
 const copySuccess = ref(false);
 const shareLinkInput = ref(null);
+const selectedPool = ref('');
+const questionsToShow = ref(1);
+
+const { flash } = usePage().props;
 
 const togglePublish = () => {
     router.post(route('examiner.quizzes.toggle-publish', props.quiz.id), {}, {
@@ -92,6 +98,37 @@ const confirmDeleteQuestion = (question) => {
         }));
     }
 };
+
+// Add pool management methods
+const attachPool = () => {
+    router.post(route('examiner.quizzes.attach-pool', {
+        quiz: props.quiz.id,
+        pool: selectedPool.value
+    }), {
+        questions_to_show: questionsToShow.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            selectedPool.value = '';
+            questionsToShow.value = 1;
+        }
+    });
+};
+
+const detachPool = (poolId) => {
+    router.delete(route('examiner.quizzes.detach-pool', {
+        quiz: props.quiz.id,
+        pool: poolId
+    }), {
+        preserveScroll: true,
+    });
+};
+
+const availablePoolsList = computed(() => {
+    return props.availablePools.filter(pool =>
+        !props.quizPools?.some(qp => qp.id === pool.id)
+    );
+});
 </script>
 
 <template>
@@ -115,6 +152,30 @@ const confirmDeleteQuestion = (question) => {
                 </div>
             </div>
         </template>
+        <!-- Flash Messages -->
+        <div v-if="flash.success" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                {{ flash.success }}
+            </div>
+        </div>
+
+        <div v-if="flash.error" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {{ flash.error }}
+            </div>
+        </div>
+
+        <div v-if="flash.info" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+                {{ flash.info }}
+            </div>
+        </div>
+
+        <div v-if="flash.warning" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                {{ flash.warning }}
+            </div>
+        </div>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -297,6 +358,96 @@ const confirmDeleteQuestion = (question) => {
                                     >
                                         Add First Question
                                     </Link>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Question Pools Section -->
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                            <div class="p-6 bg-white border-b border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-medium">Question Pools</h3>
+                                    <Link 
+                                        :href="route('examiner.question-pools.create')"
+                                        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
+                                    >
+                                        Create New Pool
+                                    </Link>
+                                </div>
+
+                                <!-- Current Pools -->
+                                <div v-if="quizPools?.length" class="space-y-4 mb-6">
+                                    <div v-for="pool in quizPools" :key="pool.id" class="border rounded-lg p-4 hover:bg-gray-50">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <h4 class="font-medium mb-1">{{ pool.name }}</h4>
+                                                <p class="text-sm text-gray-500 mb-2">{{ pool.description || 'No description' }}</p>
+                                                <div class="flex flex-wrap gap-2 text-sm text-gray-500">
+                                                    <span class="bg-gray-100 px-2 py-1 rounded">
+                                                        {{ pool.questions_count }} questions
+                                                    </span>
+                                                    <span class="bg-blue-100 px-2 py-1 rounded">
+                                                        Show {{ pool.pivot?.questions_to_show || 0 }} questions
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                @click="detachPool(pool.id)"
+                                                class="text-red-600 hover:text-red-800 text-sm"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <Link 
+                                            :href="route('examiner.question-pools.manage-questions', pool.id)"
+                                            class="mt-3 inline-block text-sm text-blue-600 hover:text-blue-800"
+                                        >
+                                            Manage Questions
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div v-else class="text-center py-4 text-gray-500">
+                                    <p>No question pools added yet.</p>
+                                </div>
+
+                                <!-- Add Pool Form -->
+                                <div v-if="availablePoolsList.length > 0" class="mt-6">
+                                    <h4 class="font-medium mb-3">Add Existing Pool</h4>
+                                    <div class="space-y-3">
+                                        <select 
+                                            v-model="selectedPool"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="" disabled>Select a pool to add</option>
+                                            <option 
+                                                v-for="pool in availablePoolsList" 
+                                                :key="pool.id" 
+                                                :value="pool.id"
+                                            >
+                                                {{ pool.name }} ({{ pool.questions_count }} questions)
+                                            </option>
+                                        </select>
+                                        
+                                        <div v-if="selectedPool">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                Questions to show from this pool
+                                            </label>
+                                            <input
+                                                v-model="questionsToShow"
+                                                type="number"
+                                                min="1"
+                                                :max="availablePoolsList.find(p => p.id === selectedPool)?.questions_count || 1"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                        </div>
+                                        
+                                        <button
+                                            @click="attachPool"
+                                            :disabled="!selectedPool"
+                                            class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                                        >
+                                            Add Pool
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

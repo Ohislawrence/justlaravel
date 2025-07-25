@@ -5,17 +5,18 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 // Props
 const props = defineProps({
   groups: Object,
-  quizzes: Array,
+  designations: Array // Add this prop
 });
 
-// Inertia form object (automatically tracks data, errors, and states)
+// Inertia form object
 const form = useForm({
   name: '',
   email: '',
+  unique_code: '',
   password: '',
   user_type: '',
+  designation_id: null, // Add designation field
   groups: [],
-  quizzes: [],
   notify_user: false,
 });
 
@@ -67,6 +68,19 @@ const submitForm = () => {
                   <div class="invalid-feedback" v-if="form.errors.email">{{ form.errors.email }}</div>
                 </div>
 
+                <div class="mb-3">
+                  <label class="form-label" for="unique_code">Identification Number</label>
+                  <input
+                    v-model="form.unique_code"
+                    type="text"
+                    class="form-control"
+                    id="unique_code"
+                    placeholder="U09CH1767"
+                    :class="{ 'is-invalid': form.errors.unique_code }"
+                  />
+                  <div class="invalid-feedback" v-if="form.errors.unique_code">{{ form.errors.unique_code }}</div>
+                </div>
+
                 <!-- Password -->
                 <div class="mb-3">
                   <label class="form-label" for="password">Password</label>
@@ -98,6 +112,29 @@ const submitForm = () => {
                   <div class="invalid-feedback" v-if="form.errors.user_type">{{ form.errors.user_type }}</div>
                 </div>
 
+                <!-- Designation Dropdown -->
+                <div class="mb-3">
+                  <label for="designation_id" class="form-label">Designation</label>
+                  <select
+                    v-model="form.designation_id"
+                    class="form-select"
+                    id="designation_id"
+                    :class="{ 'is-invalid': form.errors.designation_id }"
+                  >
+                    <option value="">Select Designation</option>
+                    <option 
+                      v-for="designation in designations" 
+                      :key="designation.id" 
+                      :value="designation.id"
+                    >
+                      {{ designation.name }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" v-if="form.errors.designation_id">
+                    {{ form.errors.designation_id }}
+                  </div>
+                </div>
+
                 <!-- Groups -->
                 <div class="mb-3">
                   <label for="groups" class="form-label">Assign Group(s)</label>
@@ -115,40 +152,23 @@ const submitForm = () => {
                   <div class="invalid-feedback" v-if="form.errors.groups">{{ form.errors.groups }}</div>
                 </div>
 
-                <!-- Quizzes -->
-                <div class="mb-3">
-                  <label for="quizzes" class="form-label">Assign Quiz(zes)</label>
-                  <select
-                    v-model="form.quizzes"
-                    multiple
-                    class="form-select"
-                    id="quizzes"
-                    :class="{ 'is-invalid': form.errors.quizzes }"
-                  >
-                    <option v-for="quiz in props.quizzes.data" :key="quiz.id" :value="quiz.id">
-                      {{ quiz.title }}
-                    </option>
-                  </select>
-                  <div class="invalid-feedback" v-if="form.errors.quizzes">{{ form.errors.quizzes }}</div>
-                </div>
-
                 <!-- Notification Checkbox -->
                 <div class="mb-3">
-                    <div class="form-check">
+                  <div class="form-check">
                     <input
-                        v-model="form.notify_user"
-                        class="form-check-input"
-                        type="checkbox"
-                        id="notify-user"
-                        :class="{ 'is-invalid': form.errors.notify_user }"
+                      v-model="form.notify_user"
+                      class="form-check-input"
+                      type="checkbox"
+                      id="notify-user"
+                      :class="{ 'is-invalid': form.errors.notify_user }"
                     />
                     <label class="form-check-label" for="notify-user">
-                        Notify user via email about account creation
+                      Notify user via email about account creation
                     </label>
                     <div class="invalid-feedback" v-if="form.errors.notify_user">
-                        {{ form.errors.notify_user }}
+                      {{ form.errors.notify_user }}
                     </div>
-                    </div>
+                  </div>
                 </div>
 
                 <!-- Submit Button -->

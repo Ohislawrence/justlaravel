@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\Organization;
 use App\Models\OrganizationMember;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -53,6 +54,18 @@ class CreateNewUser implements CreatesNewUsers
             'user_id' => $user->id,
             'role' => 'overseer',
             'permissions' => null ,
+        ]);
+
+        $freePlan = SubscriptionPlan::where('slug', 'free-tier')->first();
+
+        $subscription = $organization->subscriptions()->create([
+            'plan_id' => $freePlan->id,
+            'billing_cycle' => 'monthly',
+            'price' => 0,
+            'starts_at' => now(),
+            'ends_at' => now()->addYears(100),
+            'is_active' => true,
+            'is_trial' => false,
         ]);
         
         return $user;

@@ -15,20 +15,27 @@ class QuizController extends Controller
     // Student view
     public function show($quizId, $token = null)
     {
-        $quiz = Quiz::with(['questions' => function($query) {
-            $query->select('id', 'quiz_id', 'question', 'type', 'points', 'time_limit');
-        }])->findOrFail($quizId);
-    
+        $quiz = Quiz::with([
+            'questions' => function($query) {
+                $query->select('id', 'quiz_id', 'question', 'type', 'points', 'time_limit');
+            },
+            'questionPools' => function($query) {
+                $query->select('question_pools.id', 'question_pools.name')
+                    ->withCount('questions')
+                    ->withPivot('questions_to_show');
+            }
+        ])->findOrFail($quizId);
+
         // Verify token and quiz status
         if ($quiz->share_token !== $token || !$quiz->is_published) {
             abort(404);
         }
-    
+
         $isAuthenticated = auth()->check();
         $isAssigned = $isAuthenticated 
             ? $this->isUserAssigned($quiz, auth()->id())
             : false;
-    
+
         return Inertia::render('Examinee/QuizLanding', [
             'quiz' => $quiz->makeVisible(['instructions', 'time_limit', 'passing_score']),
             'attemptsRemaining' => $this->getAttemptsRemaining($quiz),

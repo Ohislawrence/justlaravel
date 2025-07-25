@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'paystack' => [
+        'secret_key' => env('PAYSTACK_SECRET_KEY'),
+        'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+        'url' => env('PAYSTACK_PAYMENT_URL'),
+        'webhook_secret' => env('PAYSTACK_WEBHOOK_SECRET'),
+    ],
+
 ];

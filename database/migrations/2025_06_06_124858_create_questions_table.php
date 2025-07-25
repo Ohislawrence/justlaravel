@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('quiz_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('quiz_id')->constrained()->cascadeOnDelete()->nullable();
             $table->string('type'); // mcq, true_false, fill_blank, essay, file_upload, audio, video, etc.
             $table->text('question');
             $table->text('description')->nullable();

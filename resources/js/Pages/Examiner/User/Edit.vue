@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import InputError from '@/Components/InputError.vue';
@@ -7,25 +8,38 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Multiselect from '@vueform/multiselect';
 
+const hasAdminRole = computed(() => {
+  return props.user.roles?.some(role => role.name === 'admin');
+});
+
 const props = defineProps({
   user: Object,
   groups: Array,
   quizzes: Array,
   roles: Array,
+  designations: Array, // Changed from Object to Array
+  organizationMember: Object,
+  initialUserType: String,
+  initialGroups: Array
 });
 
 const form = useForm({
   name: props.user.name,
   email: props.user.email,
-  user_type: props.user.user_type,
-  groups: (props.user.groups || []).map(group => group.id),
+  user_type: props.initialUserType,
+  groups: props.initialGroups,
+  unique_code: props.organizationMember?.unique_code || '',
+  designation_id: props.organizationMember?.designation_id || null, // Added this line
   quizzes: (props.user.assigned_quizzes || []).map(quiz => quiz.id),
   password: '',
   password_confirmation: '',
 });
 
 const submit = () => {
-  form.put(route('examiner.user.update', props.user.id), {
+  form.put(route('examiner.user.update', {
+    user: props.user.id,
+    organization: props.organizationMember?.organization_id
+  }), {
     onSuccess: () => form.reset('password', 'password_confirmation'),
   });
 };
@@ -61,69 +75,81 @@ const submit = () => {
 
                 <!-- Email -->
                 <div>
-                <InputLabel for="email" value="Email" />
-                <TextInput
+                  <InputLabel for="email" value="Email" />
+                  <TextInput
                     id="email"
                     v-model="form.email"
                     type="email"
                     class="mt-1 block w-full"
                     required
-                    readonly
-                />
-                <InputError class="mt-2" :message="form.errors.email" />
+                    :readonly="!hasAdminRole"
+                  />
+                  <InputError class="mt-2" :message="form.errors.email" />
                 </div>
-
-                <!-- Role -->
-                
 
                 <!-- User Type -->
-                <div class="mb-3">
-                  <label for="user_type" class="form-label">User Type</label>
+                <div>
+                  <InputLabel for="user_type" value="User Type" />
                   <select
                     v-model="form.user_type"
-                    class="form-select"
-                    id="user_type"
-                    :class="{ 'is-invalid': form.errors.user_type }"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    :disabled="user.id === $page.props.auth.user.id"
                   >
-                    <option disabled value="">Unchanged</option>
-                    <option value="admin">Admin (full access)</option>
-                    <option value="examiner">Examiner (staff/teacher)</option>
-                    <option value="examinee">Examinee (student/candidate)</option>
+                    <option value="admin">Admin</option>
+                    <option value="examiner">Examiner</option>
+                    <option value="examinee">Examinee</option>
                   </select>
-                  <div class="invalid-feedback" v-if="form.errors.user_type">{{ form.errors.user_type }}</div>
+                  <InputError class="mt-2" :message="form.errors.user_type" />
                 </div>
 
-                <!-- Groups -->
+                <!-- Unique Code (for examinees) -->
+                <div v-if="form.user_type === 'examinee'">
+                  <InputLabel for="unique_code" value="Unique Code" />
+                  <TextInput
+                    id="unique_code"
+                    v-model="form.unique_code"
+                    type="text"
+                    class="mt-1 block w-full"
+                  />
+                  <InputError class="mt-2" :message="form.errors.unique_code" />
+                </div>
+
+                <!-- Groups Multiselect -->
                 <div>
                   <InputLabel for="groups" value="Groups" />
                   <Multiselect
-                    id="groups"
                     v-model="form.groups"
                     :options="groups.map(group => ({ value: group.id, label: group.name }))"
                     mode="tags"
                     placeholder="Select groups"
-                    class="mt-1"
                   />
-                  <InputError class="mt-2" :message="form.errors.groups" />
                 </div>
 
-                <!-- Quizzes -->
-                <div>
-                  <InputLabel for="quizzes" value="Assigned Quizzes" />
-                  <Multiselect
-                    id="quizzes"
-                    v-model="form.quizzes"
-                    :options="quizzes.map(quiz => ({ value: quiz.id, label: quiz.name }))"
-                    mode="tags"
-                    placeholder="Select quizzes"
-                    class="mt-1"
-                  />
-                  <InputError class="mt-2" :message="form.errors.quizzes" />
+                <!-- Designation Dropdown -->
+                <div class="mb-4">
+                  <InputLabel for="designation_id" value="Designation" />
+                  <select
+                    v-model="form.designation_id"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    :class="{ 'is-invalid': form.errors.designation_id }"
+                  >
+                    <option value="">Select Designation</option>
+                    <option 
+                      v-for="designation in designations" 
+                      :value="designation.id" 
+                      :key="designation.id"
+                    >
+                      {{ designation.name }}
+                    </option>
+                  </select>
+                  <InputError class="mt-2" :message="form.errors.designation_id" />
                 </div>
+
+                
 
                 <!-- Password -->
                 <div>
-                  <InputLabel for="password" value="New Password (leave blank to keep current)" />
+                  <InputLabel for="password" value="New Password" />
                   <TextInput
                     id="password"
                     v-model="form.password"
@@ -150,7 +176,7 @@ const submit = () => {
 
               <div class="flex items-center justify-end mt-6">
                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    <span v-if="form.processing">Updating...</span>
+                  <span v-if="form.processing">Updating...</span>
                   <span v-else>Update User</span>
                 </PrimaryButton>
               </div>

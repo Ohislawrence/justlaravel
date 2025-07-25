@@ -19,9 +19,33 @@ class ActivityService
         string $type,
         Model $subject = null,
         array $data = [],
-        Model $causer = null
+        Model $causer = null,
+        int $organizationId = null
     ): ActivityLog {
-        return ActivityLog::log($type, $subject, $data, $causer);
+        return ActivityLog::create([
+            'type' => $type,
+            'subject_type' => $subject ? get_class($subject) : null,
+            'subject_id' => $subject ? $subject->id : null,
+            'causer_type' => $causer ? get_class($causer) : null,
+            'causer_id' => $causer ? $causer->id : null,
+            'data' => json_encode($data),
+            'organization_id' => $organizationId ?? self::resolveOrganizationId($subject, $causer)
+        ]);
+    }
+
+    protected static function resolveOrganizationId(?Model $subject, ?Model $causer): ?int
+    {
+        // Try to get organization from subject
+        if ($subject && method_exists($subject, 'organization')) {
+            return $subject->organization_id ?? $subject->organization?->id;
+        }
+
+        // Try to get organization from causer
+        if ($causer && method_exists($causer, 'currentOrganization')) {
+            return $causer->organizations()->first()?->id;
+        }
+
+        return null;
     }
 
     public static function logQuizCreated($quiz, $user = null)
@@ -34,7 +58,8 @@ class ActivityService
                 'quiz_id' => $quiz->id,
                 'creator_name' => $user?->name ?? 'System'
             ],
-            $user
+            $user,
+            $quiz->organization_id ?? $user?->organizations()->first()?->id
         );
     }
 
@@ -52,7 +77,8 @@ class ActivityService
                 'is_passed' => $attempt->is_passed,
                 'attempt_id' => $attempt->id
             ],
-            $user ?? $attempt->user
+            $user ?? $attempt->user,
+            $attempt->quiz->organization_id ?? ($user ?? $attempt->user)?->organizations()->first()?->id
         );
     }
 }

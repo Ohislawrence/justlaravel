@@ -8,9 +8,15 @@
         </h2>
         <Link
           :href="route('examiner.question-pools.index')"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring focus:ring-blue-300 disabled:opacity-25 transition"
         >
           Back to Pools
+        </Link>
+        <Link 
+            :href="route('examiner.pools.questions.create', pool.id)"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring focus:ring-blue-300 disabled:opacity-25 transition"
+        >
+            Add Question
         </Link>
       </div>
     </template>
@@ -28,10 +34,7 @@
             </div>
 
             <div class="overflow-x-auto">
-              <table
-                v-if="pool.questions.length > 0"
-                class="min-w-full divide-y divide-gray-200 text-sm"
-              >
+              <table v-if="pool.questions.length > 0" class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-100">
                   <tr>
                     <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wide">Question</th>
@@ -41,32 +44,28 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                  <tr
-                    v-for="question in pool.questions"
-                    :key="question.id"
-                    class="hover:bg-gray-50 transition"
-                  >
+                  <tr v-for="question in pool.questions" :key="question.id" class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 max-w-md whitespace-normal">
-                      <div class="text-gray-800 font-medium line-clamp-2">
-                        {{ question.question }}
-                      </div>
+                      <div class="text-gray-800 font-medium line-clamp-2" v-html="question.question"></div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span
-                        class="px-2 inline-flex text-xs font-semibold leading-5 rounded-full"
+                        class="px-2 inline-flex text-xs font-semibold leading-5 rounded-full capitalize"
                         :class="{
                           'bg-blue-100 text-blue-800': question.type === 'multiple_choice',
                           'bg-green-100 text-green-800': question.type === 'true_false',
-                          'bg-purple-100 text-purple-800': question.type === 'short_answer'
+                          'bg-purple-100 text-purple-800': question.type === 'short_answer',
+                          'bg-yellow-100 text-yellow-800': question.type === 'essay',
+                          'bg-red-100 text-red-800': question.type === 'fill_in_blank'
                         }"
                       >
-                        {{ question.type }}
+                        {{ formatQuestionType(question.type) }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-gray-600">
-                      {{ question.points }} pts
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {{ question.points ?? 0 }} pts
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <button
                         @click="removeQuestion(question)"
                         class="text-red-600 hover:text-red-800 transition"
@@ -168,6 +167,19 @@ const props = defineProps({
   pool: Object,
   availableQuestions: Array,
 });
+
+const formatQuestionType = (type) => {
+  const types = {
+    'multiple_choice': 'Multiple Choice',
+    'true_false': 'True/False',
+    'short_answer': 'Short Answer',
+    'essay': 'Essay',
+    'fill_in_blank': 'Fill in Blank',
+    'matching': 'Matching',
+    'ordering': 'Ordering'
+  };
+  return types[type] || type;
+};
 
 const selectedQuestions = ref([]);
 

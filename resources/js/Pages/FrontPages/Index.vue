@@ -1,176 +1,509 @@
-<script setup>
-import { Head, Link } from '@inertiajs/vue3';
-
-defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
-});
-
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
-}
-</script>
-
+<!-- resources/js/Pages/Home.vue (or similar) -->
 <template>
-    <Head title="Welcome to Tracklia" />
-    <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
-        <img id="background" class="absolute -left-20 top-0 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" />
-        <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
-            <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
-                <header class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3">
-                    <div class="flex lg:justify-center lg:col-start-2">
-                        <svg class="h-12 w-auto text-white lg:h-16 lg:text-[#FF2D20]" viewBox="0 0 62 65" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M61.8548 14.6253C61.8778 14.7102 61.8895 14.7978 61.8897 14.8858V28.5615C61.8898 28.737 61.8434 28.9095 61.7554 29.0614C61.6675 29.2132 61.5409 29.3392 61.3887 29.4265L49.9104 36.0351V49.1337C49.9104 49.4902 49.7209 49.8192 49.4118 49.9987L25.4519 63.7916C25.3971 63.8227 25.3372 63.8427 25.2774 63.8639C25.255 63.8714 25.2338 63.8851 25.2101 63.8913C25.0426 63.9354 24.8666 63.9354 24.6991 63.8913C24.6716 63.8838 24.6467 63.8689 24.6205 63.8589C24.5657 63.8389 24.5084 63.8215 24.456 63.7916L0.501061 49.9987C0.348882 49.9113 0.222437 49.7853 0.134469 49.6334C0.0465019 49.4816 0.000120578 49.3092 0 49.1337L0 8.10652C0 8.01678 0.0124642 7.92953 0.0348998 7.84477C0.0423783 7.8161 0.0598282 7.78993 0.0697995 7.76126C0.0884958 7.70891 0.105946 7.65531 0.133367 7.6067C0.152063 7.5743 0.179485 7.54812 0.20192 7.51821C0.230588 7.47832 0.256763 7.43719 0.290416 7.40229C0.319084 7.37362 0.356476 7.35243 0.388883 7.32751C0.425029 7.29759 0.457436 7.26518 0.498568 7.2415L12.4779 0.345059C12.6296 0.257786 12.8015 0.211853 12.9765 0.211853C13.1515 0.211853 13.3234 0.257786 13.475 0.345059L25.4531 7.2415H25.4556C25.4955 7.26643 25.5292 7.29759 25.5653 7.32626C25.5977 7.35119 25.6339 7.37362 25.6625 7.40104C25.6974 7.43719 25.7224 7.47832 25.7523 7.51821C25.7735 7.54812 25.8021 7.5743 25.8196 7.6067C25.8483 7.65656 25.8645 7.70891 25.8844 7.76126C25.8944 7.78993 25.9118 7.8161 25.9193 7.84602C25.9423 7.93096 25.954 8.01853 25.9542 8.10652V33.7317L35.9355 27.9844V14.8846C35.9355 14.7973 35.948 14.7088 35.9704 14.6253C35.9792 14.5954 35.9954 14.5692 36.0053 14.5405C36.0253 14.4882 36.0427 14.4346 36.0702 14.386C36.0888 14.3536 36.1163 14.3274 36.1375 14.2975C36.1674 14.2576 36.1923 14.2165 36.2272 14.1816C36.2559 14.1529 36.292 14.1317 36.3244 14.1068C36.3618 14.0769 36.3942 14.0445 36.4341 14.0208L48.4147 7.12434C48.5663 7.03694 48.7383 6.99094 48.9133 6.99094C49.0883 6.99094 49.2602 7.03694 49.4118 7.12434L61.3899 14.0208C61.4323 14.0457 61.4647 14.0769 61.5021 14.1055C61.5333 14.1305 61.5694 14.1529 61.5981 14.1803C61.633 14.2165 61.6579 14.2576 61.6878 14.2975C61.7103 14.3274 61.7377 14.3536 61.7551 14.386C61.7838 14.4346 61.8 14.4882 61.8199 14.5405C61.8312 14.5692 61.8474 14.5954 61.8548 14.6253ZM59.893 27.9844V16.6121L55.7013 19.0252L49.9104 22.3593V33.7317L59.8942 27.9844H59.893ZM47.9149 48.5566V37.1768L42.2187 40.4299L25.953 49.7133V61.2003L47.9149 48.5566ZM1.99677 9.83281V48.5566L23.9562 61.199V49.7145L12.4841 43.2219L12.4804 43.2194L12.4754 43.2169C12.4368 43.1945 12.4044 43.1621 12.3682 43.1347C12.3371 43.1097 12.3009 43.0898 12.2735 43.0624L12.271 43.0586C12.2386 43.0275 12.2162 42.9888 12.1887 42.9539C12.1638 42.9203 12.1339 42.8916 12.114 42.8567L12.1127 42.853C12.0903 42.8156 12.0766 42.7707 12.0604 42.7283C12.0442 42.6909 12.023 42.656 12.013 42.6161C12.0005 42.5688 11.998 42.5177 11.9931 42.4691C11.9881 42.4317 11.9781 42.3943 11.9781 42.3569V15.5801L6.18848 12.2446L1.99677 9.83281ZM12.9777 2.36177L2.99764 8.10652L12.9752 13.8513L22.9541 8.10527L12.9752 2.36177H12.9777ZM18.1678 38.2138L23.9574 34.8809V9.83281L19.7657 12.2459L13.9749 15.5801V40.6281L18.1678 38.2138ZM48.9133 9.14105L38.9344 14.8858L48.9133 20.6305L58.8909 14.8846L48.9133 9.14105ZM47.9149 22.3593L42.124 19.0252L37.9323 16.6121V27.9844L43.7219 31.3174L47.9149 33.7317V22.3593ZM24.9533 47.987L39.59 39.631L46.9065 35.4555L36.9352 29.7145L25.4544 36.3242L14.9907 42.3482L24.9533 47.987Z" fill="currentColor"/></svg>
+    <!-- Use the new layout component -->
+     
+    <AppLayout2>
+        <Head title="Home" />
+      <!-- All your existing homepage-specific content goes here -->
+      <!-- Hero Section -->
+      <section class="container mx-auto px-4 sm:px-6 py-16 md:py-28 relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0 opacity-5">
+          <div class="absolute top-10 left-5 w-40 h-40 bg-emerald-500 rounded-full blur-3xl"></div>
+          <div class="absolute bottom-10 right-5 w-52 h-52 bg-teal-400 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+          <div class="mb-6 inline-flex items-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium border border-emerald-100">
+            🇳🇬 Made for Nigerian Educators
+          </div>
+          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-emerald-700 to-teal-500 bg-clip-text text-transparent leading-tight">
+            Transform Education <br>with Smart Assessments
+          </h1>
+          <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
+            Create engaging quizzes, track student progress, and boost learning outcomes. Designed specifically for Nigerian schools, universities, and training centers.
+          </p>
+          <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+            <Link :href="route('register')" class="px-6 sm:px-8 py-3.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium transform hover:scale-[1.02] duration-300">
+              Start Free Trial - ₦0 for 30 days
+            </Link>
+            <a href="#demo" class="px-6 sm:px-8 py-3.5 border-2 border-gray-200 rounded-xl hover:border-emerald-300 transition text-base sm:text-lg font-medium hover:bg-emerald-50">
+              Watch Demo
+            </a>
+          </div>
+          <div class="text-sm text-gray-500">
+            No credit card required • 14-day money-back guarantee
+          </div>
+        </div>
+      </section>
+  
+      <!-- Stats Section -->
+      <section class="bg-emerald-50 py-12 sm:py-16">
+        <div class="container mx-auto px-4 sm:px-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+            <div class="p-4">
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">25,000+</div>
+              <div class="text-sm sm:text-base text-gray-600">Active Students</div>
+            </div>
+            <div class="p-4">
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">1,200+</div>
+              <div class="text-sm sm:text-base text-gray-600">Nigerian Schools</div>
+            </div>
+            <div class="p-4">
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">500K+</div>
+              <div class="text-sm sm:text-base text-gray-600">Quizzes Created</div>
+            </div>
+            <div class="p-4">
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">36</div>
+              <div class="text-sm sm:text-base text-gray-600">States Covered</div>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Key Features -->
+      <section id="features" class="container mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Built for Nigerian Educators</h2>
+          <p class="text-lg sm:text-xl text-gray-600">Everything you need to create, manage, and analyze assessments that work in our educational context.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+          <!-- Feature Cards - Copied directly -->
+          <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">AI-Powered Question Generation</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Generate questions from Nigerian curriculum topics. Supports WAEC, JAMB, and NECO syllabus formats.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Nigerian curriculum aligned</div>
+          </div>
+          <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">Real-Time Analytics</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Track student performance, identify learning gaps, and generate detailed reports for parents and administrators.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Performance insights</div>
+          </div>
+          <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">Mobile-First Design</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Works perfectly on smartphones and tablets. Students can take quizzes anywhere, even with poor internet connection.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Offline capability</div>
+          </div>
+          <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">Local Language Support</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Create quizzes in English, Hausa, Yoruba, and Igbo. Perfect for bilingual education programs.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Multi-language ready</div>
+          </div>
+          <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">Affordable Pricing</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Flexible payment options including bank transfer, mobile money, and installment plans for schools.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Pay in Naira</div>
+          </div>
+          <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">24/7 Local Support</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Get help in English or local languages via WhatsApp, phone, or email from our Lagos-based support team.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Nigerian support team</div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Testimonials -->
+      <section class="bg-gray-50 py-16 sm:py-20">
+        <div class="container mx-auto px-4 sm:px-6">
+          <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by Nigerian Educators</h2>
+            <p class="text-lg sm:text-xl text-gray-600">See what teachers and institutions are saying about QuizPortal Nigeria.</p>
+          </div>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            <!-- Testimonial Cards - Copied directly -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4">
+                  <span class="text-emerald-600 font-semibold">AD</span>
+                </div>
+                <div>
+                  <div class="font-semibold text-gray-900">Dr. Adunni Olatunji</div>
+                  <div class="text-xs sm:text-sm text-gray-500">University of Lagos</div>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"QuizPortal has revolutionized how we conduct assessments. The AI question generation saves me hours of work every week."</p>
+              <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
+            </div>
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4">
+                  <span class="text-emerald-600 font-semibold">IO</span>
+                </div>
+                <div>
+                  <div class="font-semibold text-gray-900">Ibrahim Okafor</div>
+                  <div class="text-xs sm:text-sm text-gray-500">Greenfield Secondary School, Abuja</div>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The offline feature is a game-changer. Our students can now take quizzes even when internet is unstable."</p>
+              <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
+            </div>
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4">
+                  <span class="text-emerald-600 font-semibold">EN</span>
+                </div>
+                <div>
+                  <div class="font-semibold text-gray-900">Mrs. Emeka Nwosu</div>
+                  <div class="text-xs sm:text-sm text-gray-500">Covenant University</div>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The analytics help me identify struggling students early. Parent reports are detailed and professional."</p>
+              <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Pricing Section -->
+      <section id="pricing" class="container mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+          <p class="text-lg sm:text-xl text-gray-600">Choose the plan that fits your needs. All prices in Nigerian Naira.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+          <!-- Pricing Cards - Copied directly -->
+          <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition">
+            <div class="text-center mb-8">
+              <h3 class="text-lg sm:text-xl font-semibold mb-2">Starter</h3>
+              <div class="text-2xl sm:text-3xl font-bold mb-2">₦5,000<span class="text-sm font-normal text-gray-500">/month</span></div>
+              <p class="text-gray-600 text-sm sm:text-base">Perfect for individual teachers</p>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Up to 100 students</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Unlimited quizzes</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Basic analytics</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>WhatsApp support</li>
+            </ul>
+            <button class="w-full py-3 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm">Start Free Trial</button>
+          </div>
+          <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border-2 border-emerald-600 relative transform hover:scale-[1.02] transition duration-300">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-medium">Most Popular</div>
+            <div class="text-center mb-8 mt-4">
+              <h3 class="text-lg sm:text-xl font-semibold mb-2">School</h3>
+              <div class="text-2xl sm:text-3xl font-bold mb-2">₦25,000<span class="text-sm font-normal text-gray-500">/month</span></div>
+              <p class="text-gray-600 text-sm sm:text-base">For schools and institutions</p>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Up to 1,000 students</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Multiple teachers</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Advanced analytics</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Parent portal</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Priority support</li>
+            </ul>
+            <button class="w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium text-sm">Start Free Trial</button>
+          </div>
+          <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition">
+            <div class="text-center mb-8">
+              <h3 class="text-lg sm:text-xl font-semibold mb-2">Enterprise</h3>
+              <div class="text-2xl sm:text-3xl font-bold mb-2">Custom</div>
+              <p class="text-gray-600 text-sm sm:text-base">For large institutions</p>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Unlimited students</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Unlimited quizzes</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Premium analytics</li>
+              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Dedicated support</li>
+            </ul>
+            <button class="w-full py-3 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm">Contact Sales</button>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Blog Section -->
+      <section id="blog" class="bg-gradient-to-b from-white to-gray-50 py-16 sm:py-20">
+            <div class="container mx-auto px-4 sm:px-6">
+                <!-- Section Header -->
+                <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
+                    <div class="mb-4 inline-flex items-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium border border-emerald-100">
+                        📚 Educational Insights
                     </div>
-                    <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                        <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                        >
-                            Dashboard
-                        </Link>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                        Latest from Our <span class="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Education Blog</span>
+                    </h2>
+                    <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                        Tips, insights, and best practices for Nigerian educators to enhance learning outcomes and student engagement.
+                    </p>
+                </div>
 
-                        <template v-else>
-                            <Link
-                                :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Log in
-                            </Link>
-
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Register
-                            </Link>
-                        </template>
-                    </nav>
-                </header>
-
-                <main class="mt-6">
-                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                        <a
-                            href="https://laravel.com/docs"
-                            id="docs-card"
-                            class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-light.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="aspect-video h-full w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
-                                    @error="handleImageError"
-                                />
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-dark.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="hidden aspect-video h-full w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block"
-                                />
-                                <div
-                                    class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
-                                ></div>
-                            </div>
-
-                            <div class="relative flex items-center gap-6 lg:items-end">
-                                <div id="docs-card-content" class="flex items-start gap-6 lg:flex-col">
-                                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                        <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="#FF2D20" d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z"/><path fill="#FF2D20" d="m3.55 1.893 8 4.048a1.008 1.008 0 0 0 .9 0l8-4.048a1 1 0 0 0-.9-1.785l-7.322 3.706a.506.506 0 0 1-.452 0L4.454.108a1 1 0 0 0-.9 1.785H3.55Z"/></svg>
+                <!-- Featured Article -->
+                <div v-if="featuredBlog" class="max-w-6xl mx-auto mb-12 sm:mb-16">
+                    <Link :href="route('blogs.show', featuredBlog.slug)" class="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-emerald-200 overflow-hidden block">
+                        <div class="grid lg:grid-cols-2 gap-0">
+                            <!-- Image Side -->
+                            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 p-8 lg:p-12 flex items-center justify-center min-h-[300px]">
+                                <div class="absolute inset-0 opacity-10">
+                                    <div class="absolute top-4 left-4 w-20 h-20 bg-emerald-500 rounded-full blur-2xl"></div>
+                                    <div class="absolute bottom-4 right-4 w-32 h-32 bg-teal-400 rounded-full blur-3xl"></div>
+                                </div>
+                                <div class="relative text-center">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                        </svg>
                                     </div>
-
-                                    <div class="pt-3 sm:pt-5 lg:pt-0">
-                                        <h2 class="text-xl font-semibold text-black dark:text-white">Documentation</h2>
-
-                                        <p class="mt-4 text-sm/relaxed">
-                                            Laravel has wonderful documentation covering every aspect of the framework. Whether you are a newcomer or have prior experience with Laravel, we recommend reading our documentation from beginning to end.
-                                        </p>
+                                    <div class="text-sm text-emerald-600 font-medium">Featured Article</div>
+                                </div>
+                            </div>
+                            <!-- Content Side -->
+                            <div class="p-6 sm:p-8 lg:p-12">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span v-for="category in featuredBlog.categories" :key="category.id" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                                        {{ category.name }}
+                                    </span>
+                                    <span class="text-sm text-gray-500">{{ formatDate(featuredBlog.created_at) }}</span>
+                                </div>
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 group-hover:text-emerald-600 transition-colors">
+                                    {{ featuredBlog.title }}
+                                </h3>
+                                <p class="text-gray-600 mb-6 leading-relaxed line-clamp-3">
+                                    {{ featuredBlog.excerpt || featuredBlog.content.substring(0, 200) + '...' }}
+                                </p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                                            <span class="text-white text-sm font-semibold">
+                                                QP
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">Quiz Portal</div>
+                                            <div class="text-xs text-gray-500">Author</div>
+                                        </div>
+                                    </div>
+                                    <div class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-medium text-sm transition-colors group">
+                                        Read More
+                                        <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                        </svg>
                                     </div>
                                 </div>
-
-                                <svg class="size-6 shrink-0 stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                            </div>
-                        </a>
-
-                        <a
-                            href="https://laracasts.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><g fill="#FF2D20"><path d="M24 8.25a.5.5 0 0 0-.5-.5H.5a.5.5 0 0 0-.5.5v12a2.5 2.5 0 0 0 2.5 2.5h19a2.5 2.5 0 0 0 2.5-2.5v-12Zm-7.765 5.868a1.221 1.221 0 0 1 0 2.264l-6.626 2.776A1.153 1.153 0 0 1 8 18.123v-5.746a1.151 1.151 0 0 1 1.609-1.035l6.626 2.776ZM19.564 1.677a.25.25 0 0 0-.177-.427H15.6a.106.106 0 0 0-.072.03l-4.54 4.543a.25.25 0 0 0 .177.427h3.783c.027 0 .054-.01.073-.03l4.543-4.543ZM22.071 1.318a.047.047 0 0 0-.045.013l-4.492 4.492a.249.249 0 0 0 .038.385.25.25 0 0 0 .14.042h5.784a.5.5 0 0 0 .5-.5v-2a2.5 2.5 0 0 0-1.925-2.432ZM13.014 1.677a.25.25 0 0 0-.178-.427H9.101a.106.106 0 0 0-.073.03l-4.54 4.543a.25.25 0 0 0 .177.427H8.4a.106.106 0 0 0 .073-.03l4.54-4.543ZM6.513 1.677a.25.25 0 0 0-.177-.427H2.5A2.5 2.5 0 0 0 0 3.75v2a.5.5 0 0 0 .5.5h1.4a.106.106 0 0 0 .073-.03l4.54-4.543Z"/></g></svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Laracasts</h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.
-                                </p>
-                            </div>
-
-                            <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                        </a>
-
-                        <a
-                            href="https://laravel-news.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><g fill="#FF2D20"><path d="M8.75 4.5H5.5c-.69 0-1.25.56-1.25 1.25v4.75c0 .69.56 1.25 1.25 1.25h3.25c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25Z"/><path d="M24 10a3 3 0 0 0-3-3h-2V2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2V20a3.5 3.5 0 0 0 3.5 3.5h17A3.5 3.5 0 0 0 24 20V10ZM3.5 21.5A1.5 1.5 0 0 1 2 20V3a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v17c0 .295.037.588.11.874a.5.5 0 0 1-.484.625L3.5 21.5ZM22 20a1.5 1.5 0 1 1-3 0V9.5a.5.5 0 0 1 .5-.5H21a1 1 0 0 1 1 1v10Z"/><path d="M12.751 6.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 7.3v-.5a.75.75 0 0 1 .751-.753ZM12.751 10.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 11.3v-.5a.75.75 0 0 1 .751-.753ZM4.751 14.047h10a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-10A.75.75 0 0 1 4 15.3v-.5a.75.75 0 0 1 .751-.753ZM4.75 18.047h7.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-7.5A.75.75 0 0 1 4 19.3v-.5a.75.75 0 0 1 .75-.753Z"/></g></svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Laravel News</h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials.
-                                </p>
-                            </div>
-
-                            <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                        </a>
-
-                        <div class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800">
-                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M16.597 12.635a.247.247 0 0 0-.08-.237 2.234 2.234 0 0 1-.769-1.68c.001-.195.03-.39.084-.578a.25.25 0 0 0-.09-.267 8.8 8.8 0 0 0-4.826-1.66.25.25 0 0 0-.268.181 2.5 2.5 0 0 1-2.4 1.824.045.045 0 0 0-.045.037 12.255 12.255 0 0 0-.093 3.86.251.251 0 0 0 .208.214c2.22.366 4.367 1.08 6.362 2.118a.252.252 0 0 0 .32-.079 10.09 10.09 0 0 0 1.597-3.733ZM13.616 17.968a.25.25 0 0 0-.063-.407A19.697 19.697 0 0 0 8.91 15.98a.25.25 0 0 0-.287.325c.151.455.334.898.548 1.328.437.827.981 1.594 1.619 2.28a.249.249 0 0 0 .32.044 29.13 29.13 0 0 0 2.506-1.99ZM6.303 14.105a.25.25 0 0 0 .265-.274 13.048 13.048 0 0 1 .205-4.045.062.062 0 0 0-.022-.07 2.5 2.5 0 0 1-.777-.982.25.25 0 0 0-.271-.149 11 11 0 0 0-5.6 2.815.255.255 0 0 0-.075.163c-.008.135-.02.27-.02.406.002.8.084 1.598.246 2.381a.25.25 0 0 0 .303.193 19.924 19.924 0 0 1 5.746-.438ZM9.228 20.914a.25.25 0 0 0 .1-.393 11.53 11.53 0 0 1-1.5-2.22 12.238 12.238 0 0 1-.91-2.465.248.248 0 0 0-.22-.187 18.876 18.876 0 0 0-5.69.33.249.249 0 0 0-.179.336c.838 2.142 2.272 4 4.132 5.353a.254.254 0 0 0 .15.048c1.41-.01 2.807-.282 4.117-.802ZM18.93 12.957l-.005-.008a.25.25 0 0 0-.268-.082 2.21 2.21 0 0 1-.41.081.25.25 0 0 0-.217.2c-.582 2.66-2.127 5.35-5.75 7.843a.248.248 0 0 0-.09.299.25.25 0 0 0 .065.091 28.703 28.703 0 0 0 2.662 2.12.246.246 0 0 0 .209.037c2.579-.701 4.85-2.242 6.456-4.378a.25.25 0 0 0 .048-.189 13.51 13.51 0 0 0-2.7-6.014ZM5.702 7.058a.254.254 0 0 0 .2-.165A2.488 2.488 0 0 1 7.98 5.245a.093.093 0 0 0 .078-.062 19.734 19.734 0 0 1 3.055-4.74.25.25 0 0 0-.21-.41 12.009 12.009 0 0 0-10.4 8.558.25.25 0 0 0 .373.281 12.912 12.912 0 0 1 4.826-1.814ZM10.773 22.052a.25.25 0 0 0-.28-.046c-.758.356-1.55.635-2.365.833a.25.25 0 0 0-.022.48c1.252.43 2.568.65 3.893.65.1 0 .2 0 .3-.008a.25.25 0 0 0 .147-.444c-.526-.424-1.1-.917-1.673-1.465ZM18.744 8.436a.249.249 0 0 0 .15.228 2.246 2.246 0 0 1 1.352 2.054c0 .337-.08.67-.23.972a.25.25 0 0 0 .042.28l.007.009a15.016 15.016 0 0 1 2.52 4.6.25.25 0 0 0 .37.132.25.25 0 0 0 .096-.114c.623-1.464.944-3.039.945-4.63a12.005 12.005 0 0 0-5.78-10.258.25.25 0 0 0-.373.274c.547 2.109.85 4.274.901 6.453ZM9.61 5.38a.25.25 0 0 0 .08.31c.34.24.616.561.8.935a.25.25 0 0 0 .3.127.631.631 0 0 1 .206-.034c2.054.078 4.036.772 5.69 1.991a.251.251 0 0 0 .267.024c.046-.024.093-.047.141-.067a.25.25 0 0 0 .151-.23A29.98 29.98 0 0 0 15.957.764a.25.25 0 0 0-.16-.164 11.924 11.924 0 0 0-2.21-.518.252.252 0 0 0-.215.076A22.456 22.456 0 0 0 9.61 5.38Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Vibrant Ecosystem</h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel's robust library of first-party tools and libraries, such as <a href="https://forge.laravel.com" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white dark:focus-visible:ring-[#FF2D20]">Forge</a>, <a href="https://vapor.laravel.com" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Vapor</a>, <a href="https://nova.laravel.com" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Nova</a>, and <a href="https://envoyer.io" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Envoyer</a> help you take your projects to the next level. Pair them with powerful open source libraries like <a href="https://laravel.com/docs/billing" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Cashier</a>, <a href="https://laravel.com/docs/dusk" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Dusk</a>, <a href="https://laravel.com/docs/broadcasting" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Echo</a>, <a href="https://laravel.com/docs/horizon" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Horizon</a>, <a href="https://laravel.com/docs/sanctum" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Sanctum</a>, <a href="https://laravel.com/docs/telescope" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Telescope</a>, and more.
-                                </p>
                             </div>
                         </div>
-                    </div>
-                </main>
+                    </Link>
+                </div>
 
-                <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                    Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
-                </footer>
+                <!-- Blog Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+                    <!-- Blog Post -->
+                    <article v-for="blog in recentBlogs" :key="blog.id" class="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-emerald-200 overflow-hidden">
+                        <Link :href="route('blogs.show', blog.slug)" class="block">
+                          <div class="aspect-video relative overflow-hidden">
+                            <!-- Featured Image -->
+                            <img 
+                                v-if="blog.featured_image" 
+                                :src="'/storage/' + blog.featured_image" 
+                                :alt="blog.title"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            >
+                            
+                            <!-- Fallback Gradient Background -->
+                            <div 
+                                v-else
+                                class="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center"
+                            >
+                                <div class="absolute inset-0 opacity-10">
+                                    <div class="absolute top-2 left-2 w-16 h-16 bg-emerald-500 rounded-full blur-xl"></div>
+                                    <div class="absolute bottom-2 right-2 w-20 h-20 bg-teal-400 rounded-full blur-xl"></div>
+                                </div>
+                                <div class="relative z-10">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                            <div class="p-6">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span v-for="category in blog.categories.slice(0, 1)" :key="category.id" class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                                        {{ category.name }}
+                                    </span>
+                                    <span class="text-xs text-gray-500">{{ formatDate(blog.created_at) }}</span>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors">
+                                    {{ blog.title }}
+                                </h3>
+                                <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                                    {{ blog.excerpt || blog.content.substring(0, 150) + '...' }}
+                                </p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                            <span class="text-white text-xs font-semibold">
+                                                QP
+                                            </span>
+                                        </div>
+                                        <span class="text-xs text-gray-600">Quiz Portal</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">3 min read</span>
+                                </div>
+                            </div>
+                        </Link>
+                    </article>
+                </div>
+
+                <!-- View All Blog Posts -->
+                <div class="text-center mt-12">
+                    <Link :href="route('blogs.index')" class="inline-flex items-center px-8 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all duration-200 hover:scale-[1.02] font-medium shadow-lg hover:shadow-xl">
+                        View All Articles
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </Link>
+                </div>
             </div>
+        </section>
+  
+       <!-- CTA Section -->
+      <section class="relative overflow-hidden bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 text-white py-20 sm:py-28">
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 opacity-30">
+          <div class="absolute top-0 -left-4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+          <div class="absolute top-0 -right-4 w-72 h-72 bg-lime-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          <div class="absolute -bottom-8 left-20 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
         </div>
-    </div>
-</template>
+        <!-- Grid pattern overlay (unchanged) -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E')]"></div>
+        <div class="container mx-auto px-4 sm:px-6 text-center relative z-10">
+          <!-- Badge -->
+          <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-8 transform hover:scale-105 transition-all duration-300">
+            <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+            Join 10,000+ Nigerian Educators
+          </div>
+          <!-- Heading with green gradient -->
+          <h2 class="text-4xl sm:text-6xl font-bold mb-6 bg-gradient-to-r from-green-100 via-green-300 to-emerald-200 bg-clip-text text-transparent leading-tight">
+            Ready to Transform<br />
+            Your Assessments?
+          </h2>
+          <!-- Subtitle -->
+          <p class="text-lg sm:text-xl mb-12 max-w-2xl mx-auto text-gray-100 leading-relaxed">
+            Experience the future of education with AI-powered quizzes, real-time analytics, and seamless collaboration tools.
+          </p>
+          <!-- CTA Buttons -->
+          <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+            <Link
+              :href="route('register')"
+              class="group relative px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-green-500/25 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
+            >
+              <span class="relative z-10 flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Start Free Trial
+              </span>
+              <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            </Link>
+            <a
+              href="#demo"
+              class="group px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1"
+            >
+              <span class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Watch Demo
+              </span>
+            </a>
+          </div>
+          <!-- Trust indicators -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-400">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              No Credit Card Required
+            </div>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-emerald-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+              14-Day Free Trial
+            </div>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-lime-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Instant Setup
+            </div>
+          </div>
+        </div>
+        <!-- Bottom wave decoration (blends with CTA background) -->
+        <div class="absolute bottom-0 left-0 right-0 overflow-hidden">
+        <svg class="w-full h-24 text-green-600" fill="currentColor" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity="0.25"></path>
+          <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05c51.72,39.22,117.31,38.95,176.89,19.53,31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" class="opacity-50"></path>
+          <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"></path>
+        </svg>
+      </div>
+      </section>
+      <!-- End of Homepage Specific Content -->
+    </AppLayout2>
+  </template>
+  
+  <script setup>
+  import { Head,Link } from '@inertiajs/vue3'
+  import AppLayout2 from '@/Layouts/AppLayout2.vue'; 
+  import { defineProps } from 'vue'; 
+  
+
+  const props = defineProps({
+    featuredBlog: Object,
+    recentBlogs: Array,
+    });
+
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+  
+  </script>
+  
+  <style scoped>
+  /* Move the blob animation styles here or ensure they are global */
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  </style>

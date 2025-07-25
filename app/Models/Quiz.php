@@ -61,8 +61,13 @@ class Quiz extends Model
     
     public function questionPools()
     {
-        return $this->hasMany(QuestionPool::class);
+        return $this->belongsToMany(QuestionPool::class, 'quiz_question_pool')
+            ->withPivot('questions_to_show')
+            ->withTimestamps()
+            ->withCount('questions'); 
     }
+
+    
     
     public function attempts()
     {
@@ -105,6 +110,19 @@ class Quiz extends Model
     {
         return $this->belongsToMany(Group::class, 'group_quizzes')
                     ->withTimestamps();
+    }
+
+    public function getTotalQuestionsAttribute()
+    {
+        // Count direct questions
+        $directQuestions = $this->questions()->count();
+        
+        // Count questions from pools
+        $poolQuestions = $this->questionPools->sum(function($pool) {
+            return min($pool->questions_count, $pool->pivot->questions_to_show);
+        });
+        
+        return $directQuestions + $poolQuestions;
     }
 
     

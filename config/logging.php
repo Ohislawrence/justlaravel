@@ -126,6 +126,12 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+        'paystack_webhook' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/paystack-webhook.log'),
+            'level' => 'info',
+            'days' => 30,
+        ],
 
     ],
 

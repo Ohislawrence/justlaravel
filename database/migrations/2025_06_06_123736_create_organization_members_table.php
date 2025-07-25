@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('role'); // admin, member, etc.
             $table->json('permissions')->nullable();
+            $table->string('unique_code')->unique();
+            $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
             
             $table->unique(['organization_id', 'user_id']);

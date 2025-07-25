@@ -143,31 +143,32 @@ class QuestionPoolController extends Controller
 
     // Manage pool questions
     public function manageQuestions(QuestionPool $pool)
-    {
-        //$this->authorize('update', $pool);
-        
-        $pool->load('questions');
-        
-        $availableQuestions = Question::where(function($query) use ($pool) {
-                if ($pool->quiz_id) {
-                    $query->where('quiz_id', $pool->quiz_id);
-                } else {
-                    // For global pools, show questions from the same organization
-                    $query->whereHas('quiz', function($q) {
-                        $q->where('organization_id', auth()->user()->organizations()->first()->id);
-                    });
-                }
-            })
-            ->whereDoesntHave('pools', function($query) use ($pool) {
-                $query->where('question_pool_id', $pool->id);
-            })
-            ->get();
+{
+    $pool->load(['questions' => function($query) {
+        $query->select(
+            'questions.id',
+            'questions.question',
+            'questions.type',
+            'questions.points'
+        );
+    }]);
 
-        return Inertia::render('Examiner/QuestionPools/ManageQuestions', [
-            'pool' => $pool,
-            'availableQuestions' => $availableQuestions,
-        ]);
-    }
+    $availableQuestions = Question::whereDoesntHave('pools', function($query) use ($pool) {
+            $query->where('question_pool_id', $pool->id);
+        })
+        ->select(
+            'id',
+            'question',
+            'type',
+            'points'
+        )
+        ->get();
+
+    return inertia('Examiner/QuestionPools/ManageQuestions', [
+        'pool' => $pool,
+        'availableQuestions' => $availableQuestions,
+    ]);
+}
 
     // Attach questions to pool
     public function attachQuestions(Request $request, QuestionPool $pool)

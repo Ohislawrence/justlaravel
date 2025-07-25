@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref,computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
@@ -13,10 +13,32 @@ defineProps({
     title: String,
 });
 
+const isLandlord = computed(() => page.props.auth.user.role === 'landlord');
+const currentOrganizationName = computed(() => 
+  page.props.auth.user.current_organization?.name || 
+  page.props.organization?.name || 
+  'My Organization'
+);
+
+const userRole = computed(() => page.props.auth.user.role);
+const showOrgIcon = computed(() => !isLandlord.value);
+const showRoleBadge = computed(() => page.props.auth.user?.role);
+
+const roleBadgeClasses = computed(() => ({
+  'bg-blue-100 text-blue-800': userRole.value === 'examiner',
+  'bg-purple-100 text-purple-800': userRole.value === 'landlord',
+  'bg-gray-100 text-gray-800': !['examiner', 'landlord'].includes(userRole.value)
+}));
+
 const logout = () => {
     router.post(route('logout'));
 };
 </script>
+<style scoped>
+.app-brand-text {
+  @apply truncate max-w-[180px] md:max-w-[220px] transition-all duration-300;
+}
+</style>
 
 <template>
     <Head :title="title" />
@@ -27,8 +49,27 @@ const logout = () => {
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
-                    <ResponsiveNavLink :href="route('dashboard')">
-                        <span class="app-brand-text demo menu-text fw-bolder ms-2">Tracklia</span>
+                    <ResponsiveNavLink :href="route('dashboard')" class="group">
+                    <div class="flex items-center">
+                        <!-- Logo/Icon (optional) -->
+                        <svg v-if="isLandlord" class="w-5 h-5 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
+                        </svg>
+                        
+                        <!-- Main Brand Text -->
+                        <span class="app-brand-text font-bold text-gray-800 dark:text-blue group-hover:text-indigo-600 transition-colors duration-200">
+                        <span v-if="isLandlord">QuizPortal</span>
+                        <template v-else>
+                            <!-- Organization name with optional icon -->
+                            <svg v-if="showOrgIcon" class="w-4 h-4 mr-1 inline opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                            {{ currentOrganizationName }}
+                        </template>
+                        </span>
+                        
+                        
+                    </div>
                     </ResponsiveNavLink>
 
                     <a href="javascript:void(0)" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -51,8 +92,23 @@ const logout = () => {
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
+                        <ResponsiveNavLink :href="route('landlord.organizations.index')" :active="route().current('landlord.organizations.index')">
+                            <div>Organizations</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item">
                         <ResponsiveNavLink :href="route('landlord.plans.index')" :active="route().current('landlord.plans.index')">
                             <div>Plans</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item">
+                        <ResponsiveNavLink :href="route('landlord.subscriptions.index')" :active="route().current('landlord.subscriptions.index')">
+                            <div>Subscriptions</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item">
+                        <ResponsiveNavLink :href="route('landlord.blogs.index')" :active="route().current('landlord.blogs.index')">
+                            <div>Blogs</div>
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
@@ -76,7 +132,7 @@ const logout = () => {
                     </li>
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('examiner.question-pools.index')" :active="route().current('examiner.question-pools.index')">
-                            <div>Pool</div>
+                            <div>Question Pool</div>
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
@@ -87,6 +143,11 @@ const logout = () => {
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('examiner.groups.index')" :active="route().current('examiner.groups.index')">
                             <div>Groups</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item">
+                        <ResponsiveNavLink :href="route('examiner.subscription.plans')" :active="route().current('examiner.subscription.plans')">
+                            <div>Subscription</div>
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
@@ -126,23 +187,39 @@ const logout = () => {
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0)" data-bs-toggle="dropdown">
-                                    <div class="avatar avatar-online">
-                                        <img :src="'/assets/img/avatars/1.png'" alt class="w-px-40 h-auto rounded-circle" />
+                                <a class="nav-link dropdown-toggle hide-arrow flex items-center space-x-2" href="javascript:void(0)" data-bs-toggle="dropdown">
+                                    <div class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full text-white font-semibold uppercase">
+                                        {{ $page.props.auth.user.name
+                                            .split(' ')
+                                            .map(n => n[0])
+                                            .join('')
+                                            .substring(0, 2) }}
                                     </div>
+                                    <span class="hidden md:inline font-medium text-gray-800">
+                                        {{ $page.props.auth.user.name }}
+                                    </span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0)">
-                                            <div class="d-flex">
+                                        <a class="dropdown-item py-2 px-3 hover:bg-gray-100 rounded-md transition-colors duration-150" href="javascript:void(0)">
+                                            <div class="d-flex align-items-center">
+                                                <!-- Avatar -->
                                                 <div class="flex-shrink-0 me-3">
-                                                    <div class="avatar avatar-online">
-                                                        <img :src="'/assets/img/avatars/1.png'" alt class="w-px-40 h-auto rounded-circle" />
+                                                    <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
+                                                        style="width: 40px; height: 40px;">
+                                                        {{ $page.props.auth.user.name
+                                                            .split(' ')
+                                                            .map(n => n[0])
+                                                            .join('')
+                                                            .substring(0, 2)
+                                                            .toUpperCase() }}
                                                     </div>
                                                 </div>
+
+                                                <!-- User Info -->
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">{{ $page.props.auth.user.name }}</span>
-                                                    <small class="text-muted">{{ $page.props.auth.user.email }}</small>
+                                                    <span class="fw-semibold d-block text-dark">{{ $page.props.auth.user.name }}</span>
+                                                    <small class="text-muted d-block">{{ userRole }}</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -163,13 +240,12 @@ const logout = () => {
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0)">
+                                        <Link class="dropdown-item" :href="route('examiner.subscription.plans')">
                                             <span class="d-flex align-items-center align-middle">
                                                 <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                                                <span class="flex-grow-1 align-middle">Billing</span>
-                                                <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
+                                                <span class="flex-grow-1 align-middle">Subscription</span>
                                             </span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li>
                                         <div class="dropdown-divider"></div>
@@ -212,7 +288,7 @@ const logout = () => {
                         <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
                             <div class="mb-2 mb-md-0">
                                 ©2025
-                                <a href="https://tracklia.com" target="_blank" class="footer-link fw-bolder">Tracklia.com</a>
+                                <a href="https://quizportal.online" target="_blank" class="footer-link fw-bolder">QuizPortal Online</a>
                             </div>
                             <div>
                                 <a href="javascript:void(0)" class="footer-link me-4">License</a>

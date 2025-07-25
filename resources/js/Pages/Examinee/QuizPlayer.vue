@@ -279,6 +279,9 @@ const props = defineProps({
   }
 });
 
+
+
+
 // Question type mapping
 const questionTypeLabel = (type) => {
   if (!type) return 'Unknown';

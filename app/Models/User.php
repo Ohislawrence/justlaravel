@@ -105,4 +105,37 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Organization::class, 'organization_members');
     }
+
+    public function organizationMember()
+    {
+        return $this->hasOne(OrganizationMember::class);
+    }
+
+    public function currentOrganization()
+    {
+        return $this->organizations()->first(); 
+    }
+    
+    public function scopeExaminers($query)
+    {
+        return $query->role('examiner');
+    }
+    
+    public function scopeInOrganization($query, $organizationId)
+    {
+        return $query->whereHas('organizations', function($q) use ($organizationId) {
+            $q->where('organizations.id', $organizationId);
+        });
+    }
+
+
+    public function switchOrganization($organizationId)
+    {
+        if (!$this->organizations()->where('organizations.id', $organizationId)->exists()) {
+            return false;
+        }
+
+        session(['current_organization_id' => $organizationId]);
+        return true;
+    }
 }

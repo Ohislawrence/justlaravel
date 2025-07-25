@@ -11,7 +11,6 @@ import Checkbox from '@/Components/Checkbox.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import DateTimePicker from '@/Components/DateTimePicker.vue';
 import RichTextArea from '@/Components/RichTextArea.vue';
-import QuestionPoolManager from '@/Components/QuestionPoolManager.vue';
 import Multiselect from '@vueform/multiselect';
 
 const props = defineProps({
@@ -43,7 +42,7 @@ const form = useForm({
     show_correct_answers: false,
     show_leaderboard: false,
     enable_discussions: false,
-    max_attempts: '',
+    max_attempts: null,
     max_participants: '',
     time_limit: '',
     passing_score: '',
@@ -60,24 +59,17 @@ const isValid = computed(() => {
 });
 
 const submit = () => {
-    // Get pool data from the QuestionPoolManager component
-    const poolData = poolManager.value?.getPoolData() || [];
     
     // Prepare the form data for submission
     const formData = {
         ...form.data(),
-        max_attempts: form.max_attempts === '' ? null : parseInt(form.max_attempts),
-        max_participants: form.max_participants === '' ? null : parseInt(form.max_participants),
-        time_limit: form.time_limit === '' ? null : parseInt(form.time_limit),
-        passing_score: form.passing_score === '' ? null : parseInt(form.passing_score),
+        max_attempts: form.max_attempts !== null ? parseInt(form.max_attempts) : null,
+        max_participants: form.max_participants !== null ? parseInt(form.max_participants) : null,
+        time_limit: form.time_limit !== null ? parseInt(form.time_limit) : null,
+        passing_score: form.passing_score !== null ? parseInt(form.passing_score) : null,
         starts_at: form.starts_at || null,
         ends_at: form.ends_at || null,
-        pools: poolData.map(pool => ({
-            name: pool.name,
-            description: pool.description || '',
-            questions_to_show: parseInt(pool.questions_to_show) || 1,
-            questions: pool.questions.map(q => q.id || q)
-        }))
+        
     };
     
     form.transform(() => formData)
@@ -111,6 +103,33 @@ const addSelectedPools = () => {
         selectedPools.value = [];
     }
 };
+
+const formatDateTime = (dateTime) => {
+    if (!dateTime) return '';
+    
+    try {
+        // Handle different date formats that might come from the DateTimePicker
+        const date = new Date(dateTime);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) return dateTime;
+        
+        // Format the date and time
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        };
+        
+        return date.toLocaleString('en-US', options);
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateTime;
+    }
+};
 </script>
 
 <template>
@@ -123,7 +142,7 @@ const addSelectedPools = () => {
 
         <!-- Success Message -->
         <div v-if="flash.success" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            <div class="bg-green-100 border border-green-400 text-green-2 px-4 py-3 rounded">
                 {{ flash.success }}
             </div>
         </div>
@@ -137,7 +156,7 @@ const addSelectedPools = () => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
                         <form @submit.prevent="submit">
                             <div class="grid grid-cols-1 gap-6">
@@ -234,6 +253,7 @@ const addSelectedPools = () => {
 
                                         <div class="flex items-center">
                                             <Checkbox id="randomize_answers" v-model:checked="form.randomize_answers" />
+                                            
                                             <InputLabel for="randomize_answers" value="Randomize Answers" class="ml-2" />
                                         </div>
 
@@ -267,6 +287,7 @@ const addSelectedPools = () => {
                                                 type="number"
                                                 min="0"
                                                 class="mt-1 block w-full"
+                                                @input="e => form.max_attempts = e.target.value === '' ? null : parseInt(e.target.value)"
                                             />
                                             <InputError class="mt-2" :message="form.errors.max_attempts" />
                                         </div>
@@ -310,70 +331,42 @@ const addSelectedPools = () => {
                                     </div>
                                 </div>
 
-                                <!-- Schedule -->
-                                <div class="space-y-6">
-                                    <h3 class="text-lg font-medium">Schedule</h3>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <InputLabel for="starts_at" value="Start Date & Time" />
-                                            <DateTimePicker
-                                                id="starts_at"
-                                                v-model="form.starts_at"
-                                                class="mt-1 block w-full"
-                                            />
-                                            <InputError class="mt-2" :message="form.errors.starts_at" />
-                                        </div>
+                                    <!-- Schedule -->
+                                    <div class="space-y-6">
+                                        <h3 class="text-lg font-medium">Schedule</h3>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div class="relative">
+                                                <InputLabel for="starts_at" value="Start Date & Time" />
+                                                <DateTimePicker
+                                                    id="starts_at"
+                                                    v-model="form.starts_at"
+                                                    class="mt-1 block w-full"
+                                                    placeholder="Select start date and time"
+                                                />
+                                                <!-- Display selected start datetime -->
+                                                <div v-if="form.starts_at" class="mt-2 text-sm text-gray-600">
+                                                    <strong>Selected:</strong> {{ formatDateTime(form.starts_at) }}
+                                                </div>
+                                                <InputError class="mt-2" :message="form.errors.starts_at" />
+                                            </div>
 
-                                        <div>
-                                            <InputLabel for="ends_at" value="End Date & Time" />
-                                            <DateTimePicker
-                                                id="ends_at"
-                                                v-model="form.ends_at"
-                                                class="mt-1 block w-full"
-                                            />
-                                            <InputError class="mt-2" :message="form.errors.ends_at" />
+                                            <div class="relative">
+                                                <InputLabel for="ends_at" value="End Date & Time" />
+                                                <DateTimePicker
+                                                    id="ends_at"
+                                                    v-model="form.ends_at"
+                                                    class="mt-1 block w-full"
+                                                    placeholder="Select end date and time"
+                                                />
+                                                <!-- Display selected end datetime -->
+                                                <div v-if="form.ends_at" class="mt-2 text-sm text-gray-600">
+                                                    <strong>Selected:</strong> {{ formatDateTime(form.ends_at) }}
+                                                </div>
+                                                <InputError class="mt-2" :message="form.errors.ends_at" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Question Pools Section -->
-                                <div class="space-y-6">
-                                    <h3 class="text-lg font-medium">Question Pools</h3>
-                                    
-                                    <!-- Add Existing Pools Section -->
-                                    <div class="mb-6 p-4 border rounded">
-                                        <h4 class="font-medium mb-2">Add Existing Pools</h4>
-                                        <div class="flex gap-2">
-                                            <Multiselect
-                                                v-model="selectedPools"
-                                                :options="availablePools.map(p => ({ value: p.id, label: `${p.name} (${p.questions_count} questions)` }))"
-                                                mode="tags"
-                                                placeholder="Select pools to add"
-                                                class="flex-1"
-                                            />
-                                            <PrimaryButton 
-                                                @click="addSelectedPools"
-                                                type="button"
-                                                :disabled="selectedPools.length === 0"
-                                            >
-                                                Add Selected Pools
-                                            </PrimaryButton>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Pool Manager -->
-                                    <div class="mt-6">
-                                        <QuestionPoolManager 
-                                        ref="poolManager"
-                                        :quiz="quiz"
-                                        :initial-pools="quiz.pools || []"
-                                        :available-questions="availableQuestions || []"
-                                        :available-pools="availablePools || []"
-                                        />
-                                        <InputError v-if="form.errors.pools" class="mt-2" :message="form.errors.pools" />
-                                    </div>
-                                </div>
 
                                 <!-- Submit Button -->
                                 <div class="flex items-center justify-end">
@@ -392,3 +385,29 @@ const addSelectedPools = () => {
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Custom styles for date picker dropdowns */
+.relative {
+    position: relative;
+}
+
+/* Override parent container overflow for date picker dropdowns */
+.relative :deep(.date-picker-dropdown),
+.relative :deep(.datepicker-dropdown),
+.relative :deep(.flatpickr-calendar) {
+    z-index: 50;
+}
+
+/* If using a specific date picker library, adjust the selector accordingly */
+.relative :deep(.date-picker-wrapper) {
+    position: relative;
+}
+
+/* Ensure dropdown doesn't get clipped by parent containers */
+.relative :deep(.dropdown) {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+}
+</style>
