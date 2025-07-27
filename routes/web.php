@@ -68,21 +68,7 @@ Route::middleware([
         }
     })->name('dashboard');
 
-    Route::get('home', function () {
     
-        if (auth()->user()->hasRole('landlord')){
-            return redirect(route('landlord.dashboard'));
-        }
-        elseif(auth()->user()->hasRole('examiner')){
-            return redirect(route('examiner.dashboard'));
-        }
-        elseif(auth()->user()->hasRole('examinee')){
-            return redirect(route('examinee.dashboard'));
-        }
-        else{
-            return redirect(route('dashboard'));
-        }
-    })->name('home');
 
 
     //landlord
