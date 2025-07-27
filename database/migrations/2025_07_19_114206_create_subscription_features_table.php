@@ -26,9 +26,16 @@ return new class extends Migration
             $table->string('value')->nullable(); // Can be a number, boolean, etc.
             $table->timestamps();
             
-            $table->primary(['plan_id', 'feature_id']);
-            $table->foreign('plan_id')->references('id')->on('subscription_plans')->onDelete('cascade');
-            $table->foreign('feature_id')->references('id')->on('subscription_features')->onDelete('cascade');
+            $table->primary(['subscription_plan_id', 'subscription_feature_id']);
+            $table->foreign('subscription_plan_id')
+                ->references('id')
+                ->on('subscription_plans')
+                ->onDelete('cascade');
+
+            $table->foreign('subscription_feature_id')
+                ->references('id')
+                ->on('subscription_features')
+                ->onDelete('cascade');
         });
     }
 
