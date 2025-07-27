@@ -38,5 +38,11 @@ class QuestionPool extends Model
     {
         return $this->belongsTo(Organization::class);
     }
+
+    public function quizzes()
+    {
+        return $this->belongsToMany(Quiz::class, 'quiz_question_pool', 'question_pool_id', 'quiz_id')
+            ->withTimestamps();
+    }
     
 }

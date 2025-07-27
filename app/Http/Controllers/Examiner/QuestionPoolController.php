@@ -16,8 +16,13 @@ class QuestionPoolController extends Controller
     public function index()
     {
         $organization = auth()->user()->organizations()->first();
-        $pools = QuestionPool::with(['quiz', 'questions'])->where('organization_id', $organization->id)
-        ->latest()
+        //$pools = QuestionPool::with(['quiz', 'questions'])->where('organization_id', $organization->id)
+        //->latest()->paginate(10);
+        
+        $pools = QuestionPool::withCount(['questions', 'quizzes'])
+            ->with(['quiz', 'questions'])
+            ->where('organization_id', $organization->id)
+            ->latest()
             ->paginate(10);
         /**
         $pools = QuestionPool::with(['quiz', 'questions'])

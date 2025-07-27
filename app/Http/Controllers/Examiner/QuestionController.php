@@ -33,7 +33,6 @@ class QuestionController extends Controller
             'multiple_choice' => 'Multiple Choice',
             'true_false' => 'True/False',
             'short_answer' => 'Short Answer',
-            'essay' => 'Essay',
             'fill_in_blank' => 'Fill in the Blank',
             'matching' => 'Matching',
             'ordering' => 'Ordering',
@@ -146,7 +145,8 @@ public function update(Request $request, Quiz $quiz, Question $question)
 
     // Handle boolean conversion for is_required
     $validated['is_required'] = $request->boolean('is_required');
-
+    $validated['organization_id'] = auth()->user()->organizations()->first();
+    
     // Handle image upload/removal
     if ($request->boolean('remove_image')) {
         // Delete existing image if it exists

@@ -7,6 +7,7 @@ use App\Http\Controllers\Examiner\DashboardController;
 use App\Http\Controllers\Examiner\GroupController;
 use App\Http\Controllers\Examiner\PoolQuestionController;
 use App\Http\Controllers\Examiner\QuestionController;
+use App\Http\Controllers\Examiner\QuestionPoolAIController;
 use App\Http\Controllers\Examiner\QuestionPoolController;
 use App\Http\Controllers\Examiner\QuizAnalysisController;
 use App\Http\Controllers\Examiner\QuizController;
@@ -151,6 +152,8 @@ Route::middleware([
 
         //Add new question pool
         Route::get('pools/{pool}/questions', [PoolQuestionController::class, 'create'])->name('pools.questions.create');
+        Route::get('pools/{pool}/questions/{question}/edit', [PoolQuestionController::class, 'edit'])->name('pools.questions.edit');
+        Route::put('pools/{pool}/questions/{question}/update', [PoolQuestionController::class, 'update'])->name('pools.questions.update');
         Route::post('pools/{pool}/post/questions', [PoolQuestionController::class, 'store'])->name('pools.questions.store');
 
         //addRemove pool to quiz
@@ -163,7 +166,17 @@ Route::middleware([
         Route::post('/quizzes/{quiz}/toggle-publish', [QuizController::class, 'togglePublish'])
         ->name('quizzes.toggle-publish');
         Route::get('/quizzes/{quiz}/pools/{pool}/questions', [QuizController::class, 'getPoolQuestions']);
-         Route::resource('quizzes.questions', QuestionController::class);
+        Route::resource('quizzes.questions', QuestionController::class);
+
+        //Ai genarate question
+        Route::get('/question-pools/{questionPool}/ai-generator',[QuestionPoolAIController::class, 'showAIGenerator'])
+        ->name('question-pools.ai-generator');
+        Route::post('/question-pools/generate-ai-questions', [QuestionPoolAIController::class, 'generate'])
+        ->name('question-pools.generate-ai-questions');
+    
+        Route::post('/question-pools/store-ai-questions', [QuestionPoolAIController::class, 'store'])
+            ->name('question-pools.store-ai-questions');
+
         //get Quiz Link
         Route::get('/quizz/{quiz}/share-link', [QuizController::class, 'shareLink'])->name('quizzes.share-link');
 

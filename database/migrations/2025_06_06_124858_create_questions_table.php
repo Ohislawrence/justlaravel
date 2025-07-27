@@ -24,6 +24,7 @@ return new class extends Migration
             $table->integer('time_limit')->nullable(); // seconds per question
             $table->integer('order')->default(0);
             $table->boolean('is_required')->default(true);
+            $table->boolean('is_ai')->nullable();
             $table->json('options')->nullable(); // For MCQs, etc.
             $table->json('correct_answers')->nullable();
             $table->json('settings')->nullable();

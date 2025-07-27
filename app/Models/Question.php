@@ -23,6 +23,8 @@ class Question extends Model
         'correct_answers',
         'settings',
         'pools',
+        'organization_id',
+        'is_ai'
     ];
 
     protected $casts = [
