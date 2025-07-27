@@ -17,11 +17,11 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('is_global')->default(false); // Flag for global pools
             $table->foreignId('quiz_id')->nullable()->constrained()->nullOnDelete();
-            $table->unsignedBigInteger('organization_id')->nullable()->after('quiz_id');
+            $table->unsignedBigInteger('organization_id')->nullable();
             $table->foreign('organization_id')
-                  ->references('id')
-                  ->on('organizations')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('organizations')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
