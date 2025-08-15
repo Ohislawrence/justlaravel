@@ -16,13 +16,19 @@ class QuestionController extends Controller
     // Display all questions for a quiz
     public function index(Quiz $quiz)
     {
+        $organization = auth()->user()->organizations()->first();
+
         $questions = $quiz->questions()->with('pools')->get();
         $pools = $quiz->questionPools()->withCount('questions')->get();
+        $questionsLimit = $organization->getFeatureValue('questions_limit'); 
+        $currentQuestionsCount = $organization->questions()->count(); 
 
         return Inertia::render('Examiner/Questions/Index', [
             'quiz' => $quiz,
             'questions' => $questions,
             'pools' => $pools,
+            'questionsLimit' => $questionsLimit,
+            'currentQuestionsCount' => $currentQuestionsCount,
         ]);
     }
 
@@ -50,7 +56,15 @@ class QuestionController extends Controller
     // Store a new question
     public function store(Request $request, Quiz $quiz)
     { 
-        //dd($request->all());
+        $organization = auth()->user()->organizations()->first();
+        
+        $questionsLimit = $organization->getFeatureValue('questions_limit'); // Get subscription question limit
+        $currentQuestionsCount = $organization->questions()->count(); // Count current questions
+        if ($questionsLimit > $currentQuestionsCount ) {
+            return redirect()->back()->withErrors([
+                'limit' => "You have reached your question limit of {$questionsLimit}. Upgrade your plan to add more."
+            ]);
+        }
         
         $validated = $request->validate([
             'type' => 'required|string',
@@ -74,9 +88,16 @@ class QuestionController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
+            $fileSizeMB = $image->getSize() / 1024 / 1024;
+
+            if (!$organization->hasStorageSpace($fileSizeMB)) {
+                return back()->with('error', 'Not enough storage space available');
+            }
+
             $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
             $imagePath = $image->storeAs('questions', $filename, 'public');
             $validated['image'] = Storage::url($imagePath);
+            
         }
 
         $question = $quiz->questions()->create($validated);

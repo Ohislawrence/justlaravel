@@ -1,11 +1,18 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { defineProps, ref } from 'vue';
+import FeatureLimitModal from '@/Components/FeatureLimitModal.vue';
+import { router, Link, usePage } from '@inertiajs/vue3';
 
 // Props
 const props = defineProps({
   groups: Object,
-  designations: Array // Add this prop
+  designations: Array,
+  examineeLimit: Number,
+  examinerLimit: Number,
+  currentexamineeCount: Number,
+  currentexaminerCount: Number,
 });
 
 // Inertia form object
@@ -15,15 +22,45 @@ const form = useForm({
   unique_code: '',
   password: '',
   user_type: '',
-  designation_id: null, // Add designation field
+  designation_id: null, 
   groups: [],
   notify_user: false,
 });
 
+const showModal = ref(false)
+const modalFeature = ref('')
+const modalMessage = ref('')
+
+function openFeatureModal(featureName, message) {
+  modalFeature.value = featureName
+  modalMessage.value = message
+  showModal.value = true
+}
+
 // Submit handler
 const submitForm = () => {
+  const canAddExaminee = props.currentexamineeCount < props.examineeLimit;
+  const canAddExaminer = props.currentexaminerCount < props.examinerLimit;
+
+  if (form.user_type == 'examinee' && !canAddExaminee) {
+    openFeatureModal(
+      'Add Examinee',
+      'You have reached the examinee limit. Upgrade your plan to add more examinees.'
+    );
+    return;
+  }
+
+  if (form.user_type == 'examiner' && !canAddExaminer) {
+    openFeatureModal(
+      'Add Examiner',
+      'You have reached the examiner limit. Upgrade your plan to add more examiners.'
+    );
+    return;
+  }
   form.post('/examiner/user');
 };
+
+
 </script>
 
 <template>
@@ -182,5 +219,10 @@ const submitForm = () => {
         </div>
       </div>
     </div>
+    <FeatureLimitModal 
+      v-model="showModal"
+      :featureName="modalFeature"
+      :message="modalMessage"
+    />
   </AppLayout>
 </template>

@@ -13,6 +13,7 @@ class Group extends Model
         'name',
         'description',
         'settings',
+        'slug',
     ];
 
     protected $casts = [
@@ -34,6 +35,11 @@ class Group extends Model
     {
         return $this->belongsToMany(Quiz::class, 'group_quizzes')
                     ->withTimestamps();
+    }
+
+    public function invitations()
+    {
+        return $this->hasMany(Invitation::class);
     }
     
 }

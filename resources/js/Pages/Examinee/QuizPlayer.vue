@@ -1,256 +1,269 @@
 <template>
-    <!-- Timer and Header -->
-    <div class="bg-gray-800 text-white py-3 px-4">
-      <div class="max-w-4xl mx-auto flex justify-between items-center">
-        <h1 class="text-xl font-bold">{{ quiz.title }}</h1>
-        <div class="flex items-center space-x-4">
-          <div v-if="timeLimit" class="flex items-center bg-gray-700 px-3 py-1 rounded">
-            <ClockIcon class="h-5 w-5 mr-1" />
-            <span :class="{ 'text-red-300': timeRemaining <= 300, 'animate-pulse': timeRemaining <= 60 }">
-              {{ formattedTimeRemaining }}
+  <Head>
+      <title>{{ quiz.title }}</title>
+  </Head>
+  <!-- Timer and Header -->
+  <div class="bg-white text-gray-800 py-3 px-4 shadow-sm rounded-b-lg border-b border-gray-200 sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <h1 class="text-xl font-bold text-gray-900 truncate w-full sm:w-auto">{{ quiz.title }}</h1>
+      <div class="flex items-center justify-between w-full sm:w-auto gap-3">
+        <div v-if="timeLimit" class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+          <ClockIcon class="h-4 w-4 mr-1 text-gray-600" />
+          <span :class="{ 'text-red-600 font-medium': timeRemaining <= 300, 'animate-pulse': timeRemaining <= 60 }">
+            {{ formattedTimeRemaining }}
+          </span>
+        </div>
+        <button
+          @click="confirmSubmit"
+          class="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 focus:ring-offset-2 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors shadow-sm focus:outline-none focus:ring-2"
+          :disabled="submitting"
+        >
+          Submit Quiz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Quiz Area -->
+  <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6">
+    <!-- Progress Bar -->
+    <div class="mb-6">
+      <div class="flex justify-between text-sm text-gray-600 mb-1">
+        <span>Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
+        <span class="font-medium text-emerald-600">{{ progressPercentage }}% Complete</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div
+          class="bg-emerald-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+          :style="{ width: `${progressPercentage}%` }"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Current Question -->
+    <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-300 p-6 mb-6 border border-gray-200">
+      <div class="flex items-start mb-5">
+        <span class="flex-shrink-0 bg-emerald-100 text-emerald-800 rounded-full w-9 h-9 flex items-center justify-center mr-4 font-bold text-sm">
+          {{ currentQuestionIndex + 1 }}
+        </span>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-lg font-semibold text-gray-900 leading-relaxed">
+            {{ currentQuestion?.question || 'Loading question...' }}
+          </h3>
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">
+              {{ questionTypeLabel(currentQuestion?.type) }}
+            </span>
+            <span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-medium">
+              {{ currentQuestion?.points || 0 }} pt{{ (currentQuestion?.points || 0) !== 1 ? 's' : '' }}
+            </span>
+            <span v-if="currentQuestion?.time_limit" class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-medium">
+              {{ currentQuestion.time_limit }} min limit
+            </span>
+            <span v-if="currentQuestion?.is_required" class="bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full font-medium text-xs">
+              Required
             </span>
           </div>
-          <button 
-            @click="confirmSubmit"
-            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm transition-colors"
-            :disabled="submitting"
-          >
-            Submit Quiz
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Quiz Area -->
-    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6">
-      <!-- Progress Bar -->
-      <div class="mb-6">
-        <div class="flex justify-between text-sm text-gray-600 mb-1">
-          <span>Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
-          <span>{{ progressPercentage }}% Complete</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-            :style="{ width: `${progressPercentage}%` }"
-          ></div>
+          <!-- Question Description -->
+          <p v-if="currentQuestion?.description" class="mt-4 text-sm text-gray-600">
+            {{ currentQuestion.description }}
+          </p>
         </div>
       </div>
 
-      <!-- Current Question -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div class="flex items-start mb-4">
-          <span class="flex-shrink-0 bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center mr-3 font-semibold">
-            {{ currentQuestionIndex + 1 }}
-          </span>
-          <div class="min-w-0 flex-1">
-            <h3 class="text-lg font-medium text-gray-900 leading-relaxed">
-              {{ currentQuestion?.question || 'Loading question...' }}
-            </h3>
-            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-              <span class="bg-gray-100 px-2 py-1 rounded">
-                {{ questionTypeLabel(currentQuestion?.type) }}
-              </span>
-              <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                {{ currentQuestion?.points || 0 }} point{{ (currentQuestion?.points || 0) !== 1 ? 's' : '' }}
-              </span>
-              <span v-if="currentQuestion?.time_limit" class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                {{ currentQuestion.time_limit }} min limit
-              </span>
-              <span v-if="currentQuestion?.is_required" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">
-                Required
-              </span>
-            </div>
-            
-            <!-- Question Description -->
-            <p v-if="currentQuestion?.description" class="mt-3 text-sm text-gray-600 italic">
-              {{ currentQuestion.description }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Question Image -->
-        <div v-if="currentQuestion?.image" class="mb-6 flex justify-center">
-          <div class="max-w-2xl w-full">
-            <img 
-              :src="currentQuestion.image" 
-              :alt="`Question ${currentQuestionIndex + 1} image`"
-              class="w-full h-auto rounded-lg border border-gray-200 shadow-sm cursor-pointer transition-transform hover:scale-105"
-              @click="openImageModal"
-              @error="handleImageError"
-              loading="lazy"
-            />
-            <p class="text-xs text-gray-500 text-center mt-2">
-              Click image to view full size
-            </p>
-          </div>
-        </div>
-
-        <!-- Question Component -->
-        <div v-if="currentQuestion">
-          <component 
-            v-if="getQuestionComponent(currentQuestion.type)"
-            :is="getQuestionComponent(currentQuestion.type)"
-            :question="currentQuestion"
-            :answer="answers[currentQuestionIndex]"
-            @update="updateAnswer"
-            class="mt-4"
+      <!-- Question Image -->
+      <div v-if="currentQuestion?.image" class="mb-6 flex justify-center">
+        <div class="max-w-2xl w-full">
+          <img
+            :src="currentQuestion.image"
+            :alt="`Question ${currentQuestionIndex + 1} image`"
+            class="w-full h-auto rounded-lg border border-gray-200 shadow-sm cursor-zoom-in transition-transform hover:scale-[1.02]"
+            @click="openImageModal"
+            @error="handleImageError"
+            loading="lazy"
           />
-          <div v-else class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <div class="flex items-center">
-              <svg class="h-5 w-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <p class="text-yellow-800 font-medium">
-                  Question type "{{ currentQuestion.type }}" is not supported yet.
-                </p>
-                <p class="text-sm text-yellow-700 mt-1">
-                  Available types: {{ Object.keys(questionComponents).join(', ') }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-else class="flex justify-center py-8">
-          <div class="flex items-center">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span class="ml-3 text-gray-600">Loading question...</span>
-          </div>
+          <p class="text-xs text-gray-500 text-center mt-2">
+            Click to enlarge
+          </p>
         </div>
       </div>
 
-      <!-- Navigation -->
-      <div class="flex justify-between items-center">
-        <button
-          @click="prevQuestion"
-          :disabled="currentQuestionIndex === 0"
-          class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-md transition-colors flex items-center"
-        >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Previous
-        </button>
-        
-        <!-- Question Navigation Dots -->
-        <div class="flex space-x-1">
-          <button
-            v-for="(question, index) in questions"
-            :key="question.id"
-            @click="goToQuestion(index)"
-            :class="[
-              'w-3 h-3 rounded-full transition-colors',
-              index === currentQuestionIndex ? 'bg-blue-600' : 
-              answers[index] !== null && answers[index] !== undefined && answers[index] !== '' ? 'bg-green-500' : 'bg-gray-300'
-            ]"
-            :title="`Question ${index + 1}${answers[index] !== null && answers[index] !== undefined && answers[index] !== '' ? ' (Answered)' : ''}`"
-          ></button>
-        </div>
-        
-        <div class="flex space-x-2">
-          <button
-            v-if="currentQuestionIndex < questions.length - 1"
-            @click="nextQuestion"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors flex items-center"
-          >
-            Next Question
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
-          <button
-            v-else-if="currentQuestionIndex === questions.length - 1"
-            @click="confirmSubmit"
-            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-colors flex items-center"
-            :disabled="submitting"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Submit Quiz
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Image Modal -->
-    <div v-if="showImageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" @click="closeImageModal">
-      <div class="relative max-w-4xl max-h-full">
-        <img 
-          :src="currentQuestion?.image" 
-          :alt="`Question ${currentQuestionIndex + 1} image - Full size`"
-          class="max-w-full max-h-full object-contain rounded-lg"
-          @click.stop
+      <!-- Question Component -->
+      <div v-if="currentQuestion">
+        <component
+          v-if="getQuestionComponent(currentQuestion.type)"
+          :is="getQuestionComponent(currentQuestion.type)"
+          :question="currentQuestion"
+          :answer="answers[currentQuestionIndex]"
+          @update="updateAnswer"
+          class="mt-2"
         />
-        <button
-          @click="closeImageModal"
-          class="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-opacity"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-        <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
-          Question {{ currentQuestionIndex + 1 }} Image
-        </div>
-      </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div v-if="showSubmitModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+        <div v-else class="p-4 bg-amber-50 border border-amber-200 rounded-md">
+          <div class="flex items-start">
+            <svg class="h-5 w-5 text-amber-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
-          </div>
-          <h3 class="text-lg font-medium text-gray-900">Submit Quiz</h3>
-          <div class="mt-2 px-7 py-3">
-            <p class="text-sm text-gray-500 mb-4">
-              Are you sure you want to submit your quiz? This action cannot be undone.
-            </p>
-            <div v-if="unansweredQuestions > 0" class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
-              <p class="text-yellow-800 text-sm font-medium">
-                ⚠️ You have {{ unansweredQuestions }} unanswered question(s).
+            <div>
+              <p class="text-amber-800 font-medium">
+                Unsupported Question Type
+              </p>
+              <p class="text-sm text-amber-700 mt-1">
+                The question type "{{ currentQuestion.type }}" is not currently supported in this quiz interface.
               </p>
             </div>
-            <div class="text-left space-y-2 text-sm text-gray-600">
-              <p>• Answered: {{ questions.length - unansweredQuestions }} / {{ questions.length }}</p>
-              <p v-if="timeLimit">• Time remaining: {{ formattedTimeRemaining }}</p>
-            </div>
-          </div>
-          <div class="flex justify-center space-x-3 mt-6">
-            <button
-              @click="showSubmitModal = false"
-              class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              @click="submitQuiz"
-              :disabled="submitting"
-              class="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded transition-colors flex items-center"
-            >
-              <svg v-if="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ submitting ? 'Submitting...' : 'Submit Quiz' }}
-            </button>
           </div>
         </div>
       </div>
+      <div v-else class="flex justify-center py-10">
+        <div class="flex items-center text-gray-600">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Loading question...</span>
+        </div>
+      </div>
     </div>
+
+    <!-- Navigation -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <button
+        @click="prevQuestion"
+        :disabled="currentQuestionIndex === 0"
+        class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-800 px-5 py-2 rounded-md font-medium transition-colors flex items-center justify-center"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Previous
+      </button>
+
+      <!-- Question Navigation Dots -->
+      <div class="flex space-x-1.5 justify-center">
+        <button
+          v-for="(question, index) in questions"
+          :key="question.id"
+          @click="goToQuestion(index)"
+          :class="[
+            'w-3 h-3 rounded-full transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-emerald-500',
+            index === currentQuestionIndex ? 'bg-emerald-600 scale-125' :
+            answers[index] !== null && answers[index] !== undefined && answers[index] !== '' ? 'bg-emerald-500' : 'bg-gray-300'
+          ]"
+          :title="`Go to Question ${index + 1}${answers[index] !== null && answers[index] !== undefined && answers[index] !== '' ? ' (Answered)' : ''}`"
+          :aria-label="`Go to Question ${index + 1}`"
+        ></button>
+      </div>
+
+      <div class="flex space-x-2 w-full sm:w-auto">
+        <button
+          v-if="currentQuestionIndex < questions.length - 1"
+          @click="nextQuestion"
+          class="w-full bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 text-white px-5 py-2 rounded-md font-medium transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+        >
+          Next
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+        <button
+          v-else-if="currentQuestionIndex === questions.length - 1"
+          @click="confirmSubmit"
+          class="w-full bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 text-white px-5 py-2 rounded-md font-medium transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+          :disabled="submitting"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Submit Quiz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div v-if="showImageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" @click="closeImageModal">
+    <div class="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center">
+      <img
+        :src="currentQuestion?.image"
+        :alt="`Question ${currentQuestionIndex + 1} image - Full size`"
+        class="max-w-full max-h-full object-contain rounded-lg shadow-xl border border-gray-700"
+        @click.stop
+      />
+      <button
+        @click="closeImageModal"
+        class="absolute top-4 right-4 bg-black bg-opacity-60 text-white rounded-full p-2 hover:bg-opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-white"
+        aria-label="Close image"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div class="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-1.5 rounded-md text-sm font-medium">
+        Question {{ currentQuestionIndex + 1 }} Image
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div v-if="showSubmitModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md bg-white rounded-xl shadow-xl transform transition-all">
+      <div class="px-6 pt-6 pb-4">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-100 mb-4">
+          <svg class="h-6 w-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-center text-gray-900">Submit Quiz</h3>
+        <div class="mt-4 text-center">
+          <p class="text-sm text-gray-600 mb-5">
+            Are you sure you want to submit your quiz? This action cannot be undone.
+          </p>
+          <div v-if="unansweredQuestions > 0" class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5">
+            <p class="text-amber-800 text-sm font-semibold flex items-center justify-center">
+              <svg class="w-5 h-5 mr-1.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              {{ unansweredQuestions }} Unanswered Question{{ unansweredQuestions !== 1 ? 's' : '' }}
+            </p>
+            <p class="text-xs text-amber-700 mt-1">You can go back to review them.</p>
+          </div>
+          <div class="text-left bg-gray-50 rounded-lg p-3 text-xs text-gray-600 space-y-1">
+            <p class="font-medium text-gray-700">Summary:</p>
+            <p>• Answered: <span class="font-medium">{{ questions.length - unansweredQuestions }}</span> / {{ questions.length }}</p>
+            <p v-if="timeLimit">• Time remaining: <span class="font-medium">{{ formattedTimeRemaining }}</span></p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 rounded-b-xl">
+        <button
+          @click="showSubmitModal = false"
+          type="button"
+          class="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 sm:text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          @click="submitQuiz"
+          :disabled="submitting"
+          type="button"
+          class="w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-emerald-600 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 sm:text-sm disabled:opacity-75"
+        >
+          <svg v-if="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ submitting ? 'Submitting...' : 'Yes, Submit Quiz' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Head } from '@inertiajs/vue3';
 import { ClockIcon } from '@heroicons/vue/24/outline';
-
-// Import question components
+// Import question components (ensure these paths are correct)
 import MCQQuestion from '@/Components/Questions/MCQ.vue';
 import TrueFalseQuestion from '@/Components/Questions/TrueFalse.vue';
 import ShortAnswerQuestion from '@/Components/Questions/ShortAnswer.vue';
@@ -278,9 +291,6 @@ const props = defineProps({
     default: null
   }
 });
-
-
-
 
 // Question type mapping
 const questionTypeLabel = (type) => {
@@ -336,7 +346,7 @@ const formattedTimeRemaining = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
 
-const unansweredQuestions = computed(() => 
+const unansweredQuestions = computed(() =>
   answers.value.filter(answer => answer === null || answer === undefined || answer === '').length
 );
 
@@ -345,13 +355,11 @@ const getQuestionComponent = (type) => {
     console.error('Question type is undefined');
     return null;
   }
-  
   const component = questionComponents[type];
   if (!component) {
     console.error(`No component found for question type: ${type}`);
     return null;
   }
-  
   return component;
 };
 
@@ -360,20 +368,16 @@ onMounted(() => {
   console.log('Quiz component mounted');
   console.log('Props:', props);
   console.log('Questions:', props.questions);
-  
   // Initialize answers array
   if (props.questions && props.questions.length > 0) {
     answers.value = new Array(props.questions.length).fill(null);
   }
-  
   // Start timer if there's a time limit
   if (props.timeLimit && props.timeLimit > 0) {
     startTimer();
   }
-  
   // Set up proctoring
   setupProctoring();
-  
   // Warn before leaving
   window.addEventListener('beforeunload', handleBeforeUnload);
 });
@@ -390,7 +394,6 @@ onUnmounted(() => {
 function startTimer() {
   timer.value = setInterval(() => {
     timeRemaining.value--;
-    
     if (timeRemaining.value <= 0) {
       clearInterval(timer.value);
       alert('Time is up! Your quiz will be submitted automatically.');
@@ -429,8 +432,16 @@ function closeImageModal() {
 
 function handleImageError(event) {
   console.error('Failed to load question image:', event.target.src);
+  // Hide the broken image icon
   event.target.style.display = 'none';
-  // Optionally show a placeholder or error message
+  // Optionally, show a placeholder or error message within the image container
+  const container = event.target.parentElement;
+  if (container) {
+    const errorMsg = document.createElement('div');
+    errorMsg.className = 'text-center text-gray-500 py-4';
+    errorMsg.textContent = 'Image failed to load.';
+    container.appendChild(errorMsg);
+  }
 }
 
 // Answer handling
@@ -447,65 +458,111 @@ function confirmSubmit() {
 const submitQuiz = async () => {
   submitting.value = true;
   showSubmitModal.value = false;
-
+  
   try {
-    // Prepare answers in the correct format
+    // Validate we have required data
+    if (!props.attempt?.id || !props.quiz?.id) {
+      throw new Error('Missing quiz or attempt information');
+    }
+
+    // Prepare answers with thorough validation and type-specific formatting
     const formattedAnswers = props.questions.reduce((acc, question, index) => {
       const answer = answers.value[index];
-      if (answer !== null && answer !== undefined && answer !== '') {
-        // For array answers (like matching/ordering), ensure proper format
-        if (Array.isArray(answer)) {
-          acc[question.id] = answer;
-        } 
-        // For object answers (if any), stringify if needed
-        else if (typeof answer === 'object' && answer !== null) {
-          acc[question.id] = JSON.stringify(answer);
-        }
-        // For simple values
-        else {
-          acc[question.id] = answer;
+      
+      // Only include if answer exists and question is valid
+      if (answer !== null && answer !== undefined && answer !== '' && question?.id) {
+        // Format answer based on question type
+        switch (question.type) {
+          case 'ordering':
+            // Ensure ordering answers are sent as arrays
+            acc[question.id] = Array.isArray(answer) ? answer : [answer];
+            break;
+            
+          case 'multiple_choice':
+          case 'true_false':
+            // Primitive values can be sent as-is
+            acc[question.id] = answer;
+            break;
+            
+          case 'fill_in_the_blank':
+            // Trim whitespace from fill-in answers
+            acc[question.id] = typeof answer === 'string' ? answer.trim() : answer;
+            break;
+            
+          case 'matching':
+            // Ensure matching answers are sent as objects
+            if (typeof answer === 'object' && answer !== null) {
+              acc[question.id] = Object.keys(answer).length > 0 ? answer : null;
+            } else {
+              acc[question.id] = null;
+            }
+            break;
+            
+          default:
+            // Default handling for other types
+            if (Array.isArray(answer)) {
+              acc[question.id] = answer.length > 0 ? answer : null;
+            } else if (typeof answer === 'object' && answer !== null) {
+              acc[question.id] = Object.keys(answer).length > 0 ? answer : null;
+            } else {
+              acc[question.id] = answer;
+            }
         }
       }
       return acc;
     }, {});
 
+    // Prepare submission data
     const submissionData = {
       attempt_id: props.attempt.id,
       answers: formattedAnswers,
-      time_spent: props.timeLimit ? (props.timeLimit * 60 - timeRemaining.value) : null,
+      time_spent: props.timeLimit ? Math.max(0, props.timeLimit * 60 - timeRemaining.value) : null,
       proctoring_flags: {
         tab_switches: window.tabSwitchCount || 0,
         fullscreen_exits: window.fullscreenExitCount || 0,
       }
     };
 
-    console.log('Submitting quiz with data:', submissionData);
+    console.debug('Submission payload:', submissionData);
 
-    await router.post(route('examinee.submit', { quiz: props.quiz.id }), submissionData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+    // Submit with proper error handling
+    const response = await router.post(
+      route('examinee.submit', { quiz: props.quiz.id }), 
+      submissionData, 
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        onError: (errors) => {
+          // Handle Laravel validation errors
+          if (errors.message) {
+            throw new Error(errors.message);
+          }
+          throw new Error('Submission failed. Please try again.');
+        }
       }
-    });
-    
-  } catch (error) {
-    console.error('Submission failed:', error);
-    alert('Submission failed: ' + (error?.message || 'Unknown error'));
-    submitting.value = false;
-  }
-};
+    );
 
-// Convert answers array to question_id => answer format
-const normalizeAnswers = (answersArray) => {
-  if (!props.questions || !answersArray) return {};
-  
-  return props.questions.reduce((acc, question, index) => {
-    const answer = answersArray[index];
-    if (answer !== null && answer !== undefined && answer !== '') {
-      acc[question.id] = answer;
-    }
-    return acc;
-  }, {});
+    // If we get here, submission was successful
+    return response;
+
+  } catch (error) {
+    console.error('Submission error:', error);
+    
+    // Show user-friendly error message
+    showSubmissionError.value = true;
+    submissionError.value = error.message || 'Failed to submit quiz. Please try again.';
+    
+    // Re-enable submit button in case they want to retry
+    submitting.value = false;
+    
+    // Return the error to potentially handle it in the calling code
+    throw error;
+  } finally {
+    // Any cleanup if needed
+  }
 };
 
 // Proctoring setup
@@ -518,21 +575,38 @@ function setupProctoring() {
       console.log('Tab switch detected. Count:', window.tabSwitchCount);
     }
   });
-
-  // Track fullscreen exits
+  // Track fullscreen exits (Note: Fullscreen API might require user activation)
   window.fullscreenExitCount = 0;
-  document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement) {
-      window.fullscreenExitCount++;
-      console.log('Fullscreen exit detected. Count:', window.fullscreenExitCount);
-    }
-  });
+  // Use the newer event names
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange);    // Firefox
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange);     // IE11
+}
+
+function handleFullscreenChange() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+      !document.mozFullScreenElement && !document.msFullscreenElement) {
+    window.fullscreenExitCount++;
+    console.log('Fullscreen exit detected. Count:', window.fullscreenExitCount);
+  }
 }
 
 function handleBeforeUnload(e) {
-  if (!submitting.value && unansweredQuestions.value > 0) {
-    e.preventDefault();
-    e.returnValue = 'You have unsaved answers. Are you sure you want to leave?';
+  // Only warn if the user has started answering and there are unanswered questions
+  // Or if the quiz is being submitted, don't warn
+  if (!submitting.value && answers.value.some(a => a !== null && a !== undefined && a !== '')) {
+    if (unansweredQuestions.value > 0) {
+       // Standard way to trigger a confirmation dialog
+       e.preventDefault();
+       e.returnValue = 'You have unanswered questions. Are you sure you want to leave?';
+       return e.returnValue; // For older browsers
+    }
   }
+  // If no answers given or all answered, let the browser handle default behavior
 }
 </script>
+
+<style scoped>
+/* Scoped styles remain unchanged */
+</style>

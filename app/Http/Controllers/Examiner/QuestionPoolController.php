@@ -8,6 +8,7 @@ use App\Models\QuestionPool;
 use App\Models\Quiz;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Http\Response;
 
 
 class QuestionPoolController extends Controller
@@ -16,27 +17,20 @@ class QuestionPoolController extends Controller
     public function index()
     {
         $organization = auth()->user()->organizations()->first();
-        //$pools = QuestionPool::with(['quiz', 'questions'])->where('organization_id', $organization->id)
-        //->latest()->paginate(10);
+        //plan checker
+        $PoolLimit = $organization->getFeatureValue('question_pool_limit');
+        $currentPoolCount = $organization->questionPools()->count();
         
         $pools = QuestionPool::withCount(['questions', 'quizzes'])
             ->with(['quiz', 'questions'])
             ->where('organization_id', $organization->id)
             ->latest()
             ->paginate(10);
-        /**
-        $pools = QuestionPool::with(['quiz', 'questions'])
-            ->where(function($query) use ($organization) {
-                $query->whereHas('quiz', function($q) use ($organization) {
-                    $q->where('organization_id', $organization->id);
-                })
-                ->orWhere('is_global', true);
-            })
-            ->latest()
-            ->paginate(10);
-         */
+        
         return Inertia::render('Examiner/QuestionPools/Index', [
             'pools' => $pools,
+            'PoolLimit' => $PoolLimit,
+            'currentPoolCount' => $currentPoolCount,
         ]);
     }
 
@@ -58,32 +52,39 @@ class QuestionPoolController extends Controller
     public function store(Request $request)
     {
         $organization = auth()->user()->organizations()->first();
-        
-        $validated = $request->validate([
-            'quiz_id' => [
-                'nullable',
-                'exists:quizzes,id',
-                function ($attribute, $value, $fail) use ($organization) {
-                    if ($value && !Quiz::where('id', $value)
-                        ->where('organization_id', $organization->id)
-                        ->where('user_id', auth()->id())
-                        ->exists()) {
-                        $fail('The selected quiz is invalid.');
+        //plan checker
+        $PoolLimit = $organization->getFeatureValue('question_pool_limit');
+        $currentPoolCount = $organization->questionPools()->count();
+        if($currentPoolCount < $PoolLimit){
+
+            $validated = $request->validate([
+                'quiz_id' => [
+                    'nullable',
+                    'exists:quizzes,id',
+                    function ($attribute, $value, $fail) use ($organization) {
+                        if ($value && !Quiz::where('id', $value)
+                            ->where('organization_id', $organization->id)
+                            ->where('user_id', auth()->id())
+                            ->exists()) {
+                            $fail('The selected quiz is invalid.');
+                        }
                     }
-                }
-            ],
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'questions_to_show' => 'nullable|integer|min:1',
-        ]);
+                ],
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'questions_to_show' => 'nullable|integer|min:1',
+            ]);
 
-        $validated['is_global'] = false;
-        $validated['organization_id'] = $organization->id;
+            $validated['is_global'] = false;
+            $validated['organization_id'] = $organization->id;
 
-        QuestionPool::create($validated);
+            QuestionPool::create($validated);
 
-        return redirect()->route('examiner.question-pools.index')
-            ->with('success', 'Question pool created successfully.');
+            return redirect()->route('examiner.question-pools.index')
+                ->with('success', 'Question pool created successfully.');
+                
+        }
+        return response('Forbidden access.', Response::HTTP_FORBIDDEN);
     }
 
     // Show edit form
@@ -138,8 +139,7 @@ class QuestionPoolController extends Controller
     // Delete pool
     public function destroy(QuestionPool $questionPool)
     {
-        //$this->authorize('delete', $questionPool);
-        
+        $questionPool->questions()->delete();
         $questionPool->delete();
 
         return redirect()->route('examiner.question-pools.index')

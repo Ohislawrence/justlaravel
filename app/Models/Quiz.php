@@ -30,6 +30,8 @@ class Quiz extends Model
        'ends_at',
         'settings',
         'share_token',
+        'survey_thank_you_message',
+        
     ];
     protected $casts = [
         'settings' => 'array',
@@ -40,6 +42,8 @@ class Quiz extends Model
         'show_correct_answers' => 'boolean',
         'show_leaderboard' => 'boolean',
         'enable_discussions' => 'boolean',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime'
     ];
 
 
@@ -84,10 +88,6 @@ class Quiz extends Model
         return $this->hasMany(QuizAccessRule::class);
     }
     
-    public function quizGroups()
-    {
-        return $this->belongsToMany(QuizGroup::class, 'quiz_group_items');
-    }
     
     public function learningPathItems()
     {
@@ -123,6 +123,20 @@ class Quiz extends Model
         });
         
         return $directQuestions + $poolQuestions;
+    }
+
+    public function quizGroups()
+    {
+        return $this->belongsToMany(QuizGroup::class, 'quiz_group_items')
+            ->withPivot('order')
+            ->withTimestamps();
+    }
+
+    public function scopeInGroup($query, $groupId)
+    {
+        return $query->whereHas('quizGroups', function($q) use ($groupId) {
+            $q->where('quiz_group_id', $groupId);
+        });
     }
 
     

@@ -9,54 +9,42 @@ use App\Models\QuizAttempt;
 use App\Models\Group;
 use App\Models\QuestionResponse;
 use Inertia\Inertia;
+use App\Services\QuizAnalysisService;
 
 class QuizAnalysisController extends Controller
 {
     public function index(Quiz $quiz)
     {
-        //$this->authorize('viewResults', $quiz);
-        //$quiz = Quiz::find($quiz)->first();
-        $attempts = $quiz->attempts()
-            ->with(['user', 'responses.question'])
-            ->orderBy('completed_at', 'desc')
-            ->paginate(20);
+        $service = new QuizAnalysisService($quiz);
 
-        $groups = $quiz->groups()->withCount('members')->get();
-        $questionStats = $this->getQuestionStatistics($quiz);
-
+       // dd($service->getGeneralAnalysis()['question_stats']);
         return Inertia::render('Examiner/QuizAnalysis/Index', [
-            'quiz' => $quiz,
-            'attempts' => $attempts,
-            'groups' => $groups,
-            'questionStats' => $questionStats,
-            'averageScore' => $quiz->attempts()->avg('percentage'),
-            'passRate' => $quiz->attempts()->where('is_passed', true)->count() / max($quiz->attempts()->count(), 1) * 100,
+            'quiz' => $quiz->load('groups', 'questionPools'),
+            'analysis' => $service->getGeneralAnalysis(),
+            'groups' => $quiz->groups()->withCount('members')->latest()->get(),
+            'attempts' => $quiz->attempts()->with('user')->latest()->paginate(10),
+            'questionStats' => $service->getGeneralAnalysis()['question_stats'],
         ]);
     }
 
     public function byGroup(Quiz $quiz, Group $group)
     {
-        //$this->authorize('viewResults', $quiz);
+        $service = new QuizAnalysisService($quiz, $group);
+        $analysis = $service->getGeneralAnalysis();
 
-        $attempts = $quiz->attempts()
-            ->whereHas('user', function($q) use ($group) {
-                $q->whereHas('groups', function($q) use ($group) {
-                    $q->where('groups.id', $group->id);
-                });
-            })
-            ->with(['user', 'responses.question'])
-            ->orderBy('completed_at', 'desc')
-            ->paginate(20);
-
-        $questionStats = $this->getQuestionStatistics($quiz, $group);
+        //dd($analysis['attempts']);
 
         return Inertia::render('Examiner/QuizAnalysis/GroupResults', [
-            'quiz' => $quiz,
-            'group' => $group,
-            'attempts' => $attempts,
-            'questionStats' => $questionStats,
-            'averageScore' => $attempts->avg('percentage'),
-            'passRate' => $attempts->where('is_passed', true)->count() / max($attempts->count(), 1) * 100,
+            'quiz' => $quiz->load('groups', 'questionPools'), // Match what's in index()
+            'group' => $group->loadCount('members'), // Ensure members_count is available
+            'attempts' => $analysis['attempts']->toArray(), // Already paginated from getGeneralAnalysis()
+            'questionStats' => $analysis['question_stats'],
+            'averageScore' => $analysis['average_score'],
+            'passRate' => $analysis['pass_rate'],
+            'groups' => $quiz->groups()->withCount('members')->get(), // For group switcher
+            'totalAttempts' => $analysis['total_attempts'],
+            // Add this for charts
+            'allAttempts' => $analysis['attempts']->items(),
         ]);
     }
 
@@ -64,53 +52,28 @@ class QuizAnalysisController extends Controller
     {
         //$this->authorize('viewResults', $quiz);
 
-        $question = $quiz->questions()->findOrFail($questionId);
-        $responses = QuestionResponse::where('question_id', $questionId)
-            ->whereHas('attempt', function($q) use ($quiz) {
-                $q->where('quiz_id', $quiz->id);
-            })
-            ->with('attempt.user')
-            ->paginate(20);
+        $service = new QuizAnalysisService($quiz);
 
         return Inertia::render('Examiner/QuizAnalysis/QuestionDetail', [
             'quiz' => $quiz,
-            'question' => $question,
-            'responses' => $responses,
-            'correctPercentage' => $responses->where('is_correct', true)->count() / max($responses->count(), 1) * 100,
+            'question' => $service->getQuestionDetailAnalysis($questionId)['question'],
+            'responses' => $service->getQuestionDetailAnalysis($questionId)['responses'],
+            'stats' => $service->getQuestionDetailAnalysis($questionId)['stats']
         ]);
     }
 
-    protected function getQuestionStatistics(Quiz $quiz, Group $group = null)
+    public function quizAttempt(Quiz $quiz, QuizAttempt $attempt)
     {
-        $query = $quiz->questions()->withCount(['responses as correct_responses' => function($q) {
-            $q->where('is_correct', true);
-        }]);
+        $service = new QuizAnalysisService($quiz);
 
-        if ($group) {
-            $query->withCount(['responses as correct_responses' => function($q) use ($group) {
-                $q->where('is_correct', true)
-                  ->whereHas('attempt.user', function($q) use ($group) {
-                      $q->whereHas('groups', function($q) use ($group) {
-                          $q->where('groups.id', $group->id);
-                      });
-                  });
-            }]);
-        }
-
-        return $query->get()->map(function($question) {
-            return [
-                'id' => $question->id,
-                'question' => $question->question,
-                'type' => $question->type,
-                'correct_count' => $question->correct_responses,
-                'total_responses' => $question->responses_count,
-                'correct_percentage' => $question->responses_count > 0 
-                    ? round(($question->correct_responses / $question->responses_count) * 100, 2)
-                    : 0,
-            ];
-        });
+        return Inertia::render('Examiner/QuizAttempts/Show', [
+            'quiz' => $quiz,
+            'question' => $service->getGeneralAnalysis()['question_stats'],
+            'responses' => $service->getQuestionDetailAnalysis($attempt)['responses'],
+        ]);
     }
 
+    
 
     public function export()
     {

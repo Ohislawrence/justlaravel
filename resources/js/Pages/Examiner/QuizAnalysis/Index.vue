@@ -22,17 +22,17 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <SummaryCard 
               title="Total Attempts" 
-              :value="attempts.total" 
+              :value="analysis.total_attempts" 
               icon="users"
             />
             <SummaryCard 
               title="Average Score" 
-              :value="`${Math.round(averageScore)}%`"
+              :value="`${Math.round(analysis.average_score)}%`"
               icon="chart-bar"
             />
             <SummaryCard 
               title="Pass Rate" 
-              :value="`${Math.round(passRate)}%`"
+              :value="`${Math.round(analysis.pass_rate)}%`"
               icon="check-circle"
             />
           </div>
@@ -65,22 +65,25 @@
               </Link>
             </div>
           </div>
-  
-          <!-- Question Statistics -->
+          
+
+          <!-- Attempts Table -->
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="p-6 bg-white border-b border-gray-200">
+              <h3 class="text-lg font-medium mb-4">Attempts</h3>
+              <AttemptsTable :quiz="quiz" :attempts="attempts" />
+            </div>
+          </div>
+
+          <!-- Question Statistics -->
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
               <h3 class="text-lg font-medium mb-4">Question Performance</h3>
               <QuestionStatsTable :stats="questionStats" :quiz="quiz" />
             </div>
           </div>
   
-          <!-- Attempts Table -->
-          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 bg-white border-b border-gray-200">
-              <h3 class="text-lg font-medium mb-4">Attempts</h3>
-              <AttemptsTable :attempts="attempts" />
-            </div>
-          </div>
+          
         </div>
       </div>
     </AppLayout>
@@ -91,13 +94,15 @@
   import { Link } from '@inertiajs/vue3';
   import SummaryCard from '@/Components/SummaryCard.vue';
   import QuestionStatsTable from '@/Components/Tables/QuestionStatsTable.vue';
+  import AttemptsTable from '@/Components/Tables/AttemptsTable.vue';
   
   const props = defineProps({
     quiz: Object,
-    attempts: Object,
+    analysis: Array,
     groups: Array,
     questionStats: Array,
     averageScore: Number,
     passRate: Number,
+    attempts: Object,
   });
   </script>

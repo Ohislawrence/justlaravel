@@ -1,5 +1,9 @@
 <template>
   <div class="overflow-x-auto">
+    <div v-if="!stats || stats.length === 0" class="text-center py-8 text-gray-500">
+      No question statistics available
+    </div>
+    
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
@@ -10,53 +14,62 @@
             Type
           </th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Source
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Correct
           </th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Total
+            Avg Points
           </th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            % Correct
-          </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Actions
+            Difficulty
           </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="stat in stats" :key="stat.id">
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ stat.question || 'Unknown Question' }}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
-                  :class="questionTypeClasses(stat.type)">
-              {{ stat.type || 'Unknown' }}
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {{ stat.correct_count || 0 }}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {{ stat.total_responses || 0 }}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <div class="flex items-center">
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-blue-600 h-2.5 rounded-full" 
-                     :style="`width: ${stat.correct_percentage || 0}%`"></div>
-              </div>
-              <span class="ml-2">{{ Math.round(stat.correct_percentage || 0) }}%</span>
+        <tr v-for="(question, index) in stats" :key="index">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">
+              {{ question.question }}
+              <span v-if="question.is_ai === 1" class="ml-2 text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                AI-Generated
+              </span>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-            <component
-              :is="getQuestionAnalysisUrl(stat) ? Link : 'span'"
-              :href="getQuestionAnalysisUrl(stat)"
-              :class="getQuestionAnalysisUrl(stat) ? 'text-blue-600 hover:text-blue-900' : 'text-gray-400'"
-            >
-              {{ getQuestionAnalysisUrl(stat) ? 'Details' : 'N/A' }}
-            </component>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ questionTypeLabel(question.type) }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <template v-if="question.source.type  === 'direct'">
+              Direct Question
+            </template>
+            <template v-else-if="question.source.type === 'pool'">
+              From Pool: 
+              <Link v-if="quiz" 
+                :href="route('examiner.question-pools.show', { question_pool: question.source.pool_id })"
+                class="text-blue-600 hover:text-blue-800"
+              >
+                {{ question.source.pool_name }}
+              </Link>
+              <span v-else>{{ question.source.pool_name }}</span>
+            </template>
+            <template v-else>
+              Unknown Source
+            </template>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ question.correct_responses }} / {{ question.total_responses }}
+            ({{ calculatePercentage(question.correct_responses, question.total_responses) }}%)
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ formatAveragePoints(question.average_points, question.points) }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                  :class="getDifficultyClass(question.difficulty)">
+              {{ question.difficulty }}
+            </span>
           </td>
         </tr>
       </tbody>
@@ -70,40 +83,59 @@ import { Link } from '@inertiajs/vue3';
 const props = defineProps({
   stats: {
     type: Array,
-    default: () => []
+    required: true,
+    default: () => [],
+    validator: (value) => {
+      return Array.isArray(value) && 
+        value.every(item => typeof item === 'object' && item !== null)
+    }
   },
   quiz: {
     type: Object,
-    required: true
-  }
+    default: null
+  },
+  analysis: Object,
+  
 });
 
-const questionTypeClasses = (type) => {
-  const classes = {
-    'multiple_choice': 'bg-purple-100 text-purple-800',
-    'true_false': 'bg-green-100 text-green-800',
-    'short_answer': 'bg-yellow-100 text-yellow-800',
-    'fill_in_blank': 'bg-blue-100 text-blue-800',
-    'matching': 'bg-indigo-100 text-indigo-800',
-    'essay': 'bg-pink-100 text-pink-800'
+const questionTypeLabel = (type) => {
+  const types = {
+    'multiple_choice': 'MCQ',
+    'true_false': 'True/False',
+    'short_answer': 'Short Answer',
+    'essay': 'Essay',
+    'fill_in_blank': 'Fill Blank',
+    'matching': 'Matching',
+    'ordering': 'Ordering'
   };
-  return classes[type] || 'bg-gray-100 text-gray-800';
+  return types[type] || type;
 };
 
-const getQuestionAnalysisUrl = (stat) => {
-  try {
-    // Check if route function exists and required parameters are available
-    if (typeof route === 'undefined' || !props.quiz?.id || !stat?.id) {
-      return null;
-    }
-    
-    return route('examiner.quizzes.analysis.question', { 
-      quiz: props.quiz.id, 
-      questionId: stat.id 
-    });
-  } catch (error) {
-    console.error('Route generation failed:', error);
-    return null;
+const getDifficultyClass = (difficulty) => {
+  switch(difficulty) {
+    case 'Easy': return 'bg-green-100 text-green-800';
+    case 'Medium': return 'bg-yellow-100 text-yellow-800';
+    case 'Hard': return 'bg-red-100 text-red-800';
+    default: return 'bg-gray-100 text-gray-800';
   }
 };
+
+const calculatePercentage = (correct, total) => {
+  if (!total || total === 0) return 0;
+  return Math.round((correct / total) * 100);
+};
+
+const formatAveragePoints = (average, total) => {
+  if (average === undefined || average === null) return 'N/A';
+  return `${average.toFixed(1)} / ${total || 'N/A'}`;
+};
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

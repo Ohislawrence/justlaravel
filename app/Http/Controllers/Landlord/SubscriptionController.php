@@ -10,6 +10,7 @@ use App\Models\OrganizationSubscription;
 use App\Models\SubscriptionFeature;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
@@ -124,7 +125,7 @@ class SubscriptionController extends Controller
             'plan_id' => 'required|exists:subscription_plans,id',
             'billing_cycle' => 'required|in:monthly,quarterly,yearly',
         ]);
-
+    
         try {
             $plan = SubscriptionPlan::findOrFail($request->plan_id);
             
@@ -135,11 +136,11 @@ class SubscriptionController extends Controller
             
             // Calculate dates and price
             $price = $plan->getPriceForBillingCycle($request->billing_cycle);
-            $startDate = now();
+            $startDate = Carbon::now();
             $endDate = $this->calculateEndDate($startDate, $request->billing_cycle);
             
             // Create new subscription
-            $subscription = $organization->subscriptions()->create([
+            $organization->subscriptions()->create([
                 'plan_id' => $plan->id,
                 'billing_cycle' => $request->billing_cycle,
                 'price' => $price,
@@ -148,10 +149,10 @@ class SubscriptionController extends Controller
                 'is_active' => true,
                 'is_trial' => false,
             ]);
-
+    
             return redirect()->route('landlord.subscriptions.index')
                 ->with('success', 'Subscription assigned successfully');
-
+    
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to assign subscription: ' . $e->getMessage());
         }
@@ -213,17 +214,19 @@ class SubscriptionController extends Controller
             ->with('success', 'Subscription plan updated successfully');
     }
 
-    protected function calculateEndDate($startDate, $billingCycle)
+    protected function calculateEndDate(Carbon $startDate, string $billingCycle): Carbon
     {
+        $endDate = $startDate->copy(); // Clone the start date
+
         switch ($billingCycle) {
             case 'monthly':
-                return $startDate->addMonth();
+                return $endDate->addMonth();
             case 'quarterly':
-                return $startDate->addMonths(3);
+                return $endDate->addMonths(3);
             case 'yearly':
-                return $startDate->addYear();
+                return $endDate->addYear();
             default:
-                return $startDate->addMonth();
+                return $endDate->addMonth();
         }
     }
 }

@@ -9,6 +9,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Illuminate\Support\Str;
+use App\Mail\GroupInvitationMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Invitation;
+use App\Jobs\SendGroupInvitation;
+use App\Models\Quiz;
 
 class GroupController extends Controller
 {
@@ -16,6 +23,8 @@ class GroupController extends Controller
     {
         //$this->authorize('viewAny', [Group::class, $organization]);
         $organization = auth()->user()->organizations()->first();
+        $userGroupLimit = $organization->getFeatureValue('user-group-limit');
+        $currentUserGroupCount = $organization->groups()->count();
 
         $groups = $organization->groups()
             ->withCount('members')
@@ -25,6 +34,8 @@ class GroupController extends Controller
         return inertia('Examiner/Groups/Index', [
             'organization' => $organization,
             'groups' => $groups,
+            'userGroupLimit' => $userGroupLimit,
+            'currentUserGroupCount' => $currentUserGroupCount,
         ]);
     }
 
@@ -41,22 +52,32 @@ class GroupController extends Controller
     {
         //$this->authorize('create', [Group::class, $organization]);
         $organization = auth()->user()->organizations()->first();
+
+        $userGroupLimit = $organization->getFeatureValue('user-group-limit');
+        $currentUserGroupCount = $organization->groups()->count();
+        if ($currentUserGroupCount >= $userGroupLimit) {
+            return redirect()->back()->withErrors([
+                'limit' => "You have reached your question limit of {$userGroupLimit}. Upgrade your plan to add more."
+            ]);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255',
                       Rule::unique('groups')->where('organization_id', $organization->id)],
             'description' => ['nullable', 'string'],
         ]);
 
+        $validated['slug'] = Str::slug($validated['name']);
+
         $group = $organization->groups()->create($validated);
 
-        return redirect()->route('Examiner/Groups/Index', [$organization, $group])
+        return redirect()->route('examiner.groups.index', [$organization, $group])
             ->with('success', 'Group created successfully');
     }
 
-    public function show(Organization $organization, Group $group)
+    public function show(Group $group)
     {
-        //$this->authorize('view', $group);
         $organization = auth()->user()->organizations()->first();
+        
         $group->load(['members', 'quizzes']);
 
         return inertia('Examiner/Groups/Show', [
@@ -82,6 +103,7 @@ class GroupController extends Controller
                           ->where('organization_id', $organization->id)],
             'description' => ['nullable', 'string'],
         ]);
+        $validated['slug'] = Str::slug($validated['name']);
 
         $group->update($validated);
 
@@ -149,8 +171,6 @@ class GroupController extends Controller
 
     public function assignQuizzes(Request $request, Organization $organization, Group $group)
     {
-        //$this->authorize('update', $group);
-        //$organization = auth()->user()->organizations()->first();
         $validated = $request->validate([
             'quiz_ids' => ['required', 'array'],
             'quiz_ids.*' => ['exists:quizzes,id'],
@@ -161,13 +181,90 @@ class GroupController extends Controller
         return back()->with('success', 'Quizzes assigned to group');
     }
 
-    public function removeQuiz(Organization $organization, Group $group, Quiz $quiz)
+    public function removeQuiz(Group $group, Quiz $quiz)
     {
+        // Verify the user has permission to modify this group
         $organization = auth()->user()->organizations()->first();
-        //$this->authorize('update', $group);
-        //$organization = auth()->user()->organizations()->first();
-        $group->quizzes()->detach($quiz);
+        if (!$organization || !$organization->groups->contains($group)) {
+            return back()->with('error', 'You do not have permission to modify this group');
+        }
+    
+        // Check if the quiz belongs to the organization
+        if ($quiz->organization_id !== $organization->id) {
+            return back()->with('error', 'Quiz does not belong to your organization');
+        }
+    
+        // Verify the quiz is actually attached to the group
+        if (!$group->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+            return back()->with('error', 'Quiz is not assigned to this group');
+        }
+    
+        // Perform the detachment
+        try {
+            $group->quizzes()->detach($quiz->id);
+            
+            // Alternative syntax if needed:
+            // DB::table('group_quiz')
+            //    ->where('group_id', $group->id)
+            //    ->where('quiz_id', $quiz->id)
+            //    ->delete();
+            
+            return back()->with('success', 'Quiz successfully removed from group');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to remove quiz: ' . $e->getMessage());
+        }
+    }
 
-        return back()->with('success', 'Quiz removed from group');
+    public function sendInvite(Request $request, Organization $organization, Group $group)
+    {
+        $validated = $request->validate([
+            'emails' => ['required', 'array'],
+            'emails.*' => ['required', 'email']
+        ]);
+
+        // Filter out duplicates and existing members
+        $existingInvitations = $group->invitations()
+            ->whereIn('email', $validated['emails'])
+            ->pluck('email');
+            
+        $existingMembers = $group->members()
+            ->whereIn('email', $validated['emails'])
+            ->pluck('email');
+
+        $emailsToInvite = collect($validated['emails'])
+            ->unique()
+            ->reject(fn ($email) => $existingInvitations->contains($email))
+            ->reject(fn ($email) => $existingMembers->contains($email));
+
+        if ($emailsToInvite->isEmpty()) {
+            return response()->json([
+                'message' => 'All provided emails are already invited or members',
+                'skipped' => count($validated['emails']) - $emailsToInvite->count()
+            ], 422);
+        }
+
+        // Create and send invitations
+        $sentCount = 0;
+        foreach ($emailsToInvite as $email) {
+            try {
+                $invitation = $group->invitations()->create([
+                    'email' => $email,
+                    'token' => Str::random(40),
+                    'expires_at' => now()->addDays(7)
+                ]);
+    
+                // Dispatch the job instead of sending directly
+                SendGroupInvitation::dispatch($invitation);
+                $sentCount++;
+            } catch (\Exception $e) {
+                \Log::error("Failed to create invitation for {$email}: " . $e->getMessage());
+            }
+        }
+
+        return response()->json([
+            'message' => "Invitations sent successfully",
+            'sent_count' => $sentCount,
+            'skipped_count' => count($validated['emails']) - $sentCount
+        ]);
     }
 }

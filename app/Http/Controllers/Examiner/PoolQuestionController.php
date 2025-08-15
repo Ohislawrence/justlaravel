@@ -49,7 +49,18 @@ class PoolQuestionController extends Controller
      */
     public function store(Request $request, QuestionPool $pool)
     { 
-        //dd($request->all());
+        $organization = auth()->user()->organizations()->first();
+        // Get subscription question limit
+        $questionsLimit = $organization->getQuestionsLimit();
+
+        // Count current questions
+        $currentQuestionsCount = $organization->questions()->count();
+
+        if ($currentQuestionsCount >= $questionsLimit) {
+            return redirect()->back()->withErrors([
+                'limit' => "You have reached your question limit of {$questionsLimit}. Upgrade your plan to add more."
+            ]);
+        }
         
         $validated = $request->validate([
             'type' => 'required|string',
@@ -68,7 +79,7 @@ class PoolQuestionController extends Controller
                                 }],
             'settings' => 'nullable|array',
         ]);
-        $organization = auth()->user()->organizations()->first();
+        
         $validated['is_required'] = $request->boolean('is_required');
         $validated['organization_id'] = $organization->id;
 

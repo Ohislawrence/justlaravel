@@ -24,14 +24,7 @@ class QuestionPool extends Model
     {
         return $this->belongsToMany(Question::class, 'question_pool_items')
                     ->withPivot(['question_pool_id', 'question_id', 'created_at', 'updated_at'])
-                    ->select(
-                        'questions.id',
-                        'questions.question',
-                        'questions.type',
-                        'questions.points',
-                        'questions.created_at',
-                        'questions.updated_at'
-                    );
+                    ;
     }
 
     public function organization()

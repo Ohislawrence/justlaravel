@@ -12,6 +12,7 @@ import SelectInput from '@/Components/SelectInput.vue';
 import DateTimePicker from '@/Components/DateTimePicker.vue';
 import RichTextArea from '@/Components/RichTextArea.vue';
 import Multiselect from '@vueform/multiselect';
+import { format, parseISO } from 'date-fns';
 
 const props = defineProps({
     organization: Object,
@@ -50,6 +51,7 @@ const form = useForm({
     ends_at: '',
     settings: {},
     pools: props.quiz.pools || [],
+    survey_thank_you_message: '',
 });
 
 const isValid = computed(() => {
@@ -67,8 +69,8 @@ const submit = () => {
         max_participants: form.max_participants !== null ? parseInt(form.max_participants) : null,
         time_limit: form.time_limit !== null ? parseInt(form.time_limit) : null,
         passing_score: form.passing_score !== null ? parseInt(form.passing_score) : null,
-        starts_at: form.starts_at || null,
-        ends_at: form.ends_at || null,
+        starts_at: form.starts_at ? form.starts_at : null,
+        ends_at: form.ends_at ? form.ends_at : null,
         
     };
     
@@ -104,17 +106,24 @@ const addSelectedPools = () => {
     }
 };
 
+const formatForDisplay = (isoString) => {
+  if (!isoString) return '';
+  return format(parseISO(isoString), 'MMM d, yyyy h:mm a');
+};
+
 const formatDateTime = (dateTime) => {
     if (!dateTime) return '';
-    
     try {
-        // Handle different date formats that might come from the DateTimePicker
+        // Attempt to parse the date string provided by DateTimePicker
         const date = new Date(dateTime);
-        
+
         // Check if date is valid
-        if (isNaN(date.getTime())) return dateTime;
-        
-        // Format the date and time
+        if (isNaN(date.getTime())) {
+            console.warn('formatDateTime received an unparsable date string:', dateTime);
+            return dateTime; // Return original string if parsing fails
+        }
+
+        // Format the date and time for display (adjust options as needed)
         const options = {
             year: 'numeric',
             month: 'short',
@@ -123,13 +132,13 @@ const formatDateTime = (dateTime) => {
             minute: '2-digit',
             hour12: true
         };
-        
         return date.toLocaleString('en-US', options);
     } catch (error) {
-        console.error('Error formatting date:', error);
-        return dateTime;
+        console.error('Error formatting date for display:', error, 'Input:', dateTime);
+        return dateTime; // Fallback to original input on error
     }
 };
+
 </script>
 
 <template>
@@ -227,6 +236,17 @@ const formatDateTime = (dateTime) => {
                                                 </option>
                                             </SelectInput>
                                             <InputError class="mt-2" :message="form.errors.industry" />
+                                        </div>
+                                        <div v-if="form.quiz_type === 'survey'">
+                                        <InputLabel for="survey_thank_you_message" value="Survey Thank You Message" />
+                                        <Textarea
+                                            id="survey_thank_you_message"
+                                            v-model="form.survey_thank_you_message"
+                                            class="mt-1 block w-full"
+                                            rows="3"
+                                            placeholder="Thank you for completing our survey!"
+                                        />
+                                        <InputError class="mt-2" :message="form.errors['survey_thank_you_message']" />
                                         </div>
                                     </div>
                                 </div>
@@ -342,12 +362,11 @@ const formatDateTime = (dateTime) => {
                                                     id="starts_at"
                                                     v-model="form.starts_at"
                                                     class="mt-1 block w-full"
-                                                    placeholder="Select start date and time"
+                                                    :display-format="'MMM d, yyyy h:mm a'"
+                                                    :model-value="form.starts_at"
+                                                    @update:modelValue="(val) => form.starts_at = val"
+                                                    label="Start Date & Time"
                                                 />
-                                                <!-- Display selected start datetime -->
-                                                <div v-if="form.starts_at" class="mt-2 text-sm text-gray-600">
-                                                    <strong>Selected:</strong> {{ formatDateTime(form.starts_at) }}
-                                                </div>
                                                 <InputError class="mt-2" :message="form.errors.starts_at" />
                                             </div>
 
@@ -357,12 +376,11 @@ const formatDateTime = (dateTime) => {
                                                     id="ends_at"
                                                     v-model="form.ends_at"
                                                     class="mt-1 block w-full"
-                                                    placeholder="Select end date and time"
+                                                    :display-format="'MMM d, yyyy h:mm a'"
+                                                    :model-value="form.ends_at"
+                                                    @update:modelValue="(val) => form.ends_at = val"
+                                                    label="Start Date & Time"   
                                                 />
-                                                <!-- Display selected end datetime -->
-                                                <div v-if="form.ends_at" class="mt-2 text-sm text-gray-600">
-                                                    <strong>Selected:</strong> {{ formatDateTime(form.ends_at) }}
-                                                </div>
                                                 <InputError class="mt-2" :message="form.errors.ends_at" />
                                             </div>
                                         </div>

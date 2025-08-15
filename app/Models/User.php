@@ -88,8 +88,23 @@ class User extends Authenticatable
         return $this->hasMany(Certificate::class);
     }
 
+    public function assignedQuizzesGroup()
+    {
+        return $this->hasManyThrough(
+            Quiz::class,           // Final model we want to access
+            GroupMember::class,    // Intermediate model/table
+            'user_id',             // Foreign key on group_members table
+            'id',                  // Local key on quizzes table
+            'id',                  // Local key on users table
+            'group_id'             // Foreign key on group_members table
+        )->whereHas('groups', function ($query) {
+            // Ensures we only get quizzes from groups the user is actually in
+            $query->where('group_members.user_id', $this->id);
+        });
+    }
+
     public function quizzes()
-{
+    {
         return $this->belongsToMany(Quiz::class, 'quiz_attempts')
                     ->withPivot(['score', 'completed_at'])
                     ->withTimestamps();
@@ -137,5 +152,38 @@ class User extends Authenticatable
 
         session(['current_organization_id' => $organizationId]);
         return true;
+    }
+
+    public function availableQuizzes()
+    {
+        // Get quizzes assigned to the user directly
+        $directQuizzes = $this->quizzes()
+            ->where(function ($query) {
+                $query->whereNull('quizzes.starts_at')
+                    ->orWhere('quizzes.starts_at', '<=', now());
+            })
+            ->where(function ($query) {
+                $query->whereNull('quizzes.ends_at')
+                    ->orWhere('quizzes.ends_at', '>=', now());
+            });
+        
+        // Get quizzes assigned to groups the user belongs to
+        $groupQuizzes = Quiz::whereHas('groups.members', function ($query) {
+                $query->where('users.id', $this->id);
+            })
+            ->where(function ($query) {
+                $query->whereNull('quizzes.starts_at')
+                    ->orWhere('quizzes.starts_at', '<=', now());
+            })
+            ->where(function ($query) {
+                $query->whereNull('quizzes.ends_at')
+                    ->orWhere('quizzes.ends_at', '>=', now());
+            });
+        
+        // Combine both queries
+        return Quiz::whereIn('id', 
+            $directQuizzes->select('quizzes.id')
+                ->union($groupQuizzes->select('quizzes.id'))
+        );
     }
 }

@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout2 from '@/Layouts/AppLayout2.vue';
 import { defineProps } from 'vue';
+import Cta from '@/Components/Cta.vue';
 
 defineProps({
     blogs: Object,
@@ -127,6 +128,7 @@ defineProps({
                 </div>
             </div>
         </div>
+        <Cta />
     </AppLayout2>
 </template>
 

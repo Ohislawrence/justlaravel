@@ -20,6 +20,13 @@ class QuizAttempt extends Model
         'answers',
         'grading_data',
         'feedback' ,
+        'questions_data',
+    ];
+
+    protected $casts = [
+        'answers' => 'json',
+        'grading_data' => 'json',
+        'questions_data' => 'array', // Add this line
     ];
 
     public function quiz()
@@ -40,5 +47,10 @@ class QuizAttempt extends Model
     public function certificate()
     {
         return $this->hasOne(Certificate::class);
+    }
+
+    public function getQuestionsAttribute()
+    {
+        return collect(json_decode($this->questions_data, true));
     }
 }

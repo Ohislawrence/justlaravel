@@ -3,18 +3,45 @@
 namespace App\Http\Controllers\Examinee;
 
 use App\Http\Controllers\Controller;
+use App\Models\Group;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\Invitation;
 
 class ExamineeAuthController extends Controller
 {
-    public function showLoginForm()
+    public function register($organizationSlug, $groupSlug, Request $request)
     {
-        return Inertia::render('Examinee/Auth/Login');
+        $organization = Organization::where('slug', $organizationSlug)->firstOrFail();
+        $group = Group::where('slug', $groupSlug)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        // Validate token if present
+        $invitation = null;
+        if ($request->has('token')) {
+            $invitation = Invitation::where('token', $request->token)
+                ->where('group_id', $group->id)
+                ->whereNull('accepted_at')
+                ->where('expires_at', '>', now())
+                ->first();
+
+            if (!$invitation) {
+                return redirect()->back()->withErrors([
+                    'token' => 'Invalid or expired invitation token'
+                ]);
+            }
+        }
+        return Inertia::render('Examinee/Auth/Register', [
+            'organization' => $organization,
+            'group' => $group,
+            'invitation' => $invitation,
+            ]);
     }
 
-    public function login(Request $request)
+    public function Create(Request $request)
     {
         $credentials = $request->validate([
             'unique_code' => 'required|string',
@@ -36,6 +63,6 @@ class ExamineeAuthController extends Controller
         Auth::guard('examinee')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('examinee.login');
+        return redirect()->route('home');
     }
 }

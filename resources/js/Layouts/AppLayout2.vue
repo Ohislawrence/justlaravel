@@ -8,20 +8,21 @@
       <header class="container mx-auto px-4 sm:px-6 py-4 sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
         <div class="flex justify-between items-center">
           <div class="flex items-center space-x-2">
-            <div class="w-10 h-10 bg-gradient-to-r from-emerald-600 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
-              <span class="text-white font-bold text-lg">Q</span>
-            </div>
-            <div class="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
-              QuizPortal
-            </div>
-          </div>
+            <Link :href="route('home')" class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-emerald-600 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
+                <span class="text-white font-bold text-lg">Q</span>
+              </div>
+              <div class="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+                QuizPortal
+              </div>
+            </Link></div>
   
           <!-- Desktop Navigation -->
           <nav class="hidden md:flex space-x-1">
-            <a href="#features" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Features</a>
-            <a href="#pricing" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Pricing</a>
-            <a href="#blog" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Blog</a>
-            <a href="#contact" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Contact</a>
+            <Link :href="route('features')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Features</Link>
+            <Link :href="route('pricing')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Pricing</Link>
+            <Link :href="route('blogs.index')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Blog</Link>
+            <Link :href="route('contact')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Contact</Link>
           </nav>
   
           <!-- Auth Buttons -->
@@ -53,10 +54,10 @@
         <!-- Mobile Navigation -->
         <div v-if="mobileMenuOpen" class="md:hidden mt-4 py-4 border-t border-gray-100">
           <nav class="flex flex-col space-y-3">
-            <a href="#features" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Features</a>
-            <a href="#pricing" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Pricing</a>
-            <a href="#blog" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Blog</a>
-            <a href="#contact" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Contact</a>
+            <Link :href="route('features')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Features</Link>
+            <Link :href="route('pricing')"  class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Pricing</Link>
+            <Link :href="route('blogs.index')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Blog</Link>
+            <Link :href="route('contact')" class="px-4 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50">Contact</Link>
           </nav>
         </div>
       </header>
@@ -98,26 +99,26 @@
                 </div>
                 <!-- Description -->
                 <p class="text-gray-400 text-lg leading-relaxed max-w-md">
-                  The leading assessment platform for Nigerian educators. Empowering teachers with smart technology to create engaging learning experiences.
+                  The complete quiz platform designed for Nigerian educational institutions, corporations, and training organizations.
                 </p>
                 <!-- Social Links -->
                 <div class="flex space-x-4">
-                  <a href="#" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-emerald-600 hover:to-teal-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/25">
+                  <a href="#" target="_blank" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-emerald-600 hover:to-teal-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/25">
                     <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
                     </svg>
                   </a>
-                  <a href="#" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-pink-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-pink-500/25">
+                  <a href="#" target="_blank" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-pink-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-pink-500/25">
                     <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
                   </a>
-                  <a href="#" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25">
+                  <a href="#" target="_blank" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25">
                     <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                     </svg>
                   </a>
-                  <a href="#" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-green-600 hover:to-green-700 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/25">
+                  <a href="https://wa.me/2348117297730?text=" target="_blank" class="group relative p-3 bg-gray-800/50 hover:bg-gradient-to-br hover:from-green-600 hover:to-green-700 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/25">
                     <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                     </svg>
@@ -134,25 +135,17 @@
                     <div class="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
                   </h3>
                   <nav class="space-y-3">
-                    <a href="#features" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    <Link :href="route('features')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Features
-                    </a>
-                    <a href="#pricing" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    </Link>
+                    <Link :href="route('pricing')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Pricing
-                    </a>
+                    </Link>
                     <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Integrations
-                    </a>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
-                      <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      Updates
-                    </a>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
-                      <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      API Documentation
                     </a>
                   </nav>
                 </div>
@@ -168,11 +161,6 @@
                       <div class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       About Us
                     </Link>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
-                      <div class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      Careers
-                      <span class="ml-2 px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded-full">We're hiring</span>
-                    </a>
                     <Link :href="route('blogs.index')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Blog
@@ -181,10 +169,6 @@
                       <div class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Contact
                     </Link>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
-                      <div class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      Press Kit
-                    </a>
                   </nav>
                 </div>
   
@@ -201,16 +185,7 @@
                     </a>
                     <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      Community
-                    </a>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
-                      <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Contact Support
-                    </a>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
-                      <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      System Status
-                      <div class="ml-2 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     </a>
                     <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -250,19 +225,20 @@
           </div>
         </div>
       </footer>
+      <WhatsAppFloat />
     </div>
   </template>
   
-  <script>
+<script>
 import { ref,computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { usePage } from '@inertiajs/vue3';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import WhatsAppFloat from '@/Components/WhatsAppFloat.vue';
   
 
   export default {
     components: {
       Link,
+      WhatsAppFloat,
     },
     data() {
       return {
@@ -276,7 +252,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
       }
     }
   }
-  </script>
+</script>
   
   <style scoped>
   /* You might want to move the blob animation styles here or to a global CSS file if used elsewhere */

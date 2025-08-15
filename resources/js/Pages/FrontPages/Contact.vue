@@ -7,6 +7,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue'; // Or use your own button style
 import TextInput from '@/Components/TextInput.vue';
 import TextArea from '@/Components/TextArea.vue'; // Make sure you have this component, or use a standard textarea
+import Cta from '@/Components/Cta.vue';
 
 // Define props for success message or pre-filled data if needed
 const props = defineProps({
@@ -305,22 +306,7 @@ const submit = () => {
         -->
 
         <!-- CTA Section -->
-        <section class="py-16 sm:py-20 bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
-            <div class="container mx-auto px-4 sm:px-6 text-center">
-                <h2 class="text-3xl sm:text-4xl font-bold mb-6">Need Immediate Help?</h2>
-                <p class="text-lg sm:text-xl mb-8 max-w-2xl mx-auto text-emerald-100">
-                    Check out our Help Center for quick answers or live chat support.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="#" class="px-6 sm:px-8 py-3.5 bg-white text-emerald-600 rounded-xl hover:bg-gray-100 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium">
-                        Visit Help Center
-                    </a>
-                    <a :href="route('login')" class="px-6 sm:px-8 py-3.5 border-2 border-white text-white rounded-xl hover:bg-white/10 transition text-base sm:text-lg font-medium">
-                        Login to Dashboard
-                    </a>
-                </div>
-            </div>
-        </section>
+      <Cta />
     </AppLayout2>
 </template>
 

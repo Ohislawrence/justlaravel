@@ -34,9 +34,10 @@ const form = useForm({
     max_participants: props.quiz.max_participants,
     time_limit: props.quiz.time_limit,
     passing_score: props.quiz.passing_score,
-    starts_at: props.quiz.starts_at,
-    ends_at: props.quiz.ends_at,
+    starts_at: props.quiz.starts_at || null,
+    ends_at: props.quiz.ends_at || null,
     settings: props.quiz.settings,
+    survey_thank_you_message: props.quiz.survey_thank_you_message,
 });
 
 const submit = () => {
@@ -140,6 +141,18 @@ const submit = () => {
                                                 </option>
                                             </SelectInput>
                                             <InputError class="mt-2" :message="form.errors.industry" />
+                                        </div>
+
+                                        <div v-if="form.quiz_type === 'survey'">
+                                        <InputLabel for="survey_thank_you_message" value="Survey Thank You Message" />
+                                        <Textarea
+                                            id="survey_thank_you_message"
+                                            v-model="form.survey_thank_you_message"
+                                            class="mt-1 block w-full"
+                                            rows="3"
+                                            placeholder="Thank you for completing our survey!"
+                                        />
+                                        <InputError class="mt-2" :message="form.errors['survey_thank_you_message']" />
                                         </div>
                                     </div>
                                 </div>
@@ -252,6 +265,7 @@ const submit = () => {
                                             <DateTimePicker
                                                 id="starts_at"
                                                 v-model="form.starts_at"
+                                                timezone="UTC"
                                                 class="mt-1 block w-full"
                                             />
                                             <InputError class="mt-2" :message="form.errors.starts_at" />
@@ -262,6 +276,7 @@ const submit = () => {
                                             <DateTimePicker
                                                 id="ends_at"
                                                 v-model="form.ends_at"
+                                                timezone="UTC"
                                                 class="mt-1 block w-full"
                                             />
                                             <InputError class="mt-2" :message="form.errors.ends_at" />

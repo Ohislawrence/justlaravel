@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
 class OrganizationSubscription extends Model
@@ -20,60 +21,84 @@ class OrganizationSubscription extends Model
         'is_trial',
     ];
 
-    protected $dates = [
-        'trial_ends_at',
-        'starts_at',
-        'ends_at',
-        'cancelled_at',
+    protected $casts = [
+        'trial_ends_at' => 'datetime',
+        'starts_at'     => 'datetime',
+        'ends_at'       => 'datetime',
+        'cancelled_at'  => 'datetime',
+        'is_active'     => 'boolean',
+        'is_trial'      => 'boolean',
     ];
 
-    public function organization()
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
-    public function plan()
+    public function plan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class);
     }
 
-    public function isActive()
+    /*
+    |--------------------------------------------------------------------------
+    | Subscription Status
+    |--------------------------------------------------------------------------
+    */
+    public function isActive(): bool
     {
         return $this->is_active && Carbon::now()->lt($this->ends_at);
     }
 
-    public function isOnTrial()
+    public function isOnTrial(): bool
     {
         return $this->is_trial && Carbon::now()->lt($this->trial_ends_at);
     }
 
-    public function hasFeature($featureSlug)
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Access
+    |--------------------------------------------------------------------------
+    */
+    /**
+     * Check if the plan has a feature (boolean or numeric > 0)
+     */
+    public function hasFeature(string $featureSlug): bool
     {
-        if (!$this->plan) {
-            return false;
-        }
-    
-        $feature = $this->plan->features()->where('slug', $featureSlug)->first();
-        
+        $feature = $this->getFeature($featureSlug);
         if (!$feature) {
             return false;
         }
-    
+
+        // Boolean features typically stored as 1/0, numeric features must be > 0
         return (bool) $feature->pivot->value;
     }
 
-    public function getFeatureValue($featureSlug)
+    /**
+     * Get the numeric/boolean value of a feature from the pivot
+     */
+    public function getFeatureValue(string $featureSlug)
     {
-        if (!$this->plan) {
-            return null;
+        $feature = $this->getFeature($featureSlug);
+        return $feature?->pivot->value;
+    }
+
+    /**
+     * Internal helper to fetch a feature once
+     */
+    protected function getFeature(string $featureSlug)
+    {
+        if (!$this->relationLoaded('plan') || !$this->plan) {
+            $this->load('plan.features');
         }
-    
-        $feature = $this->plan->features()->where('slug', $featureSlug)->first();
-        
-        if (!$feature) {
-            return null;
-        }
-    
-        return $feature->pivot->value;
+
+        return $this->plan
+            ? $this->plan->features->firstWhere('slug', $featureSlug)
+            : null;
     }
 }

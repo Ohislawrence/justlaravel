@@ -87,15 +87,58 @@ class DashboardController extends Controller
         ->pluck('count', 'quiz_type')
         ->toArray();
 
+    $features = [];
+    if ($organization->activeSubscription && $organization->activeSubscription->plan) {
+        foreach ($organization->activeSubscription->plan->features as $feature) {
+            $features;
+        }
+    }
+
+    $planCurrent = $organization->latestSubscription;
+    //questionlimits
+    $UsedQuestion = $organization->questions()->count();
+    $AllowedQuestionLimit = $organization->getFeatureValue('questions_limit');
+    $percentageQuestionUsed = ($UsedQuestion/$AllowedQuestionLimit) * 100;
+    $remainingQuestion = $AllowedQuestionLimit - $UsedQuestion;
+    //AttemptsLimits
+    $UsedAttempt = $organization->quizAttempts()->whereBetween('quiz_attempts.created_at', [
+                    $planCurrent->starts_at,
+                    $planCurrent->ends_at])->count();
+    $AllowedAttemptLimit = $organization->getFeatureValue('quiz_attempts_limit');
+    $percentageAttempt = ($UsedAttempt/$AllowedAttemptLimit) * 100;
+    $remainingAttempts = $AllowedAttemptLimit - $UsedAttempt;
+    //AiQuestionLimits
+    $UsedAiQuestion = $organization->questions()->where('is_ai', true)->whereBetween('created_at', [
+                        $planCurrent->starts_at,
+                        $planCurrent->ends_at])->count();
+    $AllowedAiQuestiontLimit = $organization->getFeatureValue('ai_question_generation');
+    $percentageAiused = ($UsedAiQuestion/$AllowedAiQuestiontLimit) * 100;
+    $remainingAiQuestion = $AllowedAiQuestiontLimit - $UsedAiQuestion;
+
+    
     return inertia('Examiner/Dashboard', [
         'stats' => $stats,
         'recentActivity' => $recentActivity,
         'topQuizzes' => $topQuizzes,
         'performanceData' => $performanceData,
         'quizTypes' => $quizTypes,
-        'organization' => $organization->only('id', 'name'),
-        'filters' => ['days' => $days] // Pass the current days filter back to frontend
-    ]);
+        'filters' => ['days' => $days],
+        'organization' => $organization,
+        'planCurrent' => $planCurrent->plan->name,
+        'UsedQuestion' => (int)$UsedQuestion,
+        'AllowedQuestionLimit' => (int)$AllowedQuestionLimit,
+        'UsedAttempt' => (int)$UsedAttempt,
+        'AllowedAttemptLimit' => (int)$AllowedAttemptLimit,
+        'UsedAiQuestion' => (int)$UsedAiQuestion,
+        'AllowedAiQuestiontLimit' => (int)$AllowedAiQuestiontLimit,
+        'percentageQuestionUsed' => (int)$percentageQuestionUsed,
+        'remainingQuestion' => (int)$remainingQuestion,
+        'percentageAttempt' => (int)$percentageAttempt,
+        'remainingAttempts' => (int)$remainingAttempts,
+        'percentageAiused' => (int)$percentageAiused,
+        'remainingAiQuestion' => (int)$remainingAiQuestion,
+
+    ]); 
     }
 
     protected function getGrowthPercentage(Organization $organization, string $period = 'month'): float

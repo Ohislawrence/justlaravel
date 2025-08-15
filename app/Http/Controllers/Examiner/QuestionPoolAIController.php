@@ -11,23 +11,33 @@ use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 use App\Services\QuestionGeneratorService;
+use Illuminate\Http\Response;
 
 class QuestionPoolAIController extends Controller
 {
     public function showAIGenerator(QuestionPool $questionPool)
     {
-        // Ensure the question pool belongs to the quiz
-       // if ($questionPool->quiz_id !== $quiz->id) {
-        //    abort(404);
-        //}
+        $organization = auth()->user()->organizations()->first();
 
+        if (!$organization->canGenerateAiQuestion()) {
+            $canGenAiQue = false;
+        }else{
+            $canGenAiQue = true;
+        }
+        
         return Inertia::render('Examiner/QuestionPools/AIGenerator', [
             'questionPool' => $questionPool->only(['id', 'name']),
+            'canGenAiQue' => $canGenAiQue,
         ]);
     }
 
     public function generate(Request $request, QuestionGeneratorService $questionService)
     {
+        $organization = auth()->user()->organizations()->first();
+        if (!$organization->canGenerateAiQuestion()) {
+            return response('Forbidden access.', Response::HTTP_FORBIDDEN);
+        }
+
         $validated = $request->validate([
             'source_type' => 'required|in:topic,article',
             'topic' => 'required_if:source_type,topic|string|max:255',
@@ -72,17 +82,24 @@ class QuestionPoolAIController extends Controller
 
     public function store(Request $request)
     {
+        $organization = auth()->user()->organizations()->first();
+
+        if (!$organization->canGenerateAiQuestion() && !$organization->canAddQuestion()) {
+            redirect()->back()->with('success', 'You have reached either your Ai or Question limits, kindly check your dashboard page.');
+        }
+
+
         $validated = $request->validate([
             'questions' => 'required|array|min:1',
             'questions.*.question' => 'required|string|max:1000',
             'questions.*.type' => 'required',
             'questions.*.options' => 'required_if:questions.*.type,multiple_choice|array',
-            'questions.*.correct_answers' => 'required|array',
+            'questions.*.correct_answers' => 'nullable|array',
             'pool_id' => 'required|exists:question_pools,id'
         ]);
 
         $pool = QuestionPool::findOrFail($request->pool_id);
-        $organization = auth()->user()->organizations()->first();
+        
 
         foreach ($request->questions as $questionData) {
             $question = new Question([

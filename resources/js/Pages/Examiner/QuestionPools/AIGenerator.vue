@@ -1,19 +1,31 @@
 <script setup>
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm, Link, router } from '@inertiajs/vue3';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
 import { useToast } from 'vue-toastification';
+import FeatureLimitModal from '@/Components/FeatureLimitModal.vue'
 
 const toast = useToast();
 
 const props = defineProps({
     questionPool: Object,
+    canGenAiQue: Boolean,
 });
+
+const showModal = ref(false)
+const modalFeature = ref('')
+const modalMessage = ref('')
+
+function openFeatureModal(featureName, message) {
+  modalFeature.value = featureName
+  modalMessage.value = message
+  showModal.value = true
+}
 
 const loading = ref(false);
 const generatedQuestions = ref([]);
@@ -35,12 +47,19 @@ const form = useForm({
     article: '',
     question_type: 'random',
     difficulty: 'medium',
-    number_of_questions: 5,
+    number_of_questions: '',
     language: 'English',
     pool_id: props.questionPool.id,
 });
 
 const generateQuestions = async () => {
+    if (props.canGenAiQue == false) {
+        openFeatureModal(
+        'Generating AI Question',
+        `You have reached the Ai generating limit . Upgrade your plan to generate more question this period.`
+        )
+        return
+    }
     loading.value = true;
     try {
         const response = await axios.post(
@@ -193,7 +212,7 @@ const deleteAllQuestions = () => {
                                         v-model="form.number_of_questions"
                                         type="number"
                                         min="1"
-                                        max="20"
+                                        max="10"
                                         class="mt-1 block w-full"
                                     />
                                     <InputError class="mt-2" :message="form.errors.number_of_questions" />
@@ -318,5 +337,10 @@ const deleteAllQuestions = () => {
                 </div>
             </div>
         </div>
+        <FeatureLimitModal 
+        v-model="showModal"
+        :featureName="modalFeature"
+        :message="modalMessage"
+        />
     </AppLayout>
 </template>

@@ -26,22 +26,28 @@ class QuizController extends Controller
             }
         ])->findOrFail($quizId);
 
+        $organization = $quiz->organization;
+
         // Verify token and quiz status
         if ($quiz->share_token !== $token || !$quiz->is_published) {
             abort(404);
         }
-
+        
+        //check if organization has attempts remaining
+        $remainingAttempt = $organization->canAttemptQuiz();
+        
         $isAuthenticated = auth()->check();
         $isAssigned = $isAuthenticated 
             ? $this->isUserAssigned($quiz, auth()->id())
             : false;
 
         return Inertia::render('Examinee/QuizLanding', [
-            'quiz' => $quiz->makeVisible(['instructions', 'time_limit', 'passing_score']),
+            'quiz' => $quiz->makeVisible(['instructions', 'time_limit', 'passing_score','starts_at','ends_at']),
             'attemptsRemaining' => $this->getAttemptsRemaining($quiz),
             'isAuthenticated' => $isAuthenticated,
             'isAssigned' => $isAssigned,
-            'organisation' => $quiz->organization->name,
+            'organisation' => $organization->name,
+            'remainingAttempt' => $remainingAttempt,
         ]);
     }
 

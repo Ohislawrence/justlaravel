@@ -88,7 +88,7 @@ class PaystackWebhookController extends Controller
                 $subscription->ends_at,
                 $subscription->billing_cycle
             ),
-            'last_payment_date' => now(),
+            'last_payment_date' => Carbon::now(),
             'last_payment_amount' => $data['amount'] / 100, // Convert from kobo
             'payment_data' => json_encode($data),
         ]);

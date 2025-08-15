@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Examinee\DashboardController as ExamineeDashboardController;
 use App\Http\Controllers\Examinee\ExamineeAuthController;
 use App\Http\Controllers\Examinee\QuizAttemptController;
 use App\Http\Controllers\Examinee\QuizController as ExamineeQuizController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Examiner\QuestionPoolAIController;
 use App\Http\Controllers\Examiner\QuestionPoolController;
 use App\Http\Controllers\Examiner\QuizAnalysisController;
 use App\Http\Controllers\Examiner\QuizController;
+use App\Http\Controllers\Examiner\QuizGroupController;
 use App\Http\Controllers\Examiner\ReportController;
 use App\Http\Controllers\Examiner\SettingController;
 use App\Http\Controllers\Examiner\UserController;
@@ -27,6 +29,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [FrontPageController::class, 'index'])->name('home');
+Route::get('pricing', [FrontPageController::class, 'pricing'])->name('pricing');
+Route::get('features', [FrontPageController::class, 'features'])->name('features');
 Route::get('about-us', [FrontPageController::class, 'aboutUs'])->name('aboutus');
 Route::get('contact', [FrontPageController::class, 'contact'])->name('contact');
 Route::get('privacy-policy', [FrontPageController::class, 'policy'])->name('policy');
@@ -39,6 +43,10 @@ Route::get('/blogs/{blog:slug}', [FrontPageController::class, 'show'])->name('bl
 //Route::get('exam/{organization}/{quiz}/{uniquecode}');
 Route::get('/quizzes/{quiz}/{token?}', [ExamineeQuizController::class, 'show'])
     ->name('quiz.show');
+
+//members Login
+Route::get('{organizationSlug?}/member/{groupSlug?}/register', [ExamineeAuthController::class, 'register'])
+    ->name('organization.examinee.register');
 
 Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handleWebhook']);
 
@@ -126,7 +134,7 @@ Route::middleware([
             Route::post('/add-members/{group}', [GroupController::class, 'addMembers'])->name('addMembers');
             Route::delete('/remove-member/{group}/{user}', [GroupController::class, 'removeMember'])->name('removeMember');
             Route::post('/assign-quizzes/{group}', [GroupController::class, 'assignQuizzes'])->name('assignQuizzes');
-            Route::delete('/remove-quiz/{group}', [GroupController::class, 'removeQuiz'])->name('removeQuiz');
+            Route::delete('/remove-quiz/{group}/{quiz}', [GroupController::class, 'removeQuiz'])->name('removeQuiz');
         });
         Route::resource('reports', ReportController::class);
         Route::resource('settings', SettingController::class);
@@ -167,11 +175,10 @@ Route::middleware([
         Route::get('/quizz/{quiz}/share-link', [QuizController::class, 'shareLink'])->name('quizzes.share-link');
 
         //attempt details
-        Route::get('examiner/quizzes/{quiz}/attempts/{attempt}', [QuizController::class, 'showAttempts'])
+        Route::get('quizzes/{quiz}/attempts/{attempt}', [QuizController::class, 'showAttempts'])
             ->name('quiz.attempts.show');
 
-         Route::resource('question-pools', QuestionPoolController::class)
-            ->only(['index', 'store','edit' ,'show','create', 'delete']);
+        Route::resource('question-pools', QuestionPoolController::class);
         Route::get('question-pools/{pool}/questions', [QuestionPoolController::class, 'manageQuestions'])->name('question-pools.manage-questions');
 
         Route::post('question-pools/{pool}/questions', [QuestionPoolController::class, 'attachQuestions'])
@@ -187,15 +194,44 @@ Route::middleware([
         Route::get('quizzes/{quiz}/analysis/group/{group}', [QuizAnalysisController::class, 'byGroup'])
             ->name('quizzes.analysis.group');
             
-        Route::get('quizzes/{quiz}/analysis/questions/{questionId}', [QuizAnalysisController::class, 'questionDetail'])
+        Route::get('quizzes/{quiz}/analysis/questions/{question}', [QuizAnalysisController::class, 'questionDetail'])
             ->name('quizzes.analysis.question');
+
+        Route::get('quizzes/{quiz}/analysis/attempt/{attempt}', [QuizAnalysisController::class, 'quizAttempt'])
+            ->name('quizzes.attempts.show');
+
         Route::post('/quizzes/{quiz}/analysis/export/{group}', [QuizAnalysisController::class, 'export'])
-            ->name('examiner.quizzes.analysis.export');
+            ->name('quizzes.analysis.export');
     
         //subcribe
         Route::get('/subscription', [PaymentController::class, 'index'])->name('subscription.plans');
         Route::post('/subscribe', [PaymentController::class, 'initializeSubscription'])->name('subscribe');
         Route::get('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
+
+        // Quiz Groups
+        Route::get('quiz-groups', [QuizGroupController::class, 'index'])
+            ->name('quiz-groups.index');
+        Route::get('quiz-groups/create', [QuizGroupController::class, 'create'])
+            ->name('quiz-groups.create');
+        Route::post('quiz-groups', [QuizGroupController::class, 'store'])
+            ->name('quiz-groups.store');
+        Route::get('quiz-groups/{quiz_group}', [QuizGroupController::class, 'show'])
+            ->name('quiz-groups.show');
+        Route::get('quiz-groups/{quiz_group}/edit', [QuizGroupController::class, 'edit'])
+            ->name('quiz-groups.edit');
+        Route::put('quiz-groups/{quiz_group}', [QuizGroupController::class, 'update'])
+            ->name('quiz-groups.update');
+        Route::delete('quiz-groups/{quiz_group}', [QuizGroupController::class, 'destroy'])
+            ->name('quiz-groups.destroy');
+        Route::post('organizations/{organization}/groups/{group}/send-invite', 
+            [GroupController::class, 'sendInvite'])
+            ->name('groups.sendInvite');
+
+        // Quiz Group Items
+        Route::post('quiz-groups/{quiz_group}/quizzes', [QuizGroupController::class, 'addQuiz'])
+            ->name('quiz-groups.quizzes.store');
+        Route::delete('quiz-groups/{quiz_group}/quizzes/{quiz}', [QuizGroupController::class, 'removeQuiz'])
+            ->name('quiz-groups.quizzes.destroy');
 
         
     });
@@ -221,12 +257,14 @@ Route::middleware([
         Route::get('/quiz/{quiz}/attempt', [QuizAttemptController::class, 'showAttempt'])->middleware('throttle:3,1')->name('attempt');
         Route::post('/quiz/{quiz}/submit', [QuizAttemptController::class, 'submit'])->name('submit');
 
-        
-
         Route::get('/quiz/{quiz}/{attemptId}/result', [QuizAttemptController::class, 'result'])->name('quiz.results');
-        
         Route::get('/quizzes/{quiz}/results/{attempt}/download', [QuizAttemptController::class, 'download'])
         ->name('quiz.results.download');
+
+        //dashboard
+        Route::get('dashboard', [ExamineeDashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('history', [ExamineeDashboardController::class, 'history'])->name('history');
+        Route::get('quizzes', [ExamineeDashboardController::class, 'quizzes'])->name('quizzes.index');
         
     });
 

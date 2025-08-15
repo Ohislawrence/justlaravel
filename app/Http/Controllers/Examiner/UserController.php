@@ -19,13 +19,21 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Rules\Role;
 use Spatie\Permission\Models\Role as ModelsRole;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
     
     public function index(Request $request)
-    {
-        $organizationId  = auth()->user()->organizations()->first()->id ;
+    {   
+        $organization  = auth()->user()->organizations()->first();
+        $organizationId  = $organization->id ;
+        //features checker
+        $examinerLimit = $organization->getFeatureValue('examiner-limit');
+        $examineeLimit = $organization->getFeatureValue('examinee-limit');
+        $currentexaminerCount = $organization->members()->role('examiner')->count();
+        $currentexamineeCount = $organization->members()->role('examinee')->count();
+
         $users = User::query()
             ->with(['organizations', 'groups', 'roles','organizationMember.designation']) // Eager load relationships
             ->whereHas('organizations', function($query) use ($organizationId) {
@@ -51,20 +59,33 @@ class UserController extends Controller
         return Inertia::render('Examiner/User/User', [
         'users' => $users,
         'organization_id' => $organizationId,
+        'examinerLimit' => $examinerLimit,
+        'examineeLimit' => $examineeLimit,
+        'currentexaminerCount' => $currentexaminerCount,
+        'currentexamineeCount' => $currentexamineeCount
+
         ]);
     }
 
     public function create()
     {
         $organization = auth()->user()->organizations()->first();
+        $examinerLimit = $organization->getFeatureValue('examiner-limit');
+        $examineeLimit = $organization->getFeatureValue('examinee-limit');
+        $currentexaminerCount = $organization->members()->role('examiner')->count();
+        $currentexamineeCount = $organization->members()->role('examinee')->count();
         
-        // Remove ->get() to return a collection that Inertia can properly handle
+        
         //$quizzes = $organization->quizzes()->paginate(10); 
         $groups = $organization->groups()->get(); 
         $designations = $organization->designation ()->get();
         
         
         return Inertia::render('Examiner/User/Create', [
+            'examinerLimit' => $examinerLimit,
+            'examineeLimit' => $examineeLimit,
+            'currentexaminerCount' => $currentexaminerCount,
+            'currentexamineeCount' => $currentexamineeCount,
             'groups' => [
             'data' => $groups,
             'total' => $groups->count(),
@@ -75,6 +96,23 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $organization = auth()->user()->organizations()->first();
+        $examinerLimit = $organization->getFeatureValue('examiner-limit');
+        $examineeLimit = $organization->getFeatureValue('examinee-limit');
+        $currentexaminerCount = $organization->members()->role('examiner')->count();
+        $currentexamineeCount = $organization->members()->role('examinee')->count();
+
+        $checkExaminer = $examinerLimit < $currentexaminerCount;
+        $checkExaminee = $examineeLimit < $currentexamineeCount;
+        
+        if (!$checkExaminer) {
+            return response('Forbidden access.', Response::HTTP_FORBIDDEN);
+        }
+
+        if (!$checkExaminee) {
+            return response('Forbidden access.', Response::HTTP_FORBIDDEN);
+        }
+        
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'email'      => 'required|string|email|max:255',
@@ -90,7 +128,7 @@ class UserController extends Controller
         ]);
 
         // Get current user's organization
-        $organizationId = auth()->user()->organizations()->first()->id;
+        $organizationId = $organization->id;
         
         // Check if user already exists
         $user = User::where('email', $validated['email'])->first();
@@ -105,6 +143,7 @@ class UserController extends Controller
 
             // Assign role
             $user->assignRole([$validated['user_type']]);
+
             
             // Only notify if it's a new user
             if ($validated['notify_user'] ?? false) {

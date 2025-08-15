@@ -127,11 +127,14 @@ class QuizController extends Controller
             'passing_score' => ['nullable', 'integer', 'min:0', 'max:100'],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
-            'settings' => ['nullable', 'array']
+            'settings' => ['nullable', 'array'],
+            'survey_thank_you_message' => ['nullable', 'string', 'max:500'],
             // Removed pools validation
         ]);
     
         $organization = auth()->user()->organizations()->first();
+
+        
     
         $quizData = [
             'user_id' => auth()->id(),
@@ -155,6 +158,7 @@ class QuizController extends Controller
             'starts_at' => !empty($validated['starts_at']) ? Carbon::parse($validated['starts_at']) : null,
             'ends_at' => !empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null,
             'settings' => $validated['settings'] ?? [],
+            'survey_thank_you_message' => $validated['survey_thank_you_message'] ?? null,
         ];
     
         $quiz = $organization->quizzes()->create($quizData);
@@ -255,7 +259,8 @@ class QuizController extends Controller
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'settings' => ['nullable', 'array'],
             'pools.*.questions_to_show' => 'required|integer|min:1',
-            'pools.*.questions' => 'array|min:1'
+            'pools.*.questions' => 'array|min:1',
+            'survey_thank_you_message' => ['nullable', 'string', 'max:500'],
         ]);
 
         // Only update slug if title changed
@@ -281,9 +286,8 @@ class QuizController extends Controller
             }
     
             // Delete related records if needed
-            //$quiz->pools()->delete();
-            //$quiz->attempts()->delete();
-            
+            $quiz->questions()->delete();
+            $quiz->attempts()->delete();
             $quiz->delete();
             
             return redirect()->back()->with('success', 'Quiz deleted successfully!');

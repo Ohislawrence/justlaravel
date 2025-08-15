@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const props = defineProps({
   modelValue: [String, Date],
@@ -15,57 +16,76 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const showPicker = ref(false);
-const dateInput = ref(null);
-const timeInput = ref(null);
+const dateInput = ref('');
+const timeInput = ref('');
 
-// Parse the modelValue into date and time components
-const parsedValue = computed(() => {
-  if (!props.modelValue) return { date: '', time: '' };
-  
-  const date = props.modelValue instanceof Date 
-    ? props.modelValue 
-    : parseISO(props.modelValue);
-  
-  return {
-    date: format(date, 'yyyy-MM-dd'),
-    time: format(date, 'HH:mm'),
-  };
-});
-
-// Combined date and time
-const combinedDateTime = computed(() => {
-  if (!parsedValue.value.date || !parsedValue.value.time) return null;
-  
-  const dateTime = new Date(`${parsedValue.value.date}T${parsedValue.value.time}`);
-  return dateTime.toISOString();
-});
-
-// Watch for changes and emit updates
-watch(combinedDateTime, (newValue) => {
-  if (newValue) {
-    emit('update:modelValue', newValue);
+// Handle initial value
+const initializeValues = () => {
+  if (!props.modelValue) {
+    dateInput.value = '';
+    timeInput.value = '';
+    return;
   }
-});
 
-// Close picker when clicking outside
-const onClickOutside = (event) => {
-  if (!event.target.closest('.datetime-picker-container')) {
-    showPicker.value = false;
+  try {
+    const date = props.modelValue instanceof Date 
+      ? props.modelValue 
+      : parseISO(props.modelValue);
+    
+    if (isValid(date)) {
+      dateInput.value = format(date, 'yyyy-MM-dd');
+      timeInput.value = format(date, 'HH:mm');
+    }
+  } catch (e) {
+    console.error('Date parsing error:', e);
+    dateInput.value = '';
+    timeInput.value = '';
   }
 };
 
-// Set current date/time
+// Initialize on mount
+initializeValues();
+
+// Watch for external modelValue changes
+watch(() => props.modelValue, initializeValues);
+
+// Combine date and time and emit updates
+watch([dateInput, timeInput], ([date, time]) => {
+  if (date && time) {
+    try {
+      const dateTime = new Date(`${date}T${time}`);
+      if (isValid(dateTime)) {
+        // Format as "YYYY-MM-DD HH:mm:ss" for Laravel/MySQL
+        const formatted = format(dateTime, 'yyyy-MM-dd HH:mm:ss');
+        emit('update:modelValue', formatted);
+      }
+    } catch (e) {
+      console.error('Date combination error:', e);
+    }
+  } else {
+    emit('update:modelValue', null);
+  }
+});
+
+const formatDisplayValue = (value) => {
+  if (!value) return '';
+  try {
+    const date = value instanceof Date ? value : parseISO(value);
+    return isValid(date) ? format(date, 'MMM d, yyyy h:mm a') : '';
+  } catch {
+    return '';
+  }
+};
+
 const setCurrentDateTime = () => {
   const now = new Date();
-  parsedValue.value = {
-    date: format(now, 'yyyy-MM-dd'),
-    time: format(now, 'HH:mm'),
-  };
+  dateInput.value = format(now, 'yyyy-MM-dd');
+  timeInput.value = format(now, 'HH:mm');
 };
 
-// Clear selection
 const clearSelection = () => {
-  parsedValue.value = { date: '', time: '' };
+  dateInput.value = '';
+  timeInput.value = '';
   emit('update:modelValue', null);
 };
 </script>
@@ -79,7 +99,7 @@ const clearSelection = () => {
         :id="id"
         type="text"
         readonly
-        :value="modelValue ? format(parseISO(modelValue), 'MMM d, yyyy h:mm a') : ''"
+        :value="formatDisplayValue(modelValue)"
         @click="showPicker = !showPicker"
         :class="[
           'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
@@ -104,9 +124,8 @@ const clearSelection = () => {
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
           <input
-            ref="dateInput"
             type="date"
-            v-model="parsedValue.date"
+            v-model="dateInput"
             :min="minDate"
             :max="maxDate"
             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -117,9 +136,8 @@ const clearSelection = () => {
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
           <input
-            ref="timeInput"
             type="time"
-            v-model="parsedValue.time"
+            v-model="timeInput"
             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
         </div>

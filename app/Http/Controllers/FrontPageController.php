@@ -10,22 +10,15 @@ class FrontPageController extends Controller
 {
     public function index()
     {
-        // Get featured blog (you can customize this logic)
-        $featuredBlog = Blog::with('categories')
-            ->where('is_published', true)
-            ->latest()
-            ->first();
-
+        
         // Get recent blogs (excluding the featured one)
         $recentBlogs = Blog::with('categories')
             ->where('is_published', true)
-            ->where('id', '!=', $featuredBlog->id ?? null)
             ->latest()
             ->take(3)
             ->get();
 
         return Inertia::render('FrontPages/Index', [
-            'featuredBlog' => $featuredBlog,
             'recentBlogs' => $recentBlogs,
         ]);
     }
@@ -62,6 +55,15 @@ class FrontPageController extends Controller
             'blog' => $blog->load(['categories', 'user']),
             'relatedBlogs' => $relatedBlogs,
         ]);
+    }
+    
+    public function features()
+    {
+        return Inertia::render('FrontPages/Features');
+    }
+    public function pricing()
+    {
+        return Inertia::render('FrontPages/Pricing');
     }
 
     public function aboutUs()

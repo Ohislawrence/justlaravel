@@ -22,7 +22,7 @@ class AIService
             'Authorization' => 'Bearer '.config('services.openrouter.key'),
             'Content-Type' => 'application/json',
         ])->post('https://openrouter.ai/api/v1/chat/completions', [
-            'model' => 'qwen/qwen3-coder:free', // Or your preferred model
+            'model' => 'qwen/qwen3-coder:free', 
             'messages' => [
                 ['role' => 'system', 'content' => 'You are a quiz generator AI.'],
                 ['role' => 'user', 'content' => $prompt],

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SubscriptionFeature extends Model
 {
@@ -12,7 +13,10 @@ class SubscriptionFeature extends Model
         'description',
     ];
 
-    public function plans()
+    /**
+     * Plans that include this feature
+     */
+    public function plans(): BelongsToMany
     {
         return $this->belongsToMany(SubscriptionPlan::class, 'plan_feature')
                     ->withPivot('value')

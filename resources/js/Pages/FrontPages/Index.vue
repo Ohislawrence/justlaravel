@@ -14,24 +14,24 @@
         </div>
         <div class="max-w-4xl mx-auto text-center relative z-10">
           <div class="mb-6 inline-flex items-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium border border-emerald-100">
-            🇳🇬 Made for Nigerian Educators
+            🇳🇬 Made for Nigerian
           </div>
           <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-emerald-700 to-teal-500 bg-clip-text text-transparent leading-tight">
-            Transform Education <br>with Smart Assessments
+            Revolutionize Assessment <br> with AI-Powered Quiz/Test Creation
           </h1>
           <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-            Create engaging quizzes, track student progress, and boost learning outcomes. Designed specifically for Nigerian schools, universities, and training centers.
+            The complete quiz platform designed for Nigerian educational institutions, corporations, and training organizations. Create, customize, and deploy intelligent assessments that drive real learning outcomes.
           </p>
           <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
             <Link :href="route('register')" class="px-6 sm:px-8 py-3.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium transform hover:scale-[1.02] duration-300">
-              Start Free Trial - ₦0 for 30 days
+              Get stated for FREE
             </Link>
-            <a href="#demo" class="px-6 sm:px-8 py-3.5 border-2 border-gray-200 rounded-xl hover:border-emerald-300 transition text-base sm:text-lg font-medium hover:bg-emerald-50">
-              Watch Demo
-            </a>
+            <Link :href="route('login')" class="px-6 sm:px-8 py-3.5 border-2 border-gray-200 rounded-xl hover:border-emerald-300 transition text-base sm:text-lg font-medium hover:bg-emerald-50">
+              Sign in
+            </Link>
           </div>
           <div class="text-sm text-gray-500">
-            No credit card required • 14-day money-back guarantee
+            No credit card required
           </div>
         </div>
       </section>
@@ -41,15 +41,15 @@
         <div class="container mx-auto px-4 sm:px-6">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
             <div class="p-4">
-              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">25,000+</div>
-              <div class="text-sm sm:text-base text-gray-600">Active Students</div>
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">5,000+</div>
+              <div class="text-sm sm:text-base text-gray-600">Active organizations</div>
             </div>
             <div class="p-4">
-              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">1,200+</div>
-              <div class="text-sm sm:text-base text-gray-600">Nigerian Schools</div>
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">25,200+</div>
+              <div class="text-sm sm:text-base text-gray-600">Students</div>
             </div>
             <div class="p-4">
-              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">500K+</div>
+              <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mb-1">50K+</div>
               <div class="text-sm sm:text-base text-gray-600">Quizzes Created</div>
             </div>
             <div class="p-4">
@@ -63,8 +63,8 @@
       <!-- Key Features -->
       <section id="features" class="container mx-auto px-4 sm:px-6 py-16 sm:py-20">
         <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Built for Nigerian Educators</h2>
-          <p class="text-lg sm:text-xl text-gray-600">Everything you need to create, manage, and analyze assessments that work in our educational context.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">The Smart Assessment Platform Built for Nigeria</h2>
+          <p class="text-lg sm:text-xl text-gray-600">Everything you need to create, manage, and analyze assessments that work in the educational context.</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           <!-- Feature Cards - Copied directly -->
@@ -123,8 +123,8 @@
       <section class="bg-gray-50 py-16 sm:py-20">
         <div class="container mx-auto px-4 sm:px-6">
           <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
-            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by Nigerian Educators</h2>
-            <p class="text-lg sm:text-xl text-gray-600">See what teachers and institutions are saying about QuizPortal Nigeria.</p>
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by Nigerian organizations</h2>
+            <p class="text-lg sm:text-xl text-gray-600">See what businesses and institutions are saying about QuizPortal Nigeria.</p>
           </div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
             <!-- Testimonial Cards - Copied directly -->
@@ -134,8 +134,8 @@
                   <span class="text-emerald-600 font-semibold">AD</span>
                 </div>
                 <div>
-                  <div class="font-semibold text-gray-900">Dr. Adunni Olatunji</div>
-                  <div class="text-xs sm:text-sm text-gray-500">University of Lagos</div>
+                  <div class="font-semibold text-gray-900">Mr. Adunni Olatunji</div>
+                  <div class="text-xs sm:text-sm text-gray-500">Teacher</div>
                 </div>
               </div>
               <p class="text-gray-600 mb-4 text-sm sm:text-base">"QuizPortal has revolutionized how we conduct assessments. The AI question generation saves me hours of work every week."</p>
@@ -148,10 +148,10 @@
                 </div>
                 <div>
                   <div class="font-semibold text-gray-900">Ibrahim Okafor</div>
-                  <div class="text-xs sm:text-sm text-gray-500">Greenfield Secondary School, Abuja</div>
+                  <div class="text-xs sm:text-sm text-gray-500">HR</div>
                 </div>
               </div>
-              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The offline feature is a game-changer. Our students can now take quizzes even when internet is unstable."</p>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The features in QuizPortal is a game-changer. Our staffs can now take text even at home even on weekend."</p>
               <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
             </div>
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
@@ -161,10 +161,10 @@
                 </div>
                 <div>
                   <div class="font-semibold text-gray-900">Mrs. Emeka Nwosu</div>
-                  <div class="text-xs sm:text-sm text-gray-500">Covenant University</div>
+                  <div class="text-xs sm:text-sm text-gray-500">Head of School</div>
                 </div>
               </div>
-              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The analytics help me identify struggling students early. Parent reports are detailed and professional."</p>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The analytics help me identify struggling students early. Reports are detailed and professional."</p>
               <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
             </div>
           </div>
@@ -238,66 +238,11 @@
                         Latest from Our <span class="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Education Blog</span>
                     </h2>
                     <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                        Tips, insights, and best practices for Nigerian educators to enhance learning outcomes and student engagement.
+                        Tips, insights, and best practices to enhance learning outcomes and student/staff engagement.
                     </p>
                 </div>
 
-                <!-- Featured Article -->
-                <div v-if="featuredBlog" class="max-w-6xl mx-auto mb-12 sm:mb-16">
-                    <Link :href="route('blogs.show', featuredBlog.slug)" class="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-emerald-200 overflow-hidden block">
-                        <div class="grid lg:grid-cols-2 gap-0">
-                            <!-- Image Side -->
-                            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 p-8 lg:p-12 flex items-center justify-center min-h-[300px]">
-                                <div class="absolute inset-0 opacity-10">
-                                    <div class="absolute top-4 left-4 w-20 h-20 bg-emerald-500 rounded-full blur-2xl"></div>
-                                    <div class="absolute bottom-4 right-4 w-32 h-32 bg-teal-400 rounded-full blur-3xl"></div>
-                                </div>
-                                <div class="relative text-center">
-                                    <div class="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="text-sm text-emerald-600 font-medium">Featured Article</div>
-                                </div>
-                            </div>
-                            <!-- Content Side -->
-                            <div class="p-6 sm:p-8 lg:p-12">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <span v-for="category in featuredBlog.categories" :key="category.id" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
-                                        {{ category.name }}
-                                    </span>
-                                    <span class="text-sm text-gray-500">{{ formatDate(featuredBlog.created_at) }}</span>
-                                </div>
-                                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 group-hover:text-emerald-600 transition-colors">
-                                    {{ featuredBlog.title }}
-                                </h3>
-                                <p class="text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                                    {{ featuredBlog.excerpt || featuredBlog.content.substring(0, 200) + '...' }}
-                                </p>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
-                                            <span class="text-white text-sm font-semibold">
-                                                QP
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">Quiz Portal</div>
-                                            <div class="text-xs text-gray-500">Author</div>
-                                        </div>
-                                    </div>
-                                    <div class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-medium text-sm transition-colors group">
-                                        Read More
-                                        <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </Link>
-                </div>
+                
 
                 <!-- Blog Grid -->
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
@@ -342,7 +287,7 @@
                                     {{ blog.title }}
                                 </h3>
                                 <p class="text-sm text-gray-600 mb-4 line-clamp-3">
-                                    {{ blog.excerpt || blog.content.substring(0, 150) + '...' }}
+                                  {{ blog.excerpt || stripHtml(blog.content).substring(0, 150) + '...' }}
                                 </p>
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-2">
@@ -373,87 +318,7 @@
         </section>
   
        <!-- CTA Section -->
-      <section class="relative overflow-hidden bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 text-white py-20 sm:py-28">
-        <!-- Animated background elements -->
-        <div class="absolute inset-0 opacity-30">
-          <div class="absolute top-0 -left-4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-          <div class="absolute top-0 -right-4 w-72 h-72 bg-lime-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-          <div class="absolute -bottom-8 left-20 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
-        </div>
-        <!-- Grid pattern overlay (unchanged) -->
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E')]"></div>
-        <div class="container mx-auto px-4 sm:px-6 text-center relative z-10">
-          <!-- Badge -->
-          <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-8 transform hover:scale-105 transition-all duration-300">
-            <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-            Join 10,000+ Nigerian Educators
-          </div>
-          <!-- Heading with green gradient -->
-          <h2 class="text-4xl sm:text-6xl font-bold mb-6 bg-gradient-to-r from-green-100 via-green-300 to-emerald-200 bg-clip-text text-transparent leading-tight">
-            Ready to Transform<br />
-            Your Assessments?
-          </h2>
-          <!-- Subtitle -->
-          <p class="text-lg sm:text-xl mb-12 max-w-2xl mx-auto text-gray-100 leading-relaxed">
-            Experience the future of education with AI-powered quizzes, real-time analytics, and seamless collaboration tools.
-          </p>
-          <!-- CTA Buttons -->
-          <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-            <Link
-              :href="route('register')"
-              class="group relative px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-green-500/25 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
-            >
-              <span class="relative z-10 flex items-center justify-center">
-                <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Start Free Trial
-              </span>
-              <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            </Link>
-            <a
-              href="#demo"
-              class="group px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1"
-            >
-              <span class="flex items-center justify-center">
-                <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Watch Demo
-              </span>
-            </a>
-          </div>
-          <!-- Trust indicators -->
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-400">
-            <div class="flex items-center">
-              <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              No Credit Card Required
-            </div>
-            <div class="flex items-center">
-              <svg class="w-5 h-5 text-emerald-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-              </svg>
-              14-Day Free Trial
-            </div>
-            <div class="flex items-center">
-              <svg class="w-5 h-5 text-lime-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Instant Setup
-            </div>
-          </div>
-        </div>
-        <!-- Bottom wave decoration (blends with CTA background) -->
-        <div class="absolute bottom-0 left-0 right-0 overflow-hidden">
-        <svg class="w-full h-24 text-green-600" fill="currentColor" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity="0.25"></path>
-          <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05c51.72,39.22,117.31,38.95,176.89,19.53,31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" class="opacity-50"></path>
-          <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"></path>
-        </svg>
-      </div>
-      </section>
+      <Cta />
       <!-- End of Homepage Specific Content -->
     </AppLayout2>
   </template>
@@ -462,10 +327,10 @@
   import { Head,Link } from '@inertiajs/vue3'
   import AppLayout2 from '@/Layouts/AppLayout2.vue'; 
   import { defineProps } from 'vue'; 
+  import Cta from '@/Components/Cta.vue';
   
 
   const props = defineProps({
-    featuredBlog: Object,
     recentBlogs: Array,
     });
 
@@ -479,6 +344,10 @@
         });
     };
   
+
+    const stripHtml = (html) => {
+  return html.replace(/<\/?[^>]+(>|$)/g, "");
+};
   </script>
   
   <style scoped>

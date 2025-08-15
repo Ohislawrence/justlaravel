@@ -63,7 +63,7 @@ class CreateNewUser implements CreatesNewUsers
             'billing_cycle' => 'monthly',
             'price' => 0,
             'starts_at' => now(),
-            'ends_at' => now()->addYears(100),
+            'ends_at' => now()->addYears(10),
             'is_active' => true,
             'is_trial' => false,
         ]);
