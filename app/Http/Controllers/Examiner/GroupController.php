@@ -453,6 +453,7 @@ class GroupController extends Controller
             'Content-Disposition' => 'attachment; filename="user_import_template.csv"',
         ];
 
+            //
         $template = "name,email\nJohn Doe,john@example.com\nJane Smith,jane@example.com";
 
         return response($template, 200, $headers);
