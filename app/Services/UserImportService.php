@@ -1,10 +1,11 @@
 <?php
-
+// app/Services/UserImportService.php
 
 namespace App\Services;
 
 use App\Models\User;
 use App\Models\Organization;
+use App\Models\Group;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -15,13 +16,14 @@ use Illuminate\Http\UploadedFile;
 class UserImportService
 {
     protected $organization;
+    protected $group;
     protected $errors = [];
     protected $successCount = 0;
 
-    
-    public function __construct(Organization $organization)
+    public function __construct(Organization $organization, Group $group = null)
     {
         $this->organization = $organization;
+        $this->group = $group;
     }
 
     public function importFromCsv(UploadedFile $file, array $options = [])
@@ -44,6 +46,7 @@ class UserImportService
 
         } catch (\Exception $e) {
             $this->errors[] = "File processing error: " . $e->getMessage();
+            \Log::error('Import error: ' . $e->getMessage());
             return false;
         }
     }
@@ -54,9 +57,10 @@ class UserImportService
             $csv = Reader::createFromPath($file->getRealPath());
             $csv->setHeaderOffset(0);
             
-            $headers = $csv->getHeader();
+            $headers = array_map('strtolower', $csv->getHeader());
+            
             if (!in_array('name', $headers) || !in_array('email', $headers)) {
-                $this->errors[] = "CSV must contain 'name' and 'email' columns";
+                $this->errors[] = "CSV must contain 'name' and 'email' columns. Found: " . implode(', ', $headers);
                 return false;
             }
 
@@ -99,6 +103,11 @@ class UserImportService
                         ->exists();
                     
                     if ($inOrganization) {
+                        // Check if user is already in this group
+                        if ($this->group && $this->group->members()->where('user_id', $existingUser->id)->exists()) {
+                            $this->errors[] = "Row {$rowNumber}: User with email {$email} already exists in this group";
+                            continue;
+                        }
                         $this->errors[] = "Row {$rowNumber}: User with email {$email} already exists in organization";
                         continue;
                     }
@@ -124,6 +133,7 @@ class UserImportService
 
         } catch (\Exception $e) {
             $this->errors[] = "CSV processing error: " . $e->getMessage();
+            \Log::error('CSV import error: ' . $e->getMessage());
             return false;
         }
     }
@@ -140,28 +150,28 @@ class UserImportService
                 $this->errors[] = "Excel file must contain at least a header row and one data row";
                 return false;
             }
-    
+
             // Get headers from first row
             $headers = array_map(function($value) {
                 return is_string($value) ? strtolower(trim($value)) : '';
             }, $data[0]);
             
             \Log::info('Excel headers found:', $headers);
-    
+
             // Find column indices
             $nameIndex = $this->findColumnIndex($headers, ['name', 'fullname', 'full name', 'user name']);
             $emailIndex = $this->findColumnIndex($headers, ['email', 'email address', 'e-mail', 'e-mail address']);
-    
+
             if ($nameIndex === false) {
                 $this->errors[] = "Excel must contain a 'name' column. Found columns: " . implode(', ', $data[0]);
                 return false;
             }
-    
+
             if ($emailIndex === false) {
                 $this->errors[] = "Excel must contain an 'email' column. Found columns: " . implode(', ', $data[0]);
                 return false;
             }
-    
+
             $users = [];
             
             for ($i = 1; $i < count($data); $i++) {
@@ -172,32 +182,32 @@ class UserImportService
                     $this->errors[] = "Row {$rowNumber}: Incomplete row data";
                     continue;
                 }
-    
+
                 $name = is_string($row[$nameIndex] ?? '') ? trim($row[$nameIndex]) : '';
                 $email = is_string($row[$emailIndex] ?? '') ? trim($row[$emailIndex]) : '';
-    
+
                 // Skip empty rows
                 if (empty($name) && empty($email)) {
                     continue;
                 }
-    
+
                 // Validate required fields
                 if (empty($name)) {
                     $this->errors[] = "Row {$rowNumber}: Name is required";
                     continue;
                 }
-    
+
                 if (empty($email)) {
                     $this->errors[] = "Row {$rowNumber}: Email is required";
                     continue;
                 }
-    
+
                 // Validate email format
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $this->errors[] = "Row {$rowNumber}: Invalid email format - {$email}";
                     continue;
                 }
-    
+
                 // Check if user already exists
                 $existingUser = User::where('email', $email)->first();
                 if ($existingUser) {
@@ -206,11 +216,16 @@ class UserImportService
                         ->exists();
                     
                     if ($inOrganization) {
+                        // Check if user is already in this group
+                        if ($this->group && $this->group->members()->where('user_id', $existingUser->id)->exists()) {
+                            $this->errors[] = "Row {$rowNumber}: User with email {$email} already exists in this group";
+                            continue;
+                        }
                         $this->errors[] = "Row {$rowNumber}: User with email {$email} already exists in organization";
                         continue;
                     }
                 }
-    
+
                 $users[] = [
                     'name' => $name,
                     'email' => $email,
@@ -221,14 +236,14 @@ class UserImportService
                     'updated_at' => now(),
                 ];
             }
-    
+
             if (empty($users)) {
                 $this->errors[] = "No valid users found in the file";
                 return false;
             }
-    
+
             return $this->createUsers($users);
-    
+
         } catch (\Exception $e) {
             $this->errors[] = "Excel processing error: " . $e->getMessage();
             \Log::error('Excel import error: ' . $e->getMessage());
@@ -236,11 +251,23 @@ class UserImportService
         }
     }
 
+    // Helper method to find column indices
+    protected function findColumnIndex($headers, $possibleNames)
+    {
+        foreach ($possibleNames as $name) {
+            $index = array_search(strtolower($name), $headers);
+            if ($index !== false) {
+                return $index;
+            }
+        }
+        return false;
+    }
+
     protected function createUsers(array $users)
     {
         try {
             DB::beginTransaction();
-
+    
             foreach ($users as $userData) {
                 try {
                     // Check if user exists globally but not in organization
@@ -255,38 +282,46 @@ class UserImportService
                         $user->assignRole('examinee');
                     }
                     
-                    // Add to organization if not already member
+                    // Add to organization if not already member - USING SYNC WITHOUT DETACHING
                     if (!$this->organization->members()->where('user_id', $user->id)->exists()) {
-                        $this->organization->members()->attach($user->id, [
+                        $this->organization->members()->save($user, [
+                            'role' => 'examinee',
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
                     }
-
+    
+                    // Add to group if a group is specified - USING SYNC WITHOUT DETACHING
+                    if ($this->group && !$this->group->members()->where('user_id', $user->id)->exists()) {
+                        $this->group->members()->save($user, [
+                            'joined_at' => now(),
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
+    
                     $this->successCount++;
                 } catch (\Exception $e) {
                     $this->errors[] = "Failed to create user {$userData['email']}: " . $e->getMessage();
-                    DB::rollBack();
-                    return false;
+                    \Log::error('User creation error: ' . $e->getMessage());
                 }
             }
-
+    
             DB::commit();
             return true;
+    
 
         } catch (\Exception $e) {
             DB::rollBack();
             $this->errors[] = "Database transaction error: " . $e->getMessage();
+            \Log::error('Database transaction error: ' . $e->getMessage());
             return false;
         }
     }
-
-
     protected function generatePassword($name)
     {
-        // Generate password from name: first 4 letters + random 4 digits
+        // Remove non-alphabet characters and take first 4 letters
         $namePart = Str::lower(preg_replace('/[^a-zA-Z]/', '', $name));
-        //$namePart = Str::lower(Str::substr(preg_replace('/[^a-zA-Z]/', '', $name), 0, 4));
         //$numberPart = rand(1000, 9999);
         
         return $namePart;

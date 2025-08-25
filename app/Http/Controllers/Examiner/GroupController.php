@@ -407,36 +407,36 @@ class GroupController extends Controller
     }
 
 
-    public function importUsers(Request $request, Organization $organization, Group $group)
+    public function importUsers(Request $request,  Group $group)
     {
         $request->validate([
             'import_file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:2048'],
             'timezone' => ['nullable', 'timezone']
         ]);
-        
-        $organization = auth()->user()->organizations()->first();
-
+    
         try {
-            $importService = new UserImportService($organization);
+            $organization = auth()->user()->organizations()->first();
+            // Pass both organization AND group to the service
+            $importService = new UserImportService($organization, $group);
             
             $success = $importService->importFromCsv($request->file('import_file'), [
                 'timezone' => $request->input('timezone', config('app.timezone'))
             ]);
-
+    
             if ($success) {
                 $results = $importService->getResults();
                 
                 return response()->json([
-                    'message' => "Import completed successfully",
+                    'message' => "Import completed successfully. Users added to group.",
                     'results' => $results
                 ]);
             }
-
+    
             return response()->json([
                 'message' => 'Import failed',
                 'errors' => $importService->getErrors()
             ], 422);
-
+    
         } catch (\Exception $e) {
             \Log::error('Import error: ' . $e->getMessage());
             return response()->json([
