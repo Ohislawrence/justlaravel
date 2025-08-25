@@ -31,6 +31,10 @@ class Quiz extends Model
         'settings',
         'share_token',
         'survey_thank_you_message',
+        'enable_certificates',
+        'certificate_template_id',
+        'certificate_pass_percentage',
+        'certificate_expiry_days',
         
     ];
     protected $casts = [
@@ -43,10 +47,14 @@ class Quiz extends Model
         'show_leaderboard' => 'boolean',
         'enable_discussions' => 'boolean',
         'starts_at' => 'datetime',
-        'ends_at' => 'datetime'
+        'ends_at' => 'datetime',
+        'enable_certificates' => 'boolean'
     ];
 
-
+    public function certificateTemplate()
+    {
+        return $this->belongsTo(CertificateTemplate::class);
+    }
 
     public function organization()
     {
@@ -67,8 +75,14 @@ class Quiz extends Model
     {
         return $this->belongsToMany(QuestionPool::class, 'quiz_question_pool')
             ->withPivot('questions_to_show')
-            ->withTimestamps()
+            ->withTimestamps()->with('questions')
             ->withCount('questions'); 
+    }
+
+    public function pools()
+    {
+        return $this->belongsToMany(QuestionPool::class, 'quiz_question_pool')
+            ->withPivot('questions_to_show'); 
     }
 
     
@@ -137,6 +151,11 @@ class Quiz extends Model
         return $query->whereHas('quizGroups', function($q) use ($groupId) {
             $q->where('quiz_group_id', $groupId);
         });
+    }
+
+    public function gradingSystem()
+    {
+        return $this->belongsTo(GradingSystem::class);
     }
 
     

@@ -6,10 +6,9 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import Multiselect from '@vueform/multiselect';
 
 const hasAdminRole = computed(() => {
-  return props.user.roles?.some(role => role.name === 'admin');
+  return props.user.roles?.some(role => role.name === 'examinee');
 });
 
 const props = defineProps({
@@ -17,19 +16,24 @@ const props = defineProps({
   groups: Array,
   quizzes: Array,
   roles: Array,
-  designations: Array, // Changed from Object to Array
+  designations: Array,
   organizationMember: Object,
   initialUserType: String,
   initialGroups: Array
+});
+
+// Get the first group ID if user has groups
+const initialGroupId = computed(() => {
+  return props.initialGroups?.length > 0 ? props.initialGroups[0].id : null;
 });
 
 const form = useForm({
   name: props.user.name,
   email: props.user.email,
   user_type: props.initialUserType,
-  groups: props.initialGroups,
+  group_id: initialGroupId.value, // Single group ID
   unique_code: props.organizationMember?.unique_code || '',
-  designation_id: props.organizationMember?.designation_id || null, // Added this line
+  designation_id: props.organizationMember?.designation_id || null,
   quizzes: (props.user.assigned_quizzes || []).map(quiz => quiz.id),
   password: '',
   password_confirmation: '',
@@ -92,11 +96,11 @@ const submit = () => {
                   <InputLabel for="user_type" value="User Type" />
                   <select
                     v-model="form.user_type"
-                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    class="mt-1 block w-full border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm"
                     :disabled="user.id === $page.props.auth.user.id"
                   >
-                    <option value="admin">Admin</option>
                     <option value="examiner">Examiner</option>
+                    <option value="instructor">Instructor</option>
                     <option value="examinee">Examinee</option>
                   </select>
                   <InputError class="mt-2" :message="form.errors.user_type" />
@@ -114,24 +118,31 @@ const submit = () => {
                   <InputError class="mt-2" :message="form.errors.unique_code" />
                 </div>
 
-                <!-- Groups Multiselect -->
+                <!-- Single Group Select -->
                 <div>
-                  <InputLabel for="groups" value="Groups" />
-                  <Multiselect
-                    v-model="form.groups"
-                    :options="groups.map(group => ({ value: group.id, label: group.name }))"
-                    mode="tags"
-                    placeholder="Select groups"
-                  />
+                  <InputLabel for="group_id" value="Group" />
+                  <select
+                    v-model="form.group_id"
+                    class="mt-1 block w-full border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm"
+                  >
+                    <option value="">Select a Group</option>
+                    <option 
+                      v-for="group in groups" 
+                      :value="group.id" 
+                      :key="group.id"
+                    >
+                      {{ group.name }}
+                    </option>
+                  </select>
+                  <InputError class="mt-2" :message="form.errors.group_id" />
                 </div>
 
                 <!-- Designation Dropdown -->
-                <div class="mb-4">
+                <div>
                   <InputLabel for="designation_id" value="Designation" />
                   <select
                     v-model="form.designation_id"
-                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                    :class="{ 'is-invalid': form.errors.designation_id }"
+                    class="mt-1 block w-full border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm"
                   >
                     <option value="">Select Designation</option>
                     <option 
@@ -144,8 +155,6 @@ const submit = () => {
                   </select>
                   <InputError class="mt-2" :message="form.errors.designation_id" />
                 </div>
-
-                
 
                 <!-- Password -->
                 <div>
@@ -188,4 +197,50 @@ const submit = () => {
   </AppLayout>
 </template>
 
-<style src="@vueform/multiselect/themes/default.css"></style>
+<style scoped>
+/* Custom styles to enhance the green theme */
+.PrimaryButton {
+  background-color: #10B981;
+  border-color: #10B981;
+  color: white;
+}
+
+.PrimaryButton:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.PrimaryButton:focus {
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+  border-color: #d1fae5;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+select:focus {
+  border-color: #10B981;
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+}
+
+/* Green-themed select dropdown indicator */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2310B981' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Green-themed form labels */
+label {
+  color: #065f46;
+}
+
+/* Green-themed input errors */
+.InputError {
+  color: #047857;
+}
+</style>

@@ -72,9 +72,9 @@
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
               <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
             </div>
-            <h3 class="text-lg sm:text-xl font-semibold mb-3">AI-Powered Question Generation</h3>
-            <p class="text-gray-600 mb-4 text-sm sm:text-base">Generate questions from Nigerian curriculum topics. Supports WAEC, JAMB, and NECO syllabus formats.</p>
-            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Nigerian curriculum aligned</div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">AI Question Generation</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Automatically create quiz questions from any topic or article using advanced AI technology across all academic fields and subjects.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ AI-powered question creation</div>
           </div>
           <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
@@ -86,19 +86,19 @@
           </div>
           <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
-              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path> </svg>
             </div>
-            <h3 class="text-lg sm:text-xl font-semibold mb-3">Mobile-First Design</h3>
-            <p class="text-gray-600 mb-4 text-sm sm:text-base">Works perfectly on smartphones and tablets. Students can take quizzes anywhere, even with poor internet connection.</p>
-            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Offline capability</div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">Nigerian Education Support</h3> 
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Designed specifically for Nigeria's educational standards, supporting WAEC, etc and custom grading systems alongside modern assessment methods.</p> 
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ WAEC grading compliance</div>
           </div>
           <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
               <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
             </div>
-            <h3 class="text-lg sm:text-xl font-semibold mb-3">Local Language Support</h3>
-            <p class="text-gray-600 mb-4 text-sm sm:text-base">Create quizzes in English, Hausa, Yoruba, and Igbo. Perfect for bilingual education programs.</p>
-            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Multi-language ready</div>
+            <h3 class="text-lg sm:text-xl font-semibold mb-3">Advanced Exam Proctoring</h3>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Our proprietary monitoring system ensures exam integrity with real-time student behavior tracking and AI-powered anomaly detection.</p>
+            <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ AI integrity monitoring</div>
           </div>
           <div class="group bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition border border-gray-100 hover:border-emerald-200 duration-300">
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition">
@@ -177,53 +177,103 @@
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
           <p class="text-lg sm:text-xl text-gray-600">Choose the plan that fits your needs. All prices in Nigerian Naira.</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-          <!-- Pricing Cards - Copied directly -->
-          <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition">
-            <div class="text-center mb-8">
-              <h3 class="text-lg sm:text-xl font-semibold mb-2">Starter</h3>
-              <div class="text-2xl sm:text-3xl font-bold mb-2">₦5,000<span class="text-sm font-normal text-gray-500">/month</span></div>
-              <p class="text-gray-600 text-sm sm:text-base">Perfect for individual teachers</p>
-            </div>
-            <ul class="space-y-3 mb-8">
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Up to 100 students</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Unlimited quizzes</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Basic analytics</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>WhatsApp support</li>
-            </ul>
-            <button class="w-full py-3 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm">Start Free Trial</button>
-          </div>
-          <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border-2 border-emerald-600 relative transform hover:scale-[1.02] transition duration-300">
-            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-medium">Most Popular</div>
-            <div class="text-center mb-8 mt-4">
-              <h3 class="text-lg sm:text-xl font-semibold mb-2">School</h3>
-              <div class="text-2xl sm:text-3xl font-bold mb-2">₦25,000<span class="text-sm font-normal text-gray-500">/month</span></div>
-              <p class="text-gray-600 text-sm sm:text-base">For schools and institutions</p>
-            </div>
-            <ul class="space-y-3 mb-8">
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Up to 1,000 students</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Multiple teachers</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Advanced analytics</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Parent portal</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Priority support</li>
-            </ul>
-            <button class="w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium text-sm">Start Free Trial</button>
-          </div>
-          <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition">
-            <div class="text-center mb-8">
-              <h3 class="text-lg sm:text-xl font-semibold mb-2">Enterprise</h3>
-              <div class="text-2xl sm:text-3xl font-bold mb-2">Custom</div>
-              <p class="text-gray-600 text-sm sm:text-base">For large institutions</p>
-            </div>
-            <ul class="space-y-3 mb-8">
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Unlimited students</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Unlimited quizzes</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Premium analytics</li>
-              <li class="flex items-center text-sm"><svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Dedicated support</li>
-            </ul>
-            <button class="w-full py-3 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm">Contact Sales</button>
-          </div>
-        </div>
+        <!-- Pricing Toggle -->
+        <div class="max-w-2xl mx-auto text-center mb-12 sm:mb-16">
+                    <div class="inline-flex bg-gray-100 rounded-full p-1 mb-6">
+                        <button
+                            v-for="cycle in cycles"
+                            :key="cycle.value"
+                            @click="activeCycle = cycle.value"
+                            class="px-4 py-2 text-sm font-medium rounded-full transition-colors"
+                            :class="{
+                                'bg-white text-emerald-600 shadow-sm': activeCycle === cycle.value,
+                                'text-gray-600 hover:text-gray-800': activeCycle !== cycle.value
+                            }"
+                        >
+                            {{ cycle.label }}
+                        </button>
+                    </div>
+                    <p class="text-gray-600">
+                        Have questions before choosing? <a :href="route('contact')" class="text-emerald-600 font-medium hover:underline">Contact our sales team</a> or check out our <a href="#" class="text-emerald-600 font-medium hover:underline">FAQs</a>.
+                    </p>
+                </div>
+
+                <!-- Pricing Cards -->
+                <div class="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+                    <!-- Loop through plans -->
+                    <div v-for="(plan, index) in plans" :key="plan.id" 
+                         class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition"
+                         :class="{
+                            'shadow-lg border-2 border-emerald-600 transform hover:scale-[1.02] transition duration-300': plan.is_default,
+                            'hover:shadow-md': !plan.is_default
+                         }">
+                        
+                        <!-- Popular badge for default plan -->
+                        <div v-if="plan.is_default" class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-medium">
+                            Most Popular
+                        </div>
+
+                        <div class="text-center mb-8" :class="{ 'mt-4': plan.is_default }">
+                            <h3 class="text-lg sm:text-xl font-semibold mb-2">{{ plan.name }}</h3>
+                            <div v-if="plan.slug !== 'enterprise'" class="text-2xl sm:text-3xl font-bold mb-2">
+                                {{ getCyclePrice(plan) }}<span class="text-sm font-normal text-gray-500">{{ getPriceSuffix() }}</span>
+                            </div>
+                            <div v-else class="text-2xl sm:text-3xl font-bold mb-2">
+                                Custom
+                            </div>
+                            <p class="text-gray-600 text-sm sm:text-base">{{ plan.description }}</p>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li v-if="getFeatureValue(plan, 'users_limit') !== 'Not included'" class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'users_limit') === 'unlimited' ? 'Unlimited' : 'Up to ' + getFeatureValue(plan, 'users_limit') }} students
+                            </li>
+                            <li class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'ai_question_generation') ? 'AI Question Generation' : 'Basic Question Creation' }}
+                            </li>
+                            <li class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'quiz_attempts_limit') === 'unlimited' ? 'Unlimited quizzes' : (getFeatureValue(plan, 'quiz_attempts_limit') + ' quizzes') }}
+                            </li>
+                            <li v-if="getFeatureValue(plan, 'question_pool_limit') !== 'Not included'" class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'question_pool_limit') === 'unlimited' ? 'Unlimited question pool' : (getFeatureValue(plan, 'question_pool_limit') + ' question pool') }}
+                            </li>
+                            <li v-if="getFeatureValue(plan, 'storage_space') !== 'Not included'" class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'storage_space') === 'unlimited' ? 'Unlimited storage' : (getFeatureValue(plan, 'storage_space') + ' storage') }}
+                            </li>
+                            <li class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ plan.slug === 'enterprise' ? 'Dedicated support' : (plan.slug === 'school' ? 'Priority support' : 'WhatsApp support') }}
+                            </li>
+                        </ul>
+                        <Link v-if="plan.slug !== 'enterprise'" :href="route('register')" 
+                              class="w-full py-3 text-center rounded-lg transition font-medium text-sm block"
+                              :class="{
+                                'bg-emerald-600 text-white hover:bg-emerald-700': plan.is_default,
+                                'border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50': !plan.is_default
+                              }">
+                            Start Free Trial
+                        </Link>
+                        <a v-else href="mailto:sales@quizportal.online" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
+                            Contact Sales
+                        </a>
+                    </div>
+                </div>
       </section>
   
       <!-- Blog Section -->
@@ -324,6 +374,7 @@
   </template>
   
   <script setup>
+  import { ref } from 'vue';
   import { Head,Link } from '@inertiajs/vue3'
   import AppLayout2 from '@/Layouts/AppLayout2.vue'; 
   import { defineProps } from 'vue'; 
@@ -332,6 +383,7 @@
 
   const props = defineProps({
     recentBlogs: Array,
+    plans: Array,
     });
 
 
@@ -343,7 +395,39 @@
             day: 'numeric'
         });
     };
-  
+    const activeCycle = ref('monthly');
+    const cycles = [
+        { value: 'monthly', label: 'Monthly' },
+        { value: 'quarterly', label: 'Quarterly' },
+        { value: 'yearly', label: 'Yearly' },
+    ];
+
+    // Helper function to format price
+const formatPrice = (price) => {
+    return price === 0 ? 'Free' : `₦${price.toLocaleString()}`;
+};
+
+// Helper function to get feature value
+const getFeatureValue = (plan, featureSlug) => {
+    return plan.features[featureSlug] ?? 'Not included';
+};
+
+// Helper to get price for active cycle
+const getCyclePrice = (plan) => {
+    const price = plan[`${activeCycle.value}_price`];
+    if (plan.slug === 'enterprise') return 'Custom';
+    return formatPrice(price);
+};
+
+// Helper to get price suffix
+const getPriceSuffix = () => {
+    switch(activeCycle.value) {
+        case 'monthly': return '/month';
+        case 'quarterly': return '/quarter';
+        case 'yearly': return '/year';
+        default: return '/month';
+    }
+};
 
     const stripHtml = (html) => {
   return html.replace(/<\/?[^>]+(>|$)/g, "");

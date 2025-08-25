@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Blog;
+use App\Models\SubscriptionPlan;
 use Inertia\Inertia;
 
 class FrontPageController extends Controller
 {
     public function index()
     {
-        
         // Get recent blogs (excluding the featured one)
         $recentBlogs = Blog::with('categories')
             ->where('is_published', true)
@@ -18,8 +18,19 @@ class FrontPageController extends Controller
             ->take(3)
             ->get();
 
+        $plans = SubscriptionPlan::active()
+            ->with('features')
+            ->orderBy('monthly_price')
+            ->get()
+            ->map(function ($plan) {
+                // Add computed properties
+                $plan->can_use_ai = (bool) $plan->getFeatureValue('ai_question_generation');
+                return $plan;
+            });
+
         return Inertia::render('FrontPages/Index', [
             'recentBlogs' => $recentBlogs,
+            'plans' => $plans,
         ]);
     }
 
@@ -63,7 +74,18 @@ class FrontPageController extends Controller
     }
     public function pricing()
     {
-        return Inertia::render('FrontPages/Pricing');
+        $plans = SubscriptionPlan::active()
+            ->with('features')
+            ->orderBy('monthly_price')
+            ->get()
+            ->map(function ($plan) {
+                // Add computed properties
+                $plan->can_use_ai = (bool) $plan->getFeatureValue('ai_question_generation');
+                return $plan;
+            });
+            return Inertia::render('FrontPages/Pricing',[
+            'plans' => $plans
+        ]);
     }
 
     public function aboutUs()

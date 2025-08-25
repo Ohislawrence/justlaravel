@@ -8,10 +8,15 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import draggable from 'vuedraggable';
 
 
-const appName = import.meta.env.VITE_APP_NAME || 'Tracklia';
+const appName = import.meta.env.VITE_APP_NAME || 'QuizPortal';
 
 
+// Configure axios to send credentials with every request
+axios.defaults.withCredentials = true
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
+// If using Laravel Sanctum, you might also need:
+axios.defaults.withCredentials = true
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

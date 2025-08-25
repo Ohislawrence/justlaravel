@@ -5,16 +5,16 @@
         Question Pools
       </h2>
       <p class="text-sm text-gray-600 mt-1">
-            {{ pools.data.length }} pools total • {{ totalQuestions }} questions across all pools
-          </p>
+        {{ pools.data.length }} pools total • {{ totalQuestions }} questions across all pools
+      </p>
     </template>
 
     <div class="py-12"> 
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
           <div class="p-6 bg-white border-b border-gray-200"> 
 
-            <!-- Search and Create Button Row - Matching Quizzes -->
+            <!-- Search and Create Button Row -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               
               <input
@@ -22,21 +22,24 @@
                 @input="handleSearchInput" 
                 type="text"
                 placeholder="Search pools..." 
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200"
               >
-              <!-- Create Button - Moved inside card and styled like Quizzes -->
+              
               <button
-                @click = "createPool"
-                class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                @click="createPool"
+                class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out flex items-center justify-center"
               >
+                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
                 Create New Pool
-            </button>
+              </button>
             </div>
 
-            <!-- Empty State - Updated to match Quizzes style and placement -->
+            <!-- Empty State -->
             <div v-if="pools.data.length === 0" class="text-center py-12">
               <div class="text-gray-500">
-                <i class="fas fa-question-circle text-4xl mb-4"></i> <!-- Using a relevant icon -->
+                <i class="fas fa-question-circle text-4xl mb-4"></i>
                 <p class="text-lg mb-2">No question pools found</p>
                 <p class="text-sm">
                   Get started by creating your first question pool.
@@ -44,7 +47,7 @@
               </div>
             </div>
 
-            <!-- Pools List - Table Design (Already matched from previous step) -->
+            <!-- Pools List - Table Design -->
             <div v-else class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -67,11 +70,11 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="pool in pools.data" :key="pool.id" class="hover:bg-gray-50">
+                  <tr v-for="pool in pools.data" :key="pool.id" class="hover:bg-gray-50 transition-colors duration-150">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
@@ -121,27 +124,35 @@
                       {{ formatDate(pool.updated_at) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <!-- Action Buttons - Styled like Quizzes -->
                       <div class="flex justify-end items-center gap-2">
                         <Link
                           :href="route('examiner.question-pools.manage-questions', pool.id)"
-                          class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
+                          class="inline-flex items-center text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
                           title="Manage questions"
                         >
+                          <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
                           Manage
                         </Link>
                         <Link
                           :href="route('examiner.question-pools.edit', pool.id)"
-                          class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
+                          class="inline-flex items-center text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
                           title="Edit pool"
                         >
+                          <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
                           Edit
                         </Link>
                         <button
                           @click="confirmDelete(pool)"
-                          class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
+                          class="inline-flex items-center text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
                           title="Delete pool"
                         >
+                          <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                           Delete
                         </button>
                       </div>
@@ -151,13 +162,14 @@
               </table>
             </div>
 
-            <!-- Pagination - Updated padding/margin to match Quizzes -->
+            <!-- Pagination -->
             <Pagination :links="pools.links" class="mt-6" />
 
-          </div> <!-- Close p-6 div -->
-        </div> <!-- Close card div -->
+          </div>
+        </div>
       </div>
     </div>
+    
     <!-- Modal -->
     <FeatureLimitModal 
       v-model="showModal"
@@ -180,7 +192,6 @@ const props = defineProps({
   currentPoolCount: Number,
 });
 
-
 const searchTerm = ref('');
 
 const showModal = ref(false)
@@ -194,7 +205,7 @@ function openFeatureModal(featureName, message) {
 }
 
 function createPool() {
-  const canAddPool = props.currentPoolCount < props.gPoolLimit
+  const canAddPool = props.currentPoolCount < props.PoolLimit
 
   if (!canAddPool) {
     openFeatureModal(
@@ -207,11 +218,9 @@ function createPool() {
   router.visit(route('examiner.question-pools.create'))
 }
 
-
 const handleSearchInput = (event) => {
   const value = event.target.value;
   searchTerm.value = value;
-
 };
 
 const totalQuestions = computed(() => {
@@ -225,24 +234,52 @@ const formatDate = (dateString) => {
 
 const confirmDelete = (pool) => {
   if (confirm(`Are you sure you want to delete "${pool.name}" pool? This action cannot be undone.`)) {
-    if (true) {
-      router.delete(route('examiner.question-pools.destroy', pool.id));
-    } else {
-      console.warn('Inertia global object not found. Delete functionality might not work as expected.');
-    }
+    router.delete(route('examiner.question-pools.destroy', pool.id));
   }
 };
 </script>
 
 <style scoped>
-/* Scoped styles remain unchanged */
-.btn-primary {
-  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+/* Enhanced green-themed styling */
+.bg-green-600 {
+    background-color: #10B981;
 }
-.btn-icon {
-  @apply p-2 rounded-full text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+
+.bg-green-700:hover {
+    background-color: #059669;
 }
-.btn-icon-danger {
-  @apply p-2 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500;
+
+.focus\:ring-green-500:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Green-themed pool icon */
+.bg-green-100 {
+    background-color: #ecfdf5;
+}
+
+.text-green-600 {
+    color: #10B981;
+}
+
+/* Border styling */
+.border-gray-100 {
+    border-color: #f3f4f6;
+}
+
+/* Transition effects */
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flex {
+        flex-direction: column;
+    }
+    
+    .gap-4 > *:not(:last-child) {
+        margin-bottom: 1rem;
+    }
 }
 </style>

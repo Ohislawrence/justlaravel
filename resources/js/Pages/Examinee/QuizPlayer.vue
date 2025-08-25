@@ -26,6 +26,7 @@
 
   <!-- Main Quiz Area -->
   <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6">
+    
     <!-- Progress Bar -->
     <div class="mb-6">
       <div class="flex justify-between text-sm text-gray-600 mb-1">
@@ -257,13 +258,23 @@
       </div>
     </div>
   </div>
+  <Proctoring
+      ref="proctoringRef"
+      :quiz-attempt-id="attempt.id"
+      :is-active="true"
+      :prevent-cheating="true"
+      @violation-detected="handleViolationDetected"
+      @fingerprint-generated="handleFingerprintGenerated"
+      @proctoring-data-update="handleProctoringDataUpdate"
+      @cheating-prevented="handleCheatingPrevented"
+    />
+  
 </template>
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { router, Head } from '@inertiajs/vue3';
 import { ClockIcon } from '@heroicons/vue/24/outline';
-// Import question components (ensure these paths are correct)
 import MCQQuestion from '@/Components/Questions/MCQ.vue';
 import TrueFalseQuestion from '@/Components/Questions/TrueFalse.vue';
 import ShortAnswerQuestion from '@/Components/Questions/ShortAnswer.vue';
@@ -271,6 +282,7 @@ import MatchingQuestion from '@/Components/Questions/Matching.vue';
 import Essay from '@/Components/Questions/Essay.vue';
 import FillInTheBlank from '@/Components/Questions/FillInTheBlank.vue';
 import Ordering from '@/Components/Questions/Ordering.vue';
+import Proctoring from '@/Components/Proctoring.vue';
 
 const props = defineProps({
   quiz: {
@@ -289,8 +301,22 @@ const props = defineProps({
   timeLimit: {
     type: Number,
     default: null
-  }
+  },
+  attemptID: Number,
 });
+
+const proctoringRef = ref(null)
+const proctoringData = ref({
+  violation_count: 0,
+  fingerprint: null,
+  fingerprint_components: null,
+  fingerprint_recorded_at: null,
+  proctoring_data: {}
+})
+
+// Add these for error handling
+const showSubmissionError = ref(false);
+const submissionError = ref('');
 
 // Question type mapping
 const questionTypeLabel = (type) => {
@@ -363,10 +389,66 @@ const getQuestionComponent = (type) => {
   return component;
 };
 
+// Helper function to convert ISO datetime to MySQL format
+const convertToMySQLDateTime = (isoString) => {
+  if (!isoString) return null;
+  try {
+    const date = new Date(isoString);
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+  } catch (error) {
+    console.error('Error converting datetime:', error);
+    return null;
+  }
+};
+
+// Proctoring event handlers
+const handleViolationDetected = (violation) => {
+  console.log('Violation detected:', violation);
+  proctoringData.value.violation_count = violation.count;
+};
+
+const handleFingerprintGenerated = (fingerprintData) => {
+  console.log('Fingerprint generated:', fingerprintData);
+  // Update proctoring data with MySQL-compatible datetime
+  proctoringData.value.fingerprint = fingerprintData.fingerprint;
+  proctoringData.value.fingerprint_components = fingerprintData.components;
+  proctoringData.value.fingerprint_recorded_at = convertToMySQLDateTime(fingerprintData.recorded_at);
+};
+
+const handleProctoringDataUpdate = (data) => {
+  console.log('Proctoring data update:', data);
+  // Update proctoring data based on the type
+  switch (data.type) {
+    case 'violation':
+      proctoringData.value.violation_count = data.data.count;
+      break;
+    case 'violations_batch':
+      // Handle batch of violations
+      break;
+    case 'fingerprint':
+      // Update fingerprint data with MySQL-compatible datetime
+      proctoringData.value.fingerprint = data.data.fingerprint;
+      proctoringData.value.fingerprint_components = data.data.fingerprint_components;
+      proctoringData.value.fingerprint_recorded_at = convertToMySQLDateTime(data.data.fingerprint_recorded_at);
+      break;
+    case 'final_data':
+      // Update all proctoring data before submission with MySQL-compatible datetime
+      proctoringData.value.violation_count = data.data.violation_count;
+      proctoringData.value.fingerprint = data.data.fingerprint;
+      proctoringData.value.fingerprint_components = data.data.fingerprint_components;
+      proctoringData.value.fingerprint_recorded_at = convertToMySQLDateTime(data.data.fingerprint_recorded_at);
+      proctoringData.value.proctoring_data = data.data.proctoring_data;
+      break;
+  }
+};
+
+const handleCheatingPrevented = (type) => {
+  console.log('Cheating prevented:', type);
+};
+
 // Initialize component
 onMounted(() => {
   console.log('Quiz component mounted');
-  console.log('Props:', props);
   console.log('Questions:', props.questions);
   // Initialize answers array
   if (props.questions && props.questions.length > 0) {
@@ -376,10 +458,6 @@ onMounted(() => {
   if (props.timeLimit && props.timeLimit > 0) {
     startTimer();
   }
-  // Set up proctoring
-  setupProctoring();
-  // Warn before leaving
-  window.addEventListener('beforeunload', handleBeforeUnload);
 });
 
 // Cleanup
@@ -432,9 +510,7 @@ function closeImageModal() {
 
 function handleImageError(event) {
   console.error('Failed to load question image:', event.target.src);
-  // Hide the broken image icon
   event.target.style.display = 'none';
-  // Optionally, show a placeholder or error message within the image container
   const container = event.target.parentElement;
   if (container) {
     const errorMsg = document.createElement('div');
@@ -465,78 +541,68 @@ const submitQuiz = async () => {
       throw new Error('Missing quiz or attempt information');
     }
 
-    // Prepare answers with thorough validation and type-specific formatting
+    // Submit proctoring violations first
+    if (proctoringRef.value) {
+      await proctoringRef.value.submitViolations();
+      
+      // Get the latest proctoring data after submitting violations
+      const latestProctoringData = proctoringRef.value.getProctoringData();
+      if (latestProctoringData) {
+        proctoringData.value.violation_count = latestProctoringData.violation_count;
+        proctoringData.value.fingerprint = latestProctoringData.fingerprint;
+        proctoringData.value.fingerprint_components = latestProctoringData.fingerprint_components;
+        proctoringData.value.fingerprint_recorded_at = convertToMySQLDateTime(latestProctoringData.fingerprint_recorded_at);
+        proctoringData.value.proctoring_data = latestProctoringData.violations;
+      }
+    }
+
+    // Prepare answers
     const formattedAnswers = props.questions.reduce((acc, question, index) => {
       const answer = answers.value[index];
       
-      // Only include if answer exists and question is valid
       if (answer !== null && answer !== undefined && answer !== '' && question?.id) {
-        // Format answer based on question type
         switch (question.type) {
           case 'ordering':
-            // Ensure ordering answers are sent as arrays
             acc[question.id] = Array.isArray(answer) ? answer : [answer];
             break;
-            
-          case 'multiple_choice':
-          case 'true_false':
-            // Primitive values can be sent as-is
-            acc[question.id] = answer;
-            break;
-            
           case 'fill_in_the_blank':
-            // Trim whitespace from fill-in answers
             acc[question.id] = typeof answer === 'string' ? answer.trim() : answer;
             break;
-            
           case 'matching':
-            // Ensure matching answers are sent as objects
             if (typeof answer === 'object' && answer !== null) {
               acc[question.id] = Object.keys(answer).length > 0 ? answer : null;
             } else {
               acc[question.id] = null;
             }
             break;
-            
           default:
-            // Default handling for other types
-            if (Array.isArray(answer)) {
-              acc[question.id] = answer.length > 0 ? answer : null;
-            } else if (typeof answer === 'object' && answer !== null) {
-              acc[question.id] = Object.keys(answer).length > 0 ? answer : null;
-            } else {
-              acc[question.id] = answer;
-            }
+            acc[question.id] = answer;
         }
       }
       return acc;
     }, {});
 
-    // Prepare submission data
+    // Prepare submission data with proper proctoring structure
     const submissionData = {
       attempt_id: props.attempt.id,
       answers: formattedAnswers,
       time_spent: props.timeLimit ? Math.max(0, props.timeLimit * 60 - timeRemaining.value) : null,
-      proctoring_flags: {
-        tab_switches: window.tabSwitchCount || 0,
-        fullscreen_exits: window.fullscreenExitCount || 0,
-      }
+      // Include proctoring data as separate fields, not nested
+      violation_count: proctoringData.value.violation_count || 0,
+      fingerprint: proctoringData.value.fingerprint || null,
+      fingerprint_components: proctoringData.value.fingerprint_components || null,
+      fingerprint_recorded_at: proctoringData.value.fingerprint_recorded_at || null,
+      proctoring_data: proctoringData.value.proctoring_data || {}
     };
 
     console.debug('Submission payload:', submissionData);
-
+    
     // Submit with proper error handling
     const response = await router.post(
       route('examinee.submit', { quiz: props.quiz.id }), 
       submissionData, 
       {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        },
         onError: (errors) => {
-          // Handle Laravel validation errors
           if (errors.message) {
             throw new Error(errors.message);
           }
@@ -545,68 +611,28 @@ const submitQuiz = async () => {
       }
     );
 
-    // If we get here, submission was successful
     return response;
 
   } catch (error) {
     console.error('Submission error:', error);
-    
-    // Show user-friendly error message
     showSubmissionError.value = true;
     submissionError.value = error.message || 'Failed to submit quiz. Please try again.';
-    
-    // Re-enable submit button in case they want to retry
     submitting.value = false;
-    
-    // Return the error to potentially handle it in the calling code
     throw error;
-  } finally {
-    // Any cleanup if needed
   }
 };
-
-// Proctoring setup
-function setupProctoring() {
-  // Track tab switches
-  window.tabSwitchCount = 0;
-  window.addEventListener('blur', () => {
-    if (document.visibilityState === 'hidden') {
-      window.tabSwitchCount++;
-      console.log('Tab switch detected. Count:', window.tabSwitchCount);
-    }
-  });
-  // Track fullscreen exits (Note: Fullscreen API might require user activation)
-  window.fullscreenExitCount = 0;
-  // Use the newer event names
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
-  document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
-  document.addEventListener('mozfullscreenchange', handleFullscreenChange);    // Firefox
-  document.addEventListener('MSFullscreenChange', handleFullscreenChange);     // IE11
-}
-
-function handleFullscreenChange() {
-  if (!document.fullscreenElement && !document.webkitFullscreenElement &&
-      !document.mozFullScreenElement && !document.msFullscreenElement) {
-    window.fullscreenExitCount++;
-    console.log('Fullscreen exit detected. Count:', window.fullscreenExitCount);
-  }
-}
-
-function handleBeforeUnload(e) {
-  // Only warn if the user has started answering and there are unanswered questions
-  // Or if the quiz is being submitted, don't warn
-  if (!submitting.value && answers.value.some(a => a !== null && a !== undefined && a !== '')) {
-    if (unansweredQuestions.value > 0) {
-       // Standard way to trigger a confirmation dialog
-       e.preventDefault();
-       e.returnValue = 'You have unanswered questions. Are you sure you want to leave?';
-       return e.returnValue; // For older browsers
-    }
-  }
-  // If no answers given or all answered, let the browser handle default behavior
-}
 </script>
 
 <style scoped>
-/* Scoped styles remain unchanged */
+.violation-counter {
+  position: fixed;
+  top: 50px;
+  left: 10px;
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid #ffc107;
+}
 </style>

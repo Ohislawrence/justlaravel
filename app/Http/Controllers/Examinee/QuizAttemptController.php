@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Question;
 use App\Services\ActivityService;
+use App\Services\CertificateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -68,6 +69,7 @@ class QuizAttemptController extends Controller
         return Inertia::render('Examinee/QuizPlayer', [
             'quiz' => $quiz->only('id', 'title', 'time_limit'),
             'attempt' => $attempt,
+            'attemptID' => $attempt->id,
             'questions' => $questions,
             'timeLimit' => $quiz->time_limit
         ]);
@@ -572,10 +574,23 @@ class QuizAttemptController extends Controller
             'attempt_id' => 'required|exists:quiz_attempts,id',
             'answers' => 'required|array',
             'time_spent' => 'nullable|integer',
-            'proctoring_flags' => 'nullable|array',
+            'proctoring_data' => 'nullable|array',
+            'fingerprint' => 'nullable',
+            'fingerprint_components' => 'nullable',
+            'violation_count' => 'nullable',
+            'fingerprint_recorded_at' => 'nullable',
         ]);
     
         $attempt = QuizAttempt::findOrFail($validated['attempt_id']);
+
+        // Check for serious proctoring violations
+        $seriousViolations = $attempt->proctoringViolations()
+            ->whereIn('violation_type', ['tab_switch', 'fullscreen_exit', 'multiple_displays'])
+            ->count();
+
+        if ($seriousViolations > 3) { // Adjust threshold as needed
+            return back()->with('error', 'Quiz submission rejected due to multiple proctoring violations.');
+        }
 
         if ($attempt->user_id !== auth()->id() || 
             $attempt->quiz_id !== $quiz->id ) {
@@ -617,25 +632,50 @@ class QuizAttemptController extends Controller
             $points += $question['points'];
         }
 
+        $passingScore = $quiz->passing_score ?? 50;
         
         $percentageScore = round(($score/$points) * 100, 2);
-        $is_passed = ($percentageScore >= $quiz->is_passed ? true : false);
+        $is_passed = ($percentageScore >= $passingScore ? true : false);
     
         // Insert responses one by one to ensure proper data handling
         foreach ($responses as $response) {
             QuestionResponse::create($response);
         }
+
+        if ($quiz->gradingSystem) {
+            $grade = $quiz->gradingSystem->calculateGrade($percentageScore);
+        } else {
+            $grade = [
+                'grade' => $percentageScore >= $passingScore ? 'Pass' : 'Fail',
+                'interpretation' => $percentageScore >= $passingScore ? 'Passed' : 'Failed'
+            ];
+        }
+        
+        // Update the attempt with grade information
+        $gradingData = $attempt->grading_data ?? [];
+        $gradingData['grade'] = $grade;
     
         $attempt->update([
             'completed_at' => now(),
             'score' => $score,
             'status' => 'completed',
             'time_spent' => $validated['time_spent'],
-            'proctoring_data' => $validated['proctoring_flags'],
+            'proctoring_data' => $validated['proctoring_data'],
             'percentage' => $percentageScore,
             'max_score' => $points,
             'is_passed' => $is_passed,
+            'grading_data' => $gradingData,
+            'fingerprint' => $validated['fingerprint'],
+            'fingerprint_components' => $validated['fingerprint_components'],
+            'violation_count' => $validated['violation_count'],
+            'fingerprint_recorded_at' => $validated['fingerprint_recorded_at'],
         ]);
+
+        // Generate certificate if enabled and passed
+        if ($attempt->is_passed && $quiz->enable_certificates) {
+            $certificateService = app(CertificateService::class);
+            $certificate = $certificateService->generateCertificate($attempt);
+        }
         
         return redirect()->route('examinee.quiz.results', [
             'quiz' => $quiz->id,

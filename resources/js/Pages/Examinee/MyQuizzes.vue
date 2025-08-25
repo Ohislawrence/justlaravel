@@ -3,6 +3,66 @@
       <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Header and Filters -->
+          <div v-if="ongoingQuizzes.length > 0" class="mb-10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Continue Quiz</h2>
+          </div>
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div 
+              v-for="quiz in ongoingQuizzes" 
+              :key="quiz.id"
+              class="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              <div class="px-5 py-6">
+                <!-- Quiz Header -->
+                <div class="flex items-start justify-between">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 truncate">
+                      {{ quiz.title }}
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-500 truncate">
+                      {{ quiz.organization.name }}
+                    </p>
+                  </div>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ml-3 flex-shrink-0 whitespace-nowrap bg-yellow-50 text-yellow-700 border border-yellow-100">
+                    In Progress
+                  </span>
+                </div>
+
+                <!-- Quiz Details -->
+                <div class="mt-5 space-y-3">
+                  <div class="flex items-center text-sm text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>
+                      Time spent: {{ formatTime(quiz.attempt.time_spent) }}
+                    </span>
+                  </div>
+
+                  <div class="flex items-center text-sm text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>
+                      Started {{ formatDateTime(quiz.attempt.started_at) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6">
+                  <Link 
+                    :href="route('examinee.attempt', { quiz: quiz.id, attempt: quiz.attempt.id })"
+                    class="w-full flex justify-center items-center px-4 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                  >
+                    Continue Quiz
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
           <div class="mb-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -124,6 +184,7 @@
                   </div>
                 </div>
   
+
                 <!-- Action Buttons -->
                 <div class="mt-6">
                   <div v-if="quiz.status === 'available'">
@@ -198,6 +259,10 @@
     quizzes: Array,
     organizations: Array,
     filters: Object,
+    ongoingQuizzes: {
+      type: Array,
+      default: () => []
+    },
   });
   
   const filters = ref({
@@ -221,6 +286,26 @@
     });
   });
   
+
+  const formatTime = (seconds) => {
+  if (!seconds) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return '';
+  const options = { 
+    month: 'short', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
+
   const filterQuizzes = () => {
     router.get(route('examinee.quizzes.index'), pickBy(filters.value), {
       preserveState: true,

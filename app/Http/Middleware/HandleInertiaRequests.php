@@ -55,6 +55,7 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'csrf_token' => csrf_token(),
+            'timezones' => \DateTimeZone::listIdentifiers(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
@@ -62,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 'info' => fn () => $request->session()->get('info'),
                 'message' => fn () => $request->session()->get('message'),
             ],
+
         ]);
     }
 }

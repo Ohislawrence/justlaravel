@@ -18,6 +18,11 @@ class Organization extends Model
         'industry',
         'settings',
         'is_active',
+        'certificate_seal',
+        'office_address',
+        'official_phone_number',
+        'official_email',
+        'official_Whatsapp_contact',
     ];
 
     /*
@@ -25,6 +30,8 @@ class Organization extends Model
     | Relationships
     |--------------------------------------------------------------------------
     */
+
+    
 
     public function members(): BelongsToMany
     {
@@ -254,5 +261,10 @@ class Organization extends Model
         return QuizAttempt::whereHas('quiz', function ($query) {
             $query->where('organization_id', $this->id);
         });
+    }
+
+    public function gradingSystems()
+    {
+        return $this->hasMany(GradingSystem::class);
     }
 }

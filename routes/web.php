@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\API\ProctoringController;
+use App\Http\Controllers\CertificateController as ControllersCertificateController;
 use App\Http\Controllers\Examinee\DashboardController as ExamineeDashboardController;
 use App\Http\Controllers\Examinee\ExamineeAuthController;
 use App\Http\Controllers\Examinee\QuizAttemptController;
 use App\Http\Controllers\Examinee\QuizController as ExamineeQuizController;
+use App\Http\Controllers\Examiner\CertificateController;
+use App\Http\Controllers\Examiner\CertificateTemplateController;
 use App\Http\Controllers\Examiner\DashboardController;
+use App\Http\Controllers\Examiner\GradingSystemController;
 use App\Http\Controllers\Examiner\GroupController;
 use App\Http\Controllers\Examiner\PoolQuestionController;
 use App\Http\Controllers\Examiner\QuestionController;
@@ -17,8 +22,10 @@ use App\Http\Controllers\Examiner\ReportController;
 use App\Http\Controllers\Examiner\SettingController;
 use App\Http\Controllers\Examiner\UserController;
 use App\Http\Controllers\FrontPageController;
+use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\Landlord\BlogController;
 use App\Http\Controllers\Landlord\CategoryController;
+use App\Http\Controllers\Landlord\HelpCenterController as LandlordHelpCenterController;
 use App\Http\Controllers\Landlord\OrganizationController;
 use App\Http\Controllers\Landlord\OrganizationUserController;
 use App\Http\Controllers\Landlord\SubscriptionController;
@@ -38,9 +45,14 @@ Route::get('terms-of-service', [FrontPageController::class, 'tos'])->name('tos')
 Route::get('cookie-policy', [FrontPageController::class, 'cookie'])->name('cookie');
 Route::get('/blogs', [FrontPageController::class, 'allBlogs'])->name('blogs.index');
 Route::get('/blogs/{blog:slug}', [FrontPageController::class, 'show'])->name('blogs.show');
+Route::prefix('help')->group(function () {
+    Route::get('/', [HelpCenterController::class, 'index'])->name('help.index');
+    Route::get('/search', [HelpCenterController::class, 'search'])->name('help.search');
+    Route::get('/{slug}', [HelpCenterController::class, 'showCategory'])->name('help.category');
+    Route::get('/{categorySlug}/{articleSlug}', [HelpCenterController::class, 'showArticle'])->name('help.article');
+});
 
 //sample quiz link
-//Route::get('exam/{organization}/{quiz}/{uniquecode}');
 Route::get('/quizzes/{quiz}/{token?}', [ExamineeQuizController::class, 'show'])
     ->name('quiz.show');
 
@@ -77,6 +89,7 @@ Route::middleware([
     })->name('dashboard');
 
     
+    
 
 
     //landlord
@@ -112,10 +125,28 @@ Route::middleware([
         Route::post('/organizations/switch', [OrganizationController::class, 'switch'])
             ->name('organizations.switch');
 
-    });
+        // Categories
+        Route::get('/categories', [LandlordHelpCenterController::class, 'categoriesIndex'])
+            ->name('categories.index');
+        Route::post('/categories', [LandlordHelpCenterController::class, 'storeCategory'])
+            ->name('categories.store');
+        Route::put('/categories/{category}', [LandlordHelpCenterController::class, 'updateCategory'])
+            ->name('categories.update');
+        Route::delete('/categories/{category}', [LandlordHelpCenterController::class, 'destroyCategory'])
+            ->name('categories.destroy');
+    
+        // Articles
+        Route::get('/articles', [LandlordHelpCenterController::class, 'articlesIndex'])
+            ->name('articles.index');
+        Route::post('/articles', [LandlordHelpCenterController::class, 'storeArticle'])
+            ->name('articles.store');
+        Route::put('/articles/{article}', [LandlordHelpCenterController::class, 'updateArticle'])
+            ->name('articles.update');
+        Route::delete('/articles/{article}', [LandlordHelpCenterController::class, 'destroyArticle'])
+            ->name('articles.destroy');
+       
 
-    //admin
-    //admin will just have more actions than been only examiner
+    });
 
     //examiner
     Route::group([
@@ -123,7 +154,7 @@ Route::middleware([
         'middleware' => ['role:examiner','subscription'],
         'as' => 'examiner.',
     ], function () {
-        //Route::view('dashboard', 'dashboard')->name('dashboard');
+        
         Route::get('dashboard', [DashboardController::class, 'index'] )->name('dashboard');
         Route::resource('user', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         //Route::resource('groups', GroupController::class)->except(['edit'])
@@ -135,9 +166,18 @@ Route::middleware([
             Route::delete('/remove-member/{group}/{user}', [GroupController::class, 'removeMember'])->name('removeMember');
             Route::post('/assign-quizzes/{group}', [GroupController::class, 'assignQuizzes'])->name('assignQuizzes');
             Route::delete('/remove-quiz/{group}/{quiz}', [GroupController::class, 'removeQuiz'])->name('removeQuiz');
+            Route::post('/{group}/move-users', [GroupController::class, 'moveUsers'])->name('moveUsers');
+            //import users
+            Route::post('/{group}/import-users', [GroupController::class, 'importUsers'])->name('importUsers');
+            Route::get('/import-template', [GroupController::class, 'importTemplate'])->name('importTemplate');
         });
+        
+        
         Route::resource('reports', ReportController::class);
-        Route::resource('settings', SettingController::class);
+        //settings
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings/organization', [SettingController::class, 'updateOrganization'])->name('settings.organization.update');
+
         Route::resource('quizzes', QuizController::class);
 
         //designation
@@ -202,6 +242,21 @@ Route::middleware([
 
         Route::post('/quizzes/{quiz}/analysis/export/{group}', [QuizAnalysisController::class, 'export'])
             ->name('quizzes.analysis.export');
+        Route::get('quizzes/{quiz}/analysis/users/{user}', [QuizAnalysisController::class, 'byUser'])
+            ->name('quizzes.analysis.user');
+        
+        //proctoring
+        Route::get('/proctoring/violations/{attemptId}', [QuizAnalysisController::class, 'getViolations'])
+            ->name('quizzes.analysis.violations');
+
+        // Certificate Templates
+        Route::resource('certificate-templates', CertificateTemplateController::class);
+        Route::post('certificate-templates/{certificateTemplate}/set-default', [CertificateTemplateController::class, 'setDefault'])
+            ->name('certificate-templates.set-default');
+
+        Route::get('certificate-templates/{certificateTemplate}/preview', [CertificateTemplateController::class, 'preview'])
+            ->name('certificate-templates.preview');
+
     
         //subcribe
         Route::get('/subscription', [PaymentController::class, 'index'])->name('subscription.plans');
@@ -209,29 +264,34 @@ Route::middleware([
         Route::get('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
 
         // Quiz Groups
-        Route::get('quiz-groups', [QuizGroupController::class, 'index'])
-            ->name('quiz-groups.index');
-        Route::get('quiz-groups/create', [QuizGroupController::class, 'create'])
-            ->name('quiz-groups.create');
-        Route::post('quiz-groups', [QuizGroupController::class, 'store'])
-            ->name('quiz-groups.store');
-        Route::get('quiz-groups/{quiz_group}', [QuizGroupController::class, 'show'])
-            ->name('quiz-groups.show');
-        Route::get('quiz-groups/{quiz_group}/edit', [QuizGroupController::class, 'edit'])
-            ->name('quiz-groups.edit');
-        Route::put('quiz-groups/{quiz_group}', [QuizGroupController::class, 'update'])
-            ->name('quiz-groups.update');
-        Route::delete('quiz-groups/{quiz_group}', [QuizGroupController::class, 'destroy'])
-            ->name('quiz-groups.destroy');
+        Route::get('quiz-groups', [QuizGroupController::class, 'index'])->name('quiz-groups.index');
+        Route::get('quiz-groups/create', [QuizGroupController::class, 'create'])->name('quiz-groups.create');
+        Route::post('quiz-groups', [QuizGroupController::class, 'store'])->name('quiz-groups.store');
+        Route::get('quiz-groups/{quiz_group}', [QuizGroupController::class, 'show'])->name('quiz-groups.show');
+        Route::get('quiz-groups/{quiz_group}/edit', [QuizGroupController::class, 'edit'])->name('quiz-groups.edit');
+        Route::put('quiz-groups/{quiz_group}', [QuizGroupController::class, 'update'])->name('quiz-groups.update');
+        Route::delete('quiz-groups/{quiz_group}', [QuizGroupController::class, 'destroy'])->name('quiz-groups.destroy');
         Route::post('organizations/{organization}/groups/{group}/send-invite', 
             [GroupController::class, 'sendInvite'])
             ->name('groups.sendInvite');
+
+        // Grading Systems Management
+        Route::get('grading-systems', [GradingSystemController::class, 'index'])->name('grading-systems.index');
+        Route::get('grading-systems/create', [GradingSystemController::class, 'create'])->name('grading-systems.create');
+        Route::post('grading-systems', [GradingSystemController::class, 'store'])->name('grading-systems.store');
+        Route::get('grading-systems/{gradingSystem}/edit', [GradingSystemController::class, 'edit'])->name('grading-systems.edit');
+        Route::put('grading-systems/{gradingSystem}', [GradingSystemController::class, 'update'])->name('grading-systems.update');
+        Route::delete('grading-systems/{gradingSystem}', [GradingSystemController::class, 'destroy'])->name('grading-systems.destroy');
+        Route::post('grading-systems/{gradingSystem}/set-default', [GradingSystemController::class, 'setDefault'])->name('grading-systems.set-default');
 
         // Quiz Group Items
         Route::post('quiz-groups/{quiz_group}/quizzes', [QuizGroupController::class, 'addQuiz'])
             ->name('quiz-groups.quizzes.store');
         Route::delete('quiz-groups/{quiz_group}/quizzes/{quiz}', [QuizGroupController::class, 'removeQuiz'])
             ->name('quiz-groups.quizzes.destroy');
+
+        Route::get('/certificates/{certificate}/download', [ControllersCertificateController::class, 'download'])
+            ->name('certificates.download');
 
         
     });
@@ -265,6 +325,36 @@ Route::middleware([
         Route::get('dashboard', [ExamineeDashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('history', [ExamineeDashboardController::class, 'history'])->name('history');
         Route::get('quizzes', [ExamineeDashboardController::class, 'quizzes'])->name('quizzes.index');
+
+        //View and download certificates
+        Route::get('/certificates', [ControllersCertificateController::class, 'index'])
+        ->name('certificates.index');
+
+        Route::get('/certificates/{certificate}', [ControllersCertificateController::class, 'show'])
+            ->name('certificates.show');
+
+        Route::get('/certificates/{certificate}/download', [ControllersCertificateController::class, 'download'])
+            ->name('certificates.download');
+
+        Route::get('/certificates/verify', [ControllersCertificateController::class, 'verify'])
+            ->name('certificates.verify');
+        
+    });
+
+    //instructor
+    Route::group([
+        'prefix' => 'instructor',
+        'middleware' => 'role:examinee',
+        'as' => 'instructor.',
+    ], function () {
+
+
+        Route::get('dashboard', function () {
+            return Inertia::render('Dashboard');
+        })->name('dashboard');
+        //login
+        
+        
         
     });
 

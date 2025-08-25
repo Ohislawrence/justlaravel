@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Examiner;
 
 use App\Http\Controllers\Controller;
+use App\Models\CertificateTemplate;
+use App\Models\GradingSystem;
 use Illuminate\Http\Request;
 use App\Models\Group;
 use Illuminate\Support\Str;
@@ -25,6 +27,7 @@ class QuizController extends Controller
     public function index()
     {
         $organization = auth()->user()->organizations()->first();
+        
         
         $quizzes = $organization->quizzes()
             ->with(['questions', 'questionPools' => function($query) {
@@ -63,6 +66,10 @@ class QuizController extends Controller
     public function create()
     {
        $organization = auth()->user()->organizations()->first();
+       // Get default systems and the organization's custom systems
+       $defaultSystems = GradingSystem::where('is_default', true)->get();
+       $customSystems = $organization->gradingSystems()->get();
+       $gradingSystems = $defaultSystems->merge($customSystems);
         return inertia('Examiner/Quizzes/Create', [
             'organization' => $organization,
             'quizTypes' => [
@@ -92,6 +99,13 @@ class QuizController extends Controller
                     'questions' => $pool->questions->map(fn($q) => $q->id)
                 ];
             }),
+        'certificateTemplates' => CertificateTemplate::all(),
+        'initialData' => [
+            'enable_certificates' => false,
+            'certificate_template_id' => null,
+            'certificate_pass_percentage' => 70,
+            'certificate_expiry_days' => null,
+        ],
         'availableQuestions' => Question::query()
             ->where(function($query) use ($organization) {
                 $query->whereNull('organization_id')
@@ -99,7 +113,8 @@ class QuizController extends Controller
             })
             ->whereDoesntHave('pools')
             ->select('id', 'question')
-            ->get()
+            ->get(),
+        'gradingSystems' => $gradingSystems,
         ]);
     }
 
@@ -129,7 +144,11 @@ class QuizController extends Controller
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'settings' => ['nullable', 'array'],
             'survey_thank_you_message' => ['nullable', 'string', 'max:500'],
-            // Removed pools validation
+            'enable_certificates' => ['boolean'],
+            'certificate_template_id' => ['nullable', 'exists:certificate_templates,id'],
+            'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
+            'grading_system_id' => ['nullable', 'integer', 'min:0'],
         ]);
     
         $organization = auth()->user()->organizations()->first();
@@ -159,6 +178,11 @@ class QuizController extends Controller
             'ends_at' => !empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null,
             'settings' => $validated['settings'] ?? [],
             'survey_thank_you_message' => $validated['survey_thank_you_message'] ?? null,
+            'enable_certificates' => $validated['enable_certificates'] ?? false,
+            'certificate_template_id' => $validated['certificate_template_id'] ?? null,
+            'certificate_pass_percentage' => $validated['certificate_pass_percentage'] ?? 70,
+            'certificate_expiry_days' => $validated['certificate_expiry_days'] ?? null,
+            'grading_system_id' => $validated['grading_system_id'] ?? null,
         ];
     
         $quiz = $organization->quizzes()->create($quizData);
@@ -216,8 +240,14 @@ class QuizController extends Controller
      */
     public function edit(Quiz $quiz)
     {
+        $organization = auth()->user()->organizations()->first();
         return inertia('Examiner/Quizzes/Edit', [
             'quiz' => $quiz,
+            'gradingSystems' => GradingSystem::where('is_default', true)
+                    ->orWhere('organization_id', $organization->id)
+                    ->get(),
+            
+            'certificateTemplates' => CertificateTemplate::all(),
             'quizTypes' => [
                 'test' => 'Standard Test',
                 'exam' => 'Formal Exam',
@@ -261,6 +291,11 @@ class QuizController extends Controller
             'pools.*.questions_to_show' => 'required|integer|min:1',
             'pools.*.questions' => 'array|min:1',
             'survey_thank_you_message' => ['nullable', 'string', 'max:500'],
+            'enable_certificates' => ['boolean'],
+            'certificate_template_id' => ['nullable', 'exists:certificate_templates,id'],
+            'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
+            'grading_system_id' => ['nullable', 'integer', 'min:0'],
         ]);
 
         // Only update slug if title changed
@@ -366,21 +401,25 @@ class QuizController extends Controller
 
     public function showAttempts(Quiz $quiz, QuizAttempt $attempt)
     {
+        //dd($attempt);
         // Ensure the attempt belongs to the quiz
         if ($attempt->quiz_id !== $quiz->id) {
             abort(404);
         }
-
+        //dd($quiz->questionPools);
         // Load necessary relationships
         $attempt->load([
             'user',
             'responses.question',
-            'quiz.questions'
+            'quiz.questions',
+            'proctoringViolations', 
         ]);
 
         return Inertia::render('Examiner/QuizAttempts/Show', [
             'quiz' => $quiz,
+            'questionpools' => $quiz->questionPools,
             'attempt' => $attempt,
+            'violations' => $attempt->where('id', $attempt->id)->get(),
             'questions' => $quiz->questions()->with(['responses' => function($q) use ($attempt) {
                 $q->where('attempt_id', $attempt->id);
             }])->get()

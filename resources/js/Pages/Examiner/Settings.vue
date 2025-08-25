@@ -7,17 +7,16 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
 import Checkbox from '@/Components/Checkbox.vue'; // Assuming you have a Checkbox component
+import GradingComponent from '@/Components/GradingComponent.vue';
 
 const page = usePage();
 const props = defineProps({
     user: Object,
-    organization: Object, // Assuming organization data is passed as a prop
-    // Add other relevant props like notification preferences if needed
-    // e.g., notificationPreferences: Object
+    organization: Object, 
 });
 
 // --- State for Tabs ---
-const activeTab = ref('general'); // Default to 'general' tab
+const activeTab = ref('organization'); // Default to 'organization' tab
 
 // --- General Settings State (Profile & Password) ---
 const profileForm = ref({
@@ -57,9 +56,27 @@ const notificationErrors = ref({});
 // For now, let's assume it displays organization info, potentially with an edit option for admins
 const organizationForm = ref({
     name: props.organization?.name || '',
-    slug: props.organization?.slug || '',
-    // Add other relevant, editable organization fields if applicable
-    // description, contact_email, etc.
+    description: props.organization?.description || '',
+    website: props.organization?.website || '',
+    industry: props.organization?.industry || '',
+    office_address: props.organization?.office_address || '',
+    official_phone_number: props.organization?.official_phone_number || '',
+    official_email: props.organization?.official_email || '',
+    official_Whatsapp_contact: props.organization?.official_Whatsapp_contact || '',
+    logo: null, // For file upload
+    certificate_seal: null, // For file upload
+});
+
+const currentLogoUrl = computed(() => {
+    return props.organization?.logo 
+        ? `/storage/${props.organization.logo}`
+        : '/images/default-organization-logo.png';
+});
+
+const currentSealUrl = computed(() => {
+    return props.organization?.certificate_seal 
+        ? `/storage/${props.organization.certificate_seal}`
+        : '/images/default-seal.png';
 });
 
 const organizationProcessing = ref(false);
@@ -70,47 +87,6 @@ const organizationErrors = ref({});
 
 // --- Methods ---
 
-const updateProfile = () => {
-    profileProcessing.value = true;
-    profileErrors.value = {};
-
-    router.put(route('profile.update'), profileForm.value, {
-        preserveScroll: true,
-        onSuccess: () => {
-            // Profile updated successfully
-            console.log('Profile updated');
-        },
-        onError: (errors) => {
-            profileErrors.value = errors;
-        },
-        onFinish: () => {
-            profileProcessing.value = false;
-        }
-    });
-};
-
-const updatePassword = () => {
-    passwordProcessing.value = true;
-    passwordErrors.value = {};
-
-    router.put(route('password.update'), passwordForm.value, {
-        preserveScroll: true,
-        onSuccess: () => {
-            // Password updated successfully
-            console.log('Password updated');
-            // Clear the form fields
-            passwordForm.value.current_password = '';
-            passwordForm.value.password = '';
-            passwordForm.value.password_confirmation = '';
-        },
-        onError: (errors) => {
-            passwordErrors.value = errors;
-        },
-        onFinish: () => {
-            passwordProcessing.value = false;
-        }
-    });
-};
 
 const updateNotifications = () => {
     notificationProcessing.value = true;
@@ -134,13 +110,37 @@ const updateNotifications = () => {
 
 // Placeholder for organization update if needed
 const updateOrganization = () => {
-     // Implement organization update logic if applicable
-     // This might involve checking user permissions
-     console.log('Update organization logic would go here');
-     // organizationProcessing.value = true;
-     // ... router.put(route('organization.update', props.organization.id), organizationForm.value, {...})
-};
+    organizationProcessing.value = true;
+    organizationErrors.value = {};
 
+    // Create FormData to handle file uploads
+    const formData = new FormData();
+    
+    // Append all fields to formData
+    Object.keys(organizationForm.value).forEach(key => {
+        if (organizationForm.value[key] !== null) {
+            formData.append(key, organizationForm.value[key]);
+        }
+    });
+
+    router.post(route('examiner.settings.organization.update'), formData, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Reset file inputs after successful upload
+            organizationForm.value.logo = null;
+            organizationForm.value.certificate_seal = null;
+        },
+        onError: (errors) => {
+            organizationErrors.value = errors;
+        },
+        onFinish: () => {
+            organizationProcessing.value = false;
+        },
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
 </script>
 
 <template>
@@ -160,34 +160,10 @@ const updateOrganization = () => {
                         <div class="border-b border-gray-200 mb-6">
                             <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                                 <button
-                                    @click="activeTab = 'general'"
-                                    :class="[
-                                        activeTab === 'general'
-                                            ? 'border-indigo-500 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                                    ]"
-                                    :aria-current="activeTab === 'general' ? 'page' : undefined"
-                                >
-                                    General
-                                </button>
-                                <button
-                                    @click="activeTab = 'notification'"
-                                    :class="[
-                                        activeTab === 'notification'
-                                            ? 'border-indigo-500 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                                    ]"
-                                    :aria-current="activeTab === 'notification' ? 'page' : undefined"
-                                >
-                                    Notification
-                                </button>
-                                <button
                                     @click="activeTab = 'organization'"
                                     :class="[
                                         activeTab === 'organization'
-                                            ? 'border-indigo-500 text-indigo-600'
+                                            ? 'border-green-500 text-green-600'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                                         'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                                     ]"
@@ -195,106 +171,27 @@ const updateOrganization = () => {
                                 >
                                     Organization
                                 </button>
+                                <button
+                                    @click="activeTab = 'notification'"
+                                    :class="[
+                                        activeTab === 'notification'
+                                            ? 'border-green-500 text-green-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                                    ]"
+                                    :aria-current="activeTab === 'notification' ? 'page' : undefined"
+                                >
+                                    Notification
+                                </button>
+                                
+                                
                             </nav>
                         </div>
 
                         <!-- Tab Content -->
                         <div>
 
-                            <!-- General Tab Content -->
-                            <div v-show="activeTab === 'general'">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">Profile Information</h3>
-                                <form @submit.prevent="updateProfile" class="mb-10"> <!-- Added mb-10 for spacing -->
-                                    <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-                                        <div>
-                                            <InputLabel for="profile_name" value="Name" />
-                                            <TextInput
-                                                id="profile_name"
-                                                v-model="profileForm.name"
-                                                type="text"
-                                                class="mt-1 block w-full"
-                                                required
-                                                autofocus
-                                                autocomplete="name"
-                                            />
-                                            <InputError :message="profileErrors.name" class="mt-2" />
-                                        </div>
-
-                                        <div>
-                                            <InputLabel for="profile_email" value="Email" />
-                                            <TextInput
-                                                id="profile_email"
-                                                v-model="profileForm.email"
-                                                type="email"
-                                                class="mt-1 block w-full"
-                                                required
-                                                autocomplete="username"
-                                            />
-                                            <InputError :message="profileErrors.email" class="mt-2" />
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center justify-end mt-6">
-                                        <PrimaryButton :disabled="profileProcessing">
-                                            <span v-if="profileProcessing">Saving...</span>
-                                            <span v-else>Save Changes</span>
-                                        </PrimaryButton>
-                                    </div>
-                                </form>
-
-                                <h3 class="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">Update Password</h3>
-                                <form @submit.prevent="updatePassword">
-                                    <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-                                         <div class="sm:col-span-2">
-                                            <InputLabel for="current_password" value="Current Password" />
-                                            <TextInput
-                                                id="current_password"
-                                                v-model="passwordForm.current_password"
-                                                type="password"
-                                                class="mt-1 block w-full"
-                                                required
-                                                autocomplete="current-password"
-                                            />
-                                            <InputError :message="passwordErrors.current_password" class="mt-2" />
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-                                        <div>
-                                            <InputLabel for="password" value="New Password" />
-                                            <TextInput
-                                                id="password"
-                                                v-model="passwordForm.password"
-                                                type="password"
-                                                class="mt-1 block w-full"
-                                                required
-                                                autocomplete="new-password"
-                                            />
-                                            <InputError :message="passwordErrors.password" class="mt-2" />
-                                        </div>
-
-                                        <div>
-                                            <InputLabel for="password_confirmation" value="Confirm Password" />
-                                            <TextInput
-                                                id="password_confirmation"
-                                                v-model="passwordForm.password_confirmation"
-                                                type="password"
-                                                class="mt-1 block w-full"
-                                                required
-                                                autocomplete="new-password"
-                                            />
-                                            <InputError :message="passwordErrors.password_confirmation" class="mt-2" />
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center justify-end mt-6">
-                                        <PrimaryButton :disabled="passwordProcessing">
-                                             <span v-if="passwordProcessing">Updating...</span>
-                                             <span v-else>Update Password</span>
-                                        </PrimaryButton>
-                                    </div>
-                                </form>
-                            </div>
+                            
 
                             <!-- Notification Tab Content -->
                             <div v-show="activeTab === 'notification'">
@@ -305,7 +202,7 @@ const updateOrganization = () => {
                                             <Checkbox
                                                 id="email_quiz_results"
                                                 v-model:checked="notificationForm.email_quiz_results"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500"
                                             />
                                             <InputLabel for="email_quiz_results" class="ml-2 block text-sm text-gray-700">
                                                 Email quiz results to me
@@ -316,7 +213,7 @@ const updateOrganization = () => {
                                             <Checkbox
                                                 id="email_new_assignments"
                                                 v-model:checked="notificationForm.email_new_assignments"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500"
                                             />
                                             <InputLabel for="email_new_assignments" class="ml-2 block text-sm text-gray-700">
                                                 Email me when assigned new quizzes
@@ -327,7 +224,7 @@ const updateOrganization = () => {
                                             <Checkbox
                                                 id="email_reminders"
                                                 v-model:checked="notificationForm.email_reminders"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500"
                                             />
                                             <InputLabel for="email_reminders" class="ml-2 block text-sm text-gray-700">
                                                 Send email reminders for upcoming quizzes
@@ -338,7 +235,7 @@ const updateOrganization = () => {
                                             <Checkbox
                                                 id="in_app_notifications"
                                                 v-model:checked="notificationForm.in_app_notifications"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500"
                                             />
                                             <InputLabel for="in_app_notifications" class="ml-2 block text-sm text-gray-700">
                                                 Show in-app notifications
@@ -360,62 +257,153 @@ const updateOrganization = () => {
                             <!-- Organization Tab Content -->
                             <div v-show="activeTab === 'organization'">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">Organization Details</h3>
-                                <div class="bg-gray-50 p-4 rounded-md mb-6"> <!-- Info box styling -->
-                                    <p class="text-sm text-gray-600 mb-2">You are currently viewing settings for:</p>
-                                    <h4 class="text-base font-semibold text-gray-800">{{ props.organization?.name }}</h4>
-                                    <p class="text-sm text-gray-500 mt-1">ID: {{ props.organization?.slug }}</p>
-                                </div>
 
-                                <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-                                    <div>
-                                        <InputLabel for="org_name" value="Organization Name" />
-                                        <TextInput
-                                            id="org_name"
-                                            v-model="organizationForm.name"
-                                            type="text"
-                                            class="mt-1 block w-full"
-                                            disabled
-                                            readonly
-                                        />
-                                        <p class="mt-1 text-xs text-gray-500">Organization name cannot be changed here.</p>
+                                <form @submit.prevent="updateOrganization">
+                                    <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+                                        <div>
+                                            <InputLabel for="org_name" value="Organization Name" />
+                                            <TextInput
+                                                id="org_name"
+                                                v-model="organizationForm.name"
+                                                type="text"
+                                                class="mt-1 block w-full"
+                                                required
+                                            />
+                                            <InputError :message="organizationErrors.name" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_description" value="Description" />
+                                            <textarea
+                                                id="org_description"
+                                                v-model="organizationForm.description"
+                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"
+                                                rows="3"
+                                            ></textarea>
+                                            <InputError :message="organizationErrors.description" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_website" value="Website" />
+                                            <TextInput
+                                                id="org_website"
+                                                v-model="organizationForm.website"
+                                                type="url"
+                                                class="mt-1 block w-full"
+                                            />
+                                            <InputError :message="organizationErrors.website" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_industry" value="Industry" />
+                                            <TextInput
+                                                id="org_industry"
+                                                v-model="organizationForm.industry"
+                                                type="text"
+                                                class="mt-1 block w-full"
+                                            />
+                                            <InputError :message="organizationErrors.industry" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_address" value="Office Address" />
+                                            <TextInput
+                                                id="org_address"
+                                                v-model="organizationForm.office_address"
+                                                type="text"
+                                                class="mt-1 block w-full"
+                                            />
+                                            <InputError :message="organizationErrors.office_address" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_phone" value="Official Phone Number" />
+                                            <TextInput
+                                                id="org_phone"
+                                                v-model="organizationForm.official_phone_number"
+                                                type="tel"
+                                                class="mt-1 block w-full"
+                                            />
+                                            <InputError :message="organizationErrors.official_phone_number" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_email" value="Official Email" />
+                                            <TextInput
+                                                id="org_email"
+                                                v-model="organizationForm.official_email"
+                                                type="email"
+                                                class="mt-1 block w-full"
+                                            />
+                                            <InputError :message="organizationErrors.official_email" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_whatsapp" value="WhatsApp Contact" />
+                                            <TextInput
+                                                id="org_whatsapp"
+                                                v-model="organizationForm.official_Whatsapp_contact"
+                                                type="tel"
+                                                class="mt-1 block w-full"
+                                            />
+                                            <InputError :message="organizationErrors.official_Whatsapp_contact" class="mt-2" />
+                                        </div>
+
+                                        <div>
+                                            <InputLabel for="org_logo" value="Organization Logo" />
+                                            <div class="mt-2 flex items-center gap-4">
+                                                <img :src="currentLogoUrl" alt="Current logo" class="h-16 w-16 rounded-full object-cover">
+                                                <input
+                                                    id="org_logo"
+                                                    type="file"
+                                                    @change="organizationForm.logo = $event.target.files[0]"
+                                                    accept="image/*"
+                                                    class="block w-full text-sm text-gray-500
+                                                        file:mr-4 file:py-2 file:px-4
+                                                        file:rounded-md file:border-0
+                                                        file:text-sm file:font-semibold
+                                                        file:bg-green-50 file:text-green-700
+                                                        hover:file:bg-green-100"
+                                                />
+                                            </div>
+                                            <InputError :message="organizationErrors.logo" class="mt-2" />
+                                            <p class="mt-1 text-xs text-gray-500">Recommended size: 256x256 pixels. Max 2MB.</p>
+                                        </div>
+
+                                        <!-- Certificate Seal Upload -->
+                                        <div>
+                                            <InputLabel for="org_seal" value="Certificate Seal" />
+                                            <div class="mt-2 flex items-center gap-4">
+                                                <img :src="currentSealUrl" alt="Current seal" class="h-16 w-16 rounded-full object-cover">
+                                                <input
+                                                    id="org_seal"
+                                                    type="file"
+                                                    @change="organizationForm.certificate_seal = $event.target.files[0]"
+                                                    accept="image/*"
+                                                    class="block w-full text-sm text-gray-500
+                                                        file:mr-4 file:py-2 file:px-4
+                                                        file:rounded-md file:border-0
+                                                        file:text-sm file:font-semibold
+                                                        file:bg-green-50 file:text-green-700
+                                                        hover:file:bg-green-100"
+                                                />
+                                            </div>
+                                            <InputError :message="organizationErrors.certificate_seal" class="mt-2" />
+                                            <p class="mt-1 text-xs text-gray-500">Recommended size: 200x200 pixels. Max 2MB.</p>
+                                        </div>
+                                    
                                     </div>
 
-                                    <div>
-                                        <InputLabel for="org_slug" value="Organization Slug" />
-                                        <TextInput
-                                            id="org_slug"
-                                            v-model="organizationForm.slug"
-                                            type="text"
-                                            class="mt-1 block w-full"
-                                            disabled
-                                            readonly
-                                        />
-                                        <p class="mt-1 text-xs text-gray-500">This is your organization's unique identifier.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Display other organization details if needed -->
-                                <!--
-                                <div class="mt-6">
-                                    <h4 class="text-md font-medium text-gray-800 mb-2">Contact Information</h4>
-                                    <p class="text-sm text-gray-600">Contact email: {{ props.organization?.contact_email }}</p>
-                                </div>
-                                -->
-
-                                <!-- If organization settings are editable (e.g., by admins), add a form here -->
-                                <!--
-                                <form @submit.prevent="updateOrganization" class="mt-8">
-                                    <h4 class="text-md font-medium text-gray-800 mb-2">Edit Organization (Admin Only)</h4>
-                                     ... form fields for editable org details ...
-                                    <div class="flex items-center justify-end mt-4">
+                                    <div class="flex items-center justify-end mt-6">
                                         <PrimaryButton :disabled="organizationProcessing">
-                                             <span v-if="organizationProcessing">Saving...</span>
-                                             <span v-else>Save Organization</span>
+                                            <span v-if="organizationProcessing">Saving...</span>
+                                            <span v-else>Save Changes</span>
                                         </PrimaryButton>
                                     </div>
                                 </form>
-                                -->
                             </div>
+                            <!-- Organization Tab Content -->
+                            
 
                         </div> <!-- End Tab Content -->
 

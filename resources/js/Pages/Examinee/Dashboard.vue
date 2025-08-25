@@ -8,78 +8,76 @@
           <p class="mt-2 text-gray-600">Your learning progress and quiz dashboard</p>
         </div>
 
-          <!-- Stats Cards -->
-<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-  
-  <!-- Completed Quizzes -->
-  <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
-    <div class="px-6 py-6 flex items-center">
-      <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-indigo-100 to-indigo-200">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div class="ml-5 flex-1">
-        <dt class="text-xs font-semibold text-gray-500 uppercase">Completed Quizzes</dt>
-        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ stats.completed_quizzes }}</dd>
-      </div>
-    </div>
-  </div>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          
+          <!-- Completed Quizzes -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
+            <div class="px-6 py-6 flex items-center">
+              <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-green-100 to-green-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 flex-1">
+                <dt class="text-xs font-semibold text-gray-500 uppercase">Completed Quizzes</dt>
+                <dd class="mt-1 text-2xl font-bold text-gray-900">{{ stats.completed_quizzes }}</dd>
+              </div>
+            </div>
+          </div>
 
-  <!-- Average Score -->
-  <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
-    <div class="px-6 py-6 flex items-center">
-      <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-blue-100 to-blue-200">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-      </div>
-      <div class="ml-5 flex-1">
-        <dt class="text-xs font-semibold text-gray-500 uppercase">Average Score</dt>
-        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ stats.average_score }}%</dd>
-      </div>
-    </div>
-  </div>
+          <!-- Average Score -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
+            <div class="px-6 py-6 flex items-center">
+              <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-blue-100 to-blue-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div class="ml-5 flex-1">
+                <dt class="text-xs font-semibold text-gray-500 uppercase">Average Score</dt>
+                <dd class="mt-1 text-2xl font-bold text-gray-900">{{ stats.average_score }}%</dd>
+              </div>
+            </div>
+          </div>
 
-  <!-- Time Spent -->
-  <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
-    <div class="px-6 py-6 flex items-center">
-      <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-green-100 to-green-200">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div class="ml-5 flex-1">
-        <dt class="text-xs font-semibold text-gray-500 uppercase">Time Spent</dt>
-        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ formatTime(stats.time_spent) }}</dd>
-      </div>
-    </div>
-  </div>
+          <!-- Time Spent -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
+            <div class="px-6 py-6 flex items-center">
+              <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-green-100 to-green-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 flex-1">
+                <dt class="text-xs font-semibold text-gray-500 uppercase">Time Spent</dt>
+                <dd class="mt-1 text-2xl font-bold text-gray-900">{{ formatTime(stats.time_spent) }}</dd>
+              </div>
+            </div>
+          </div>
 
-  <!-- Available Quizzes -->
-  <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
-    <div class="px-6 py-6 flex items-center">
-      <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-amber-100 to-amber-200">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      </div>
-      <div class="ml-5 flex-1">
-        <dt class="text-xs font-semibold text-gray-500 uppercase">Available Quizzes</dt>
-        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ stats.available_quizzes }}</dd>
-      </div>
-    </div>
-  </div>
-
-</div>
-
+          <!-- Available Quizzes -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200">
+            <div class="px-6 py-6 flex items-center">
+              <div class="flex-shrink-0 p-3 rounded-lg bg-gradient-to-tr from-amber-100 to-amber-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div class="ml-5 flex-1">
+                <dt class="text-xs font-semibold text-gray-500 uppercase">Available Quizzes</dt>
+                <dd class="mt-1 text-2xl font-bold text-gray-900">{{ stats.available_quizzes }}</dd>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <!-- Recent Attempts -->
           <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100">
               <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Recent Quiz Attempts
@@ -114,7 +112,6 @@
                         </div>
                       </div>
                     </div>
-                    
                   </div>
                 </div>
               </template>
@@ -125,7 +122,10 @@
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No quiz attempts yet</h3>
                 <p class="mt-1 text-sm text-gray-500">Get started by taking your first quiz</p>
                 <div class="mt-4">
-                  <Link :href="route('examinee.quizzes.index')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                  <Link :href="route('examinee.quizzes.index')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
                     Browse Available Quizzes
                   </Link>
                 </div>
@@ -182,7 +182,6 @@
                         </div>
                       </div>
                     </div>
-                    
                   </div>
                 </div>
               </template>
@@ -234,3 +233,45 @@ const formatTime = (seconds) => {
   return result;
 };
 </script>
+
+<style scoped>
+/* Green-themed gradient for completed quizzes */
+.from-green-100 {
+    --tw-gradient-from: #d1fae5;
+    --tw-gradient-to: #d1fae500;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-green-200 {
+    --tw-gradient-to: #a7f3d0;
+}
+
+.text-green-500 {
+    color: #10B981;
+}
+
+.text-green-600 {
+    color: #059669;
+}
+
+/* Border styling */
+.border-gray-100 {
+    border-color: #f3f4f6;
+}
+
+/* Transition effects */
+.transition-all {
+    transition: all 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gap-6 > *:not(:last-child) {
+        margin-bottom: 1.5rem;
+    }
+}
+</style>

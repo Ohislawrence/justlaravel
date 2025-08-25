@@ -19,6 +19,8 @@ class Certificate extends Model
         'expires_at',
         'metadata',
     ];
+
+   
     
 
     public function quiz()

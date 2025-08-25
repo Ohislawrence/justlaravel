@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Examinee;
 
 use App\Http\Controllers\Controller;
+use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 
@@ -178,10 +179,27 @@ class DashboardController extends Controller
             })
             ->get();
         
+            $ongoingQuizzes = Quiz::query()
+            ->with(['organization', 'attempts' => function($query) {
+                $query->where('user_id', auth()->id())
+                      ->whereNull('completed_at')
+                      ->latest();
+            }])
+            ->whereHas('attempts', function($query) {
+                $query->where('user_id', auth()->id())
+                      ->whereNull('completed_at');
+            })
+            ->get()
+            ->map(function($quiz) {
+                $quiz->attempt = $quiz->attempts->first();
+                return $quiz;
+            });
+        
         return inertia('Examinee/MyQuizzes', [
             'quizzes' => $quizzes,
             'organizations' => $organizations,
             'filters' => $filters,
+            'ongoingQuizzes' => $ongoingQuizzes,
             
         ]);
     }

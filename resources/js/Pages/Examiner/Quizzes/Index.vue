@@ -97,37 +97,56 @@ const deleteQuiz = (quiz) => {
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-4 sm:p-6 bg-white border-b border-gray-200"> <!-- Adjusted padding for mobile -->
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"> <!-- Flex column on small screens -->
-                            <input
-                                v-model="search"
-                                @input="updateSearch($event.target.value)"
-                                type="text"
-                                placeholder="Search quizzes..."
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
+                    <div class="p-4 sm:p-6 bg-white border-b border-gray-200">
+                        <!-- Search and Create Button Section -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <!-- Search Bar -->
+                            <div class="relative flex-grow w-full sm:w-auto">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    v-model="search"
+                                    @input="updateSearch($event.target.value)"
+                                    type="text"
+                                    placeholder="Search quizzes..."
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                                >
+                                <div v-if="search" @click="search = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+                                    <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Create Button -->
                             <Link
                                 :href="route('examiner.quizzes.create', props.organization.id)"
-                                class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                                class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition duration-150 ease-in-out flex items-center justify-center gap-2"
                             >
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
                                 Create New Quiz
                             </Link>
                         </div>
 
-                        <div class="overflow-x-auto"> <!-- Ensure horizontal scrolling if needed -->
+                        <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Title
                                         </th>
-                                        <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> <!-- Hidden on small screens -->
+                                        <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Type
                                         </th>
-                                        <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> <!-- Hidden on small screens -->
+                                        <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Questions
                                         </th>
-                                        <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> <!-- Hidden on small screens -->
+                                        <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Attempts
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -143,19 +162,19 @@ const deleteQuiz = (quiz) => {
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <Link
                                                 :href="route('examiner.quizzes.show', quiz.id)"
-                                                class="text-blue-600 hover:text-blue-800 font-medium"
+                                                class="text-green-600 hover:text-green-800 font-medium"
                                             >
                                                 {{ quiz.title }}
                                             </Link>
                                         </td>
-                                        <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900"> <!-- Hidden on small screens -->
+                                        <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ quiz.quiz_type }}
                                         </td>
-                                        <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap"> <!-- Hidden on small screens -->
+                                        <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                             <div class="group relative inline-block">
                                                 <Link
                                                     :href="route('examiner.quizzes.questions.index', { quiz: quiz.id })"
-                                                    class="text-blue-600 hover:text-blue-800 font-medium"
+                                                    class="text-green-600 hover:text-green-800 font-medium"
                                                 >
                                                     <span v-if="quiz.questions_count === quiz.total_questions">
                                                         {{ quiz.questions_count }}
@@ -172,7 +191,7 @@ const deleteQuiz = (quiz) => {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900"> <!-- Hidden on small screens -->
+                                        <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ quiz.attempts_count }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -188,20 +207,20 @@ const deleteQuiz = (quiz) => {
                                             <div class="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                                                 <Link
                                                     :href="route('examiner.quizzes.edit', quiz.id)"
-                                                    class="px-2.5 py-1.5 text-center text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 rounded-md transition duration-150 ease-in-out"
+                                                    class="px-2.5 py-1.5 text-center text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 rounded-md transition duration-150 ease-in-out"
                                                 >
                                                     Edit
                                                 </Link>
                                                 <Link
                                                     :href="route('examiner.quizzes.questions.index', { quiz: quiz.id })"
-                                                    class="px-2.5 py-1.5 text-center text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 rounded-md transition duration-150 ease-in-out"
+                                                    class="px-2.5 py-1.5 text-center text-emerald-600 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 rounded-md transition duration-150 ease-in-out"
                                                     title="Manage Questions"
                                                 >
                                                     Questions
                                                 </Link>
                                                 <Link
                                                     :href="route('examiner.quizzes.analysis.index', { quiz: quiz.id })"
-                                                    class="px-2.5 py-1.5 text-center text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 rounded-md transition duration-150 ease-in-out"
+                                                    class="px-2.5 py-1.5 text-center text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 rounded-md transition duration-150 ease-in-out"
                                                     title="Analyze Quiz"
                                                 >
                                                     Analyze
@@ -234,7 +253,7 @@ const deleteQuiz = (quiz) => {
                         <!-- Empty State -->
                         <div v-if="quizzes.data.length === 0" class="text-center py-12">
                             <div class="text-gray-500">
-                                <i class="fas fa-clipboard-list text-3xl sm:text-4xl mb-4"></i> <!-- Adjusted icon size for mobile -->
+                                <i class="fas fa-clipboard-list text-3xl sm:text-4xl mb-4"></i>
                                 <p class="text-lg mb-2">No quizzes found</p>
                                 <p class="text-sm">
                                     {{ search ? 'Try adjusting your search terms' : 'Get started by creating your first quiz' }}
@@ -249,3 +268,45 @@ const deleteQuiz = (quiz) => {
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Enhanced search input styling */
+input[type="text"] {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"]:focus {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+/* Create button hover effect */
+.bg-green-600:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flex-col .w-full {
+        width: 100%;
+    }
+    
+    .gap-4 {
+        gap: 1rem;
+    }
+}
+
+/* Action buttons hover effects */
+.text-green-600:hover {
+    transform: translateY(-1px);
+}
+
+.text-emerald-600:hover {
+    transform: translateY(-1px);
+}
+
+.text-teal-600:hover {
+    transform: translateY(-1px);
+}
+</style>

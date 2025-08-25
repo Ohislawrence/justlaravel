@@ -5,11 +5,23 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout2 from '@/Layouts/AppLayout2.vue';
 import Cta from '@/Components/Cta.vue';
 
+const props = defineProps({
+    plans: Array,
+    });
+
 // Refs to manage the open state of each FAQ item
 const openFaq1 = ref(false);
 const openFaq2 = ref(false);
 const openFaq3 = ref(false);
 const openFaq4 = ref(false);
+
+// Pricing cycle state
+const activeCycle = ref('monthly');
+const cycles = [
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'quarterly', label: 'Quarterly' },
+    { value: 'yearly', label: 'Yearly' },
+];
 
 // Function to toggle FAQ state
 const toggleFaq = (faqNumber) => {
@@ -25,10 +37,37 @@ const toggleFaq = (faqNumber) => {
     openFaq4.value = !openFaq4.value;
   }
 };
+
+// Helper function to format price
+const formatPrice = (price) => {
+    return price === 0 ? 'Free' : `₦${price.toLocaleString()}`;
+};
+
+// Helper function to get feature value
+const getFeatureValue = (plan, featureSlug) => {
+    return plan.features[featureSlug] ?? 'Not included';
+};
+
+// Helper to get price for active cycle
+const getCyclePrice = (plan) => {
+    const price = plan[`${activeCycle.value}_price`];
+    if (plan.slug === 'enterprise') return 'Custom';
+    return formatPrice(price);
+};
+
+// Helper to get price suffix
+const getPriceSuffix = () => {
+    switch(activeCycle.value) {
+        case 'monthly': return '/month';
+        case 'quarterly': return '/quarter';
+        case 'yearly': return '/year';
+        default: return '/month';
+    }
+};
 </script>
 
 <template>
-    <Head title="Pricing - QuizPortal NG" />
+    <Head title="Pricing" />
     <AppLayout2>
          <!-- Hero Section -->
         <section class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-16 sm:py-24 overflow-hidden">
@@ -54,15 +93,25 @@ const toggleFaq = (faqNumber) => {
                 </div>
             </div>
         </section>
-
         <!-- Pricing Section (Main Content) -->
         <section class="py-16 sm:py-20 bg-white">
             <div class="container mx-auto px-4 sm:px-6">
-                 <!-- Pricing Toggle/FAQ Intro (Optional) -->
+                <!-- Pricing Toggle -->
                 <div class="max-w-2xl mx-auto text-center mb-12 sm:mb-16">
-                    <!-- <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium mb-4">
-                        Billed Monthly
-                    </div> -->
+                    <div class="inline-flex bg-gray-100 rounded-full p-1 mb-6">
+                        <button
+                            v-for="cycle in cycles"
+                            :key="cycle.value"
+                            @click="activeCycle = cycle.value"
+                            class="px-4 py-2 text-sm font-medium rounded-full transition-colors"
+                            :class="{
+                                'bg-white text-emerald-600 shadow-sm': activeCycle === cycle.value,
+                                'text-gray-600 hover:text-gray-800': activeCycle !== cycle.value
+                            }"
+                        >
+                            {{ cycle.label }}
+                        </button>
+                    </div>
                     <p class="text-gray-600">
                         Have questions before choosing? <a :href="route('contact')" class="text-emerald-600 font-medium hover:underline">Contact our sales team</a> or check out our <a href="#" class="text-emerald-600 font-medium hover:underline">FAQs</a>.
                     </p>
@@ -70,150 +119,134 @@ const toggleFaq = (faqNumber) => {
 
                 <!-- Pricing Cards -->
                 <div class="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-                    <!-- Starter Plan -->
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition">
-                        <div class="text-center mb-8">
-                            <h3 class="text-lg sm:text-xl font-semibold mb-2">Starter</h3>
-                            <div class="text-2xl sm:text-3xl font-bold mb-2">₦5,000<span class="text-sm font-normal text-gray-500">/month</span></div>
-                            <p class="text-gray-600 text-sm sm:text-base">Perfect for individual teachers</p>
-                        </div>
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Up to 100 students
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Unlimited quizzes
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Basic analytics
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                WhatsApp support
-                            </li>
-                        </ul>
-                        <Link :href="route('register')" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
-                            Start Free Trial
-                        </Link>
-                    </div>
-
-                    <!-- School Plan (Highlighted) -->
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border-2 border-emerald-600 relative transform hover:scale-[1.02] transition duration-300">
-                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-medium">
+                    <!-- Loop through plans -->
+                    <div v-for="(plan, index) in plans" :key="plan.id" 
+                         class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition"
+                         :class="{
+                            'shadow-lg border-2 border-emerald-600 transform hover:scale-[1.02] transition duration-300': plan.is_default,
+                            'hover:shadow-md': !plan.is_default
+                         }">
+                        
+                        <!-- Popular badge for default plan -->
+                        <div v-if="plan.is_default" class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-medium">
                             Most Popular
                         </div>
-                        <div class="text-center mb-8 mt-4">
-                            <h3 class="text-lg sm:text-xl font-semibold mb-2">School</h3>
-                            <div class="text-2xl sm:text-3xl font-bold mb-2">₦25,000<span class="text-sm font-normal text-gray-500">/month</span></div>
-                            <p class="text-gray-600 text-sm sm:text-base">For schools and institutions</p>
+
+                        <div class="text-center mb-8" :class="{ 'mt-4': plan.is_default }">
+                            <h3 class="text-lg sm:text-xl font-semibold mb-2">{{ plan.name }}</h3>
+                            <div v-if="plan.slug !== 'enterprise'" class="text-2xl sm:text-3xl font-bold mb-2">
+                                {{ getCyclePrice(plan) }}<span class="text-sm font-normal text-gray-500">{{ getPriceSuffix() }}</span>
+                            </div>
+                            <div v-else class="text-2xl sm:text-3xl font-bold mb-2">
+                                Custom
+                            </div>
+                            <p class="text-gray-600 text-sm sm:text-base">{{ plan.description }}</p>
                         </div>
                         <ul class="space-y-3 mb-8">
-                            <li class="flex items-center text-sm">
+                            <li v-if="getFeatureValue(plan, 'users_limit') !== 'Not included'" class="flex items-center text-sm">
                                 <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
-                                Up to 1,000 students
+                                {{ getFeatureValue(plan, 'users_limit') === 'unlimited' ? 'Unlimited' : 'Up to ' + getFeatureValue(plan, 'users_limit') }} students
                             </li>
                             <li class="flex items-center text-sm">
                                 <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
-                                Multiple teachers
+                                {{ getFeatureValue(plan, 'ai_question_generation') ? 'AI Question Generation' : 'Basic Question Creation' }}
                             </li>
                             <li class="flex items-center text-sm">
                                 <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
-                                Advanced analytics
+                                {{ getFeatureValue(plan, 'quiz_attempts_limit') === 'unlimited' ? 'Unlimited quizzes' : (getFeatureValue(plan, 'quiz_attempts_limit') + ' quizzes') }}
+                            </li>
+                            <li v-if="getFeatureValue(plan, 'question_pool_limit') !== 'Not included'" class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'question_pool_limit') === 'unlimited' ? 'Unlimited question pool' : (getFeatureValue(plan, 'question_pool_limit') + ' question pool') }}
+                            </li>
+                            <li v-if="getFeatureValue(plan, 'storage_space') !== 'Not included'" class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ getFeatureValue(plan, 'storage_space') === 'unlimited' ? 'Unlimited storage' : (getFeatureValue(plan, 'storage_space') + ' storage') }}
                             </li>
                             <li class="flex items-center text-sm">
                                 <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
-                                Parent portal
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Priority support
+                                {{ plan.slug === 'enterprise' ? 'Dedicated support' : (plan.slug === 'school' ? 'Priority support' : 'WhatsApp support') }}
                             </li>
                         </ul>
-                        <Link :href="route('register')" class="w-full py-3 text-center bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium text-sm block">
+                        <Link v-if="plan.slug !== 'enterprise'" :href="route('register')" 
+                              class="w-full py-3 text-center rounded-lg transition font-medium text-sm block"
+                              :class="{
+                                'bg-emerald-600 text-white hover:bg-emerald-700': plan.is_default,
+                                'border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50': !plan.is_default
+                              }">
                             Start Free Trial
                         </Link>
-                    </div>
-
-                    <!-- Enterprise Plan -->
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition">
-                        <div class="text-center mb-8">
-                            <h3 class="text-lg sm:text-xl font-semibold mb-2">Enterprise</h3>
-                            <div class="text-2xl sm:text-3xl font-bold mb-2">Custom</div>
-                            <p class="text-gray-600 text-sm sm:text-base">For large institutions</p>
-                        </div>
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Unlimited students
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Unlimited quizzes
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Premium analytics
-                            </li>
-                            <li class="flex items-center text-sm">
-                                <svg class="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Dedicated support
-                            </li>
-                        </ul>
-                        <a href="mailto:sales@quizportal.ng" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
+                        <a v-else href="mailto:sales@quizportal.online" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
                             Contact Sales
                         </a>
                     </div>
                 </div>
 
-                <!-- Plan Comparison Table (Optional) -->
-                
+                <!-- Plan Comparison Table -->
                 <div class="mt-20 max-w-6xl mx-auto overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Starter</th>
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">School</th>
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Enterprise</th>
+                                <th v-for="plan in plans" :key="plan.id" scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{{ plan.name }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Students</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Up to 100</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Up to 1,000</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Unlimited</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Monthly Price</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ plan.slug === 'enterprise' ? 'Custom' : `₦${plan.monthly_price.toLocaleString()}` }}
+                                </td>
                             </tr>
-                             Add more rows for other features
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Students Limit</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ getFeatureValue(plan, 'users_limit') === 'unlimited' ? 'Unlimited' : (getFeatureValue(plan, 'users_limit') === 'Not included' ? '-' : 'Up to ' + getFeatureValue(plan, 'users_limit')) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">AI Question Generation</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ getFeatureValue(plan, 'ai_question_generation') ? '✓' : '✗' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Quiz Attempts</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ getFeatureValue(plan, 'quiz_attempts_limit') === 'unlimited' ? 'Unlimited' : (getFeatureValue(plan, 'quiz_attempts_limit') === 'Not included' ? '-' : getFeatureValue(plan, 'quiz_attempts_limit')) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Question Pool</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ getFeatureValue(plan, 'question_pool_limit') === 'unlimited' ? 'Unlimited' : (getFeatureValue(plan, 'question_pool_limit') === 'Not included' ? '-' : getFeatureValue(plan, 'question_pool_limit')) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Storage Space</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ getFeatureValue(plan, 'storage_space') === 'unlimited' ? 'Unlimited' : (getFeatureValue(plan, 'storage_space') === 'Not included' ? '-' : getFeatureValue(plan, 'storage_space')) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Support</td>
+                                <td v-for="plan in plans" :key="plan.id" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    {{ plan.slug === 'basic' ? 'Dedicated' : (plan.slug === 'educational-2' ? 'Priority' : 'Basic') }}
+                                </td>
+                            </tr>
+                            
                         </tbody>
                     </table>
                 </div>

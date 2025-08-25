@@ -59,8 +59,6 @@ const submitForm = () => {
   }
   form.post('/examiner/user');
 };
-
-
 </script>
 
 <template>
@@ -142,8 +140,8 @@ const submitForm = () => {
                     :class="{ 'is-invalid': form.errors.user_type }"
                   >
                     <option disabled value="">Select One</option>
-                    <option value="admin">Admin (full access)</option>
-                    <option value="examiner">Examiner (staff/teacher)</option>
+                    <option value="examiner">Examiner (full access)</option>
+                    <option value="instructor">Instructor (staff/teacher)</option>
                     <option value="examinee">Examinee (student/candidate)</option>
                   </select>
                   <div class="invalid-feedback" v-if="form.errors.user_type">{{ form.errors.user_type }}</div>
@@ -158,7 +156,7 @@ const submitForm = () => {
                     id="designation_id"
                     :class="{ 'is-invalid': form.errors.designation_id }"
                   >
-                    <option value="">Select Designation</option>
+                    <option disabled value="">Select Designation</option>
                     <option 
                       v-for="designation in designations" 
                       :key="designation.id" 
@@ -174,19 +172,21 @@ const submitForm = () => {
 
                 <!-- Groups -->
                 <div class="mb-3">
-                  <label for="groups" class="form-label">Assign Group(s)</label>
+                  <label for="groups" class="form-label">Assign Group</label>
                   <select
-                    v-model="form.groups"
-                    multiple
+                    v-model="form.group"
                     class="form-select"
                     id="groups"
-                    :class="{ 'is-invalid': form.errors.groups }"
+                    :class="{ 'is-invalid': form.errors.group }"
                   >
+                    <option disabled value="">-- Select a group --</option>
                     <option v-for="group in props.groups.data" :key="group.id" :value="group.id">
                       {{ group.name }}
                     </option>
                   </select>
-                  <div class="invalid-feedback" v-if="form.errors.groups">{{ form.errors.groups }}</div>
+                  <div class="invalid-feedback" v-if="form.errors.group">
+                    {{ form.errors.group }}
+                  </div>
                 </div>
 
                 <!-- Notification Checkbox -->
@@ -209,7 +209,7 @@ const submitForm = () => {
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary" :disabled="form.processing">
+                <button type="submit" class="btn btn-success" :disabled="form.processing">
                   <span v-if="form.processing">Creating...</span>
                   <span v-else>Create User</span>
                 </button>
@@ -226,3 +226,60 @@ const submitForm = () => {
     />
   </AppLayout>
 </template>
+
+<style scoped>
+/* Custom styles to enhance the green theme */
+.btn-success {
+  background-color: #10B981;
+  border-color: #10B981;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.btn-success:focus {
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+}
+
+.form-control:focus {
+  border-color: #10B981;
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+}
+
+.form-select:focus {
+  border-color: #10B981;
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: #10B981;
+  border-color: #10B981;
+}
+
+.card-header {
+  background-color: #ecfdf5;
+  border-bottom: 1px solid #d1fae5;
+}
+
+.card {
+  border: 1px solid #d1fae5;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.is-invalid {
+  border-color: #ef4444;
+}
+
+.invalid-feedback {
+  color: #ef4444;
+}
+
+/* Green-themed select dropdown indicator */
+.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2310B981' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+</style>

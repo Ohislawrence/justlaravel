@@ -7,8 +7,11 @@
         </h2>
         <Link 
           :href="route('examiner.quizzes.analysis.index', { quiz: quiz.id })"
-          class="btn btn-sm btn-outline"
+          class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
         >
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
           Back to Full Results
         </Link>
       </div>
@@ -22,61 +25,72 @@
             title="Group Members"
             :value="group.members_count || 0"
             icon="users"
+            color="green"
           />
           <SummaryCard 
             title="Attempts"
             :value="totalAttempts || 0"
             icon="clipboard-document"
+            color="green"
           />
           <SummaryCard 
             title="Average Score"
             :value="`${Math.round(averageScore)}%`"
             icon="chart-bar"
+            color="green"
           />
           <SummaryCard 
             title="Pass Rate"
             :value="`${Math.round(passRate)}%`"
             icon="check-circle"
+            color="green"
           />
         </div>
 
         <!-- Performance Charts -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div class="bg-white p-6 rounded-lg shadow">
+          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
             <h3 class="text-lg font-medium mb-4">Score Distribution</h3>
-            <BarChart 
-              v-if="scoreDistributionData"
-              :data="scoreDistributionData"
-              :options="chartOptions"
-            />
-            <div v-else class="text-gray-500 text-center py-8">
-              No score data available
+            <div class="chart-container">
+              <BarChart 
+                v-if="scoreDistributionData"
+                :data="scoreDistributionData"
+                :options="chartOptions"
+              />
+              <div v-else class="text-gray-500 text-center py-8">
+                No score data available
+              </div>
             </div>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow">
+          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
             <h3 class="text-lg font-medium mb-4">Completion Over Time</h3>
-            <LineChart 
-              v-if="completionOverTimeData"
-              :data="completionOverTimeData"
-              :options="chartOptions"
-              :key="JSON.stringify(completionOverTimeData)" 
-            />
-            <div v-else class="text-gray-500 text-center py-8">
-              No completion data available
+            <div class="chart-container">
+              <LineChart 
+                v-if="completionOverTimeData"
+                :data="completionOverTimeData"
+                :options="chartOptions"
+                :key="JSON.stringify(completionOverTimeData)" 
+              />
+              <div v-else class="text-gray-500 text-center py-8">
+                No completion data available
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Attempts Table -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6 border border-gray-100">
           <div class="p-6 bg-white border-b border-gray-200">
             <div class="flex justify-between items-center mb-4">
               <h3 class="text-lg font-medium">Member Attempts</h3>
               <button 
                 @click="exportToCSV"
-                class="btn btn-sm btn-primary"
+                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
                 :disabled="!attempts.data?.length"
               >
+                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
                 Export to CSV
               </button>
             </div>
@@ -88,7 +102,7 @@
         </div>
 
         <!-- Question Performance -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg ">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
           <div class="p-6 bg-white border-b border-gray-200">
             <h3 class="text-lg font-medium mb-4">Question Performance</h3>
             <QuestionStatsTable 
@@ -97,8 +111,6 @@
             />
           </div>
         </div>
-
-        
       </div>
     </div>
   </AppLayout>
@@ -185,7 +197,7 @@ const scoreDistributionData = computed(() => {
     datasets: [{
       label: 'Number of Attempts',
       data: distribution,
-      backgroundColor: '#3B82F6'
+      backgroundColor: '#10B981' // Changed to green
     }]
   };
 });
@@ -232,7 +244,27 @@ const completionOverTimeData = computed(() => {
 
 const chartOptions = {
   responsive: true,
-  maintainAspectRatio: false
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          return `${context.dataset.label}: ${context.parsed.y}`;
+        }
+      }
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        stepSize: 1
+      }
+    }
+  }
 };
 
 const exportToCSV = () => {
@@ -273,8 +305,45 @@ const formatTime = (seconds) => {
 .chart-container {
   height: 300px;
 }
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+
+/* Enhanced green-themed styling */
+.bg-green-600 {
+    background-color: #10B981;
+}
+
+.bg-green-700:hover {
+    background-color: #059669;
+}
+
+.focus\:ring-green-300:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Card hover effect */
+.hover\:shadow-md:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Border styling */
+.border-gray-100 {
+    border-color: #f3f4f6;
+}
+
+/* Disabled state */
+.disabled\:opacity-25:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gap-4 > *:not(:last-child) {
+        margin-bottom: 1rem;
+    }
 }
 </style>

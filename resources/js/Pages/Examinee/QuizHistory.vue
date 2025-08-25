@@ -14,7 +14,7 @@
                 <select 
                   v-model="filters.status"
                   @change="filterAttempts"
-                  class="appearance-none bg-white border border-gray-200 rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all duration-200 w-full sm:w-auto"
+                  class="appearance-none bg-white border border-gray-200 rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 shadow-sm transition-all duration-200 w-full sm:w-auto"
                 >
                   <option value="all">All Statuses</option>
                   <option value="passed">Passed</option>
@@ -30,7 +30,7 @@
                 <select 
                   v-model="filters.sort"
                   @change="filterAttempts"
-                  class="appearance-none bg-white border border-gray-200 rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all duration-200 w-full sm:w-auto"
+                  class="appearance-none bg-white border border-gray-200 rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 shadow-sm transition-all duration-200 w-full sm:w-auto"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -71,7 +71,6 @@
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Completed
                   </th>
-                  
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-100">
@@ -79,9 +78,9 @@
                   <td class="px-6 py-5 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10">
-                        <div class="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <div class="h-10 w-10 rounded-lg" :class="attempt.is_passed ? 'bg-green-50' : 'bg-red-50'">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 m-2.5" :class="attempt.is_passed ? 'text-green-600' : 'text-red-600'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="attempt.is_passed ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2'" />
                           </svg>
                         </div>
                       </div>
@@ -103,12 +102,19 @@
                       class="px-2.5 py-1 inline-flex text-xs leading-4 font-semibold rounded-full" 
                       :class="attempt.is_passed ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'"
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" :class="attempt.is_passed ? 'text-green-500' : 'text-red-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="attempt.is_passed ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2'" />
+                      </svg>
                       {{ attempt.is_passed ? 'Passed' : 'Failed' }}
                     </span>
                   </td>
                   <td class="px-6 py-5 whitespace-nowrap">
                     <div class="text-sm text-gray-900 font-medium">
                       {{ attempt.score }} / {{ attempt.max_score }} <span class="text-gray-500">({{ attempt.percentage }}%)</span>
+                    </div>
+                    <!-- Progress bar for score -->
+                    <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+                      <div class="bg-gradient-to-r" :class="attempt.is_passed ? 'from-green-500 to-green-600' : 'from-red-500 to-red-600'" :style="`width: ${attempt.percentage}%`"></div>
                     </div>
                   </td>
                   <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
@@ -117,7 +123,6 @@
                   <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
                     {{ formatDate(attempt.completed_at) }}
                   </td>
-                  
                 </tr>
               </tbody>
             </table>
@@ -134,7 +139,7 @@
               <div class="mt-6">
                 <Link 
                   :href="route('examinee.quizzes.index')" 
-                  class="inline-flex items-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                  class="inline-flex items-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -166,7 +171,7 @@
                     :key="index"
                     :href="link.url || '#'"
                     :class="{
-                      'bg-indigo-50 border-indigo-500 text-indigo-600 z-10': link.active,
+                      'bg-green-50 border-green-500 text-green-600 z-10': link.active,
                       'bg-white border-gray-200 text-gray-600 hover:bg-gray-50': !link.active && link.url,
                       'bg-white border-gray-200 text-gray-300 cursor-not-allowed': !link.url
                     }"
@@ -239,3 +244,48 @@ const formatTime = (seconds) => {
   return result;
 };
 </script>
+
+<style scoped>
+/* Green-themed styling */
+.bg-green-50 {
+    background-color: #ecfdf5;
+}
+
+.border-green-500 {
+    border-color: #10B981;
+}
+
+.text-green-600 {
+    color: #10B981;
+}
+
+.text-green-700 {
+    color: #065f46;
+}
+
+/* Focus ring styling */
+.focus\:ring-green-500:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Border styling */
+.border-gray-100 {
+    border-color: #f3f4f6;
+}
+
+/* Transition effects */
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gap-4 > *:not(:last-child) {
+        margin-bottom: 1rem;
+    }
+}
+</style>

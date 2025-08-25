@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Invitation;
 use App\Jobs\SendGroupInvitation;
 use App\Models\Quiz;
+use App\Services\UserImportService;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 class GroupController extends Controller
 {
@@ -79,18 +82,153 @@ class GroupController extends Controller
         $organization = auth()->user()->organizations()->first();
         
         $group->load(['members', 'quizzes']);
-
+    
+        // Get all users in the organization with their current group info
+        $organizationUsers = $organization->members()->role('examinee')
+            ->with(['groups' => function ($query) use ($organization) {
+                $query->where('groups.organization_id', $organization->id)
+                      ->whereNull('group_members.left_at');
+            }])
+            ->get()
+            ->map(function ($user) {
+                $currentGroup = $user->groups->first();
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'current_group_id' => $currentGroup ? $currentGroup->id : null,
+                    'current_group_name' => $currentGroup ? $currentGroup->name : null,
+                    'has_no_group' => is_null($currentGroup), 
+                ];
+            });
+    
+        // Filter out users already in the current group
+        $availableUsers = $organizationUsers->filter(function ($user) use ($group) {
+            return $user['has_no_group'];
+        })->values();
+    
         return inertia('Examiner/Groups/Show', [
             'organization' => $organization,
             'group' => $group,
-            'availableUsers' => $organization->members()
-                ->whereNotIn('users.id', $group->members->pluck('id'))
-                ->get(),
+            'availableUsers' => $availableUsers,
             'availableQuizzes' => $organization->quizzes()
                 ->whereNotIn('quizzes.id', $group->quizzes->pluck('id'))
                 ->get(),
+            'allGroups' => $organization->groups()->get(),
+            'allGroups' => $organization->groups()->where('id', '!=', $group->id)->get(),
         ]);
     }
+
+    public function moveUsers(Request $request, Organization $organization, Group $group)
+    {
+        $validated = $request->validate([
+            'user_ids' => ['required', 'array'],
+            'user_ids.*' => ['exists:users,id'],
+            'target_group_id' => ['required', 'exists:groups,id']
+        ]);
+
+        $organization = auth()->user()->organizations()->first();
+
+        $targetGroup = Group::findOrFail($validated['target_group_id']);
+
+        DB::transaction(function () use ($validated, $organization, $targetGroup) {
+            $users = User::whereIn('id', $validated['user_ids'])->get();
+
+            foreach ($users as $user) {
+                // Get all memberships in this org
+                $memberships = DB::table('group_members')
+                    ->join('groups', 'group_members.group_id', '=', 'groups.id')
+                    ->where('group_members.user_id', $user->id)
+                    ->where('groups.organization_id', $organization->id)
+                    ->select('group_members.*')
+                    ->get();
+
+                $mergedHistory = [];
+
+                foreach ($memberships as $membership) {
+                    // If target group, skip (we’ll handle below)
+                    if ($membership->group_id == $targetGroup->id) {
+                        $existingReason = $membership->change_reason
+                            ? json_decode($membership->change_reason, true)
+                            : [];
+
+                        if (is_array($existingReason)) {
+                            $mergedHistory = array_merge($mergedHistory, $existingReason);
+                        }
+
+                        continue;
+                    }
+
+                    // Build history record with full timeline
+                    $historyRecord = [
+                        'id'        => $membership->group_id,
+                        'joined_at' => $membership->joined_at,
+                        'left_at'   => $membership->left_at ?? now()->toDateTimeString(),
+                    ];
+
+                    // Merge with any existing history in that row
+                    $existingReason = $membership->change_reason
+                        ? json_decode($membership->change_reason, true)
+                        : [];
+
+                    if (!is_array($existingReason)) {
+                        $existingReason = [];
+                    }
+
+                    $mergedHistory = array_merge($mergedHistory, $existingReason, [$historyRecord]);
+
+                    // Delete the old row
+                    DB::table('group_members')
+                        ->where('group_id', $membership->group_id)
+                        ->where('user_id', $user->id)
+                        ->delete();
+                }
+
+                // Check if user already in target group
+                $targetMembership = DB::table('group_members')
+                    ->where('group_id', $targetGroup->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                if ($targetMembership) {
+                    // Merge with existing target history
+                    $existingReason = $targetMembership->change_reason
+                        ? json_decode($targetMembership->change_reason, true)
+                        : [];
+
+                    if (!is_array($existingReason)) {
+                        $existingReason = [];
+                    }
+
+                    $finalHistory = array_merge($existingReason, $mergedHistory);
+
+                    DB::table('group_members')
+                        ->where('group_id', $targetGroup->id)
+                        ->where('user_id', $user->id)
+                        ->update([
+                            'left_at'       => null,
+                            'change_reason' => json_encode($finalHistory),
+                            'updated_at'    => now(),
+                        ]);
+                } else {
+                    // Create new target record
+                    DB::table('group_members')->insert([
+                        'group_id'      => $targetGroup->id,
+                        'user_id'       => $user->id,
+                        'joined_at'     => now(),
+                        'left_at'       => null,
+                        'change_reason' => json_encode($mergedHistory),
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
+                    ]);
+                }
+            }
+        });
+
+        return back()->with('success', 'Members moved successfully');
+    }
+
+    
 
     public function update(Request $request, Organization $organization, Group $group)
     {
@@ -266,5 +404,57 @@ class GroupController extends Controller
             'sent_count' => $sentCount,
             'skipped_count' => count($validated['emails']) - $sentCount
         ]);
+    }
+
+
+    public function importUsers(Request $request, Organization $organization, Group $group)
+    {
+        $request->validate([
+            'import_file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:2048'],
+            'timezone' => ['nullable', 'timezone']
+        ]);
+        
+        $organization = auth()->user()->organizations()->first();
+
+        try {
+            $importService = new UserImportService($organization);
+            
+            $success = $importService->importFromCsv($request->file('import_file'), [
+                'timezone' => $request->input('timezone', config('app.timezone'))
+            ]);
+
+            if ($success) {
+                $results = $importService->getResults();
+                
+                return response()->json([
+                    'message' => "Import completed successfully",
+                    'results' => $results
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Import failed',
+                'errors' => $importService->getErrors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Import error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Import failed due to server error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function importTemplate(Organization $organization)
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="user_import_template.csv"',
+        ];
+
+        $template = "name,email\nJohn Doe,john@example.com\nJane Smith,jane@example.com";
+
+        return response($template, 200, $headers);
     }
 }

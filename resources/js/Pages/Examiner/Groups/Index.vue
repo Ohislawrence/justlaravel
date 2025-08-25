@@ -1,4 +1,4 @@
-\<script setup>
+<script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
@@ -56,14 +56,19 @@ function createUserGroup() {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
                     <div class="p-6 bg-white border-b border-gray-200">
                         <!-- Create Button - Aligned to the right -->
                         <div class="flex justify-end mb-6">
-                            <button @click ="createUserGroup"
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                            <button 
+                                @click="createUserGroup"
+                                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
+                            >
+                                <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
                                 Create New Group
-                        </button>
+                            </button>
                         </div>
 
                         <!-- Check if groups exist and handle empty state -->
@@ -84,13 +89,16 @@ function createUserGroup() {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="group in groups.data" :key="group.id" class="hover:bg-gray-50">
+                                    <tr v-for="group in groups.data" :key="group.id" class="hover:bg-gray-50 transition-colors duration-150">
                                         <!-- Standardized table cells -->
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <Link :href="route('examiner.groups.show', {
-                                                organization: organization.slug,
-                                                group: group.id
-                                            })" class="text-blue-600 hover:text-blue-800 font-medium">
+                                            <Link 
+                                                :href="route('examiner.groups.show', {
+                                                    organization: organization.slug,
+                                                    group: group.id
+                                                })" 
+                                                class="text-green-600 hover:text-green-800 font-medium transition-colors duration-150"
+                                            >
                                                 {{ group.name }}
                                             </Link>
                                         </td>
@@ -100,15 +108,25 @@ function createUserGroup() {
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <!-- Action Buttons - Styled like Quizzes -->
                                             <div class="flex items-center gap-2">
-                                                <Link :href="route('examiner.groups.show', {
-                                                    organization: organization.slug,
-                                                    group: group.id
-                                                })"
-                                                    class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition duration-150 ease-in-out">
+                                                <Link 
+                                                    :href="route('examiner.groups.show', {
+                                                        organization: organization.slug,
+                                                        group: group.id
+                                                    })"
+                                                    class="inline-flex items-center text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
+                                                >
+                                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
                                                     Manage
                                                 </Link>
-                                                <button @click="deleteGroup(group)"
-                                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition duration-150 ease-in-out">
+                                                <button 
+                                                    @click="deleteGroup(group)"
+                                                    class="inline-flex items-center text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition duration-150 ease-in-out"
+                                                >
+                                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
                                                     Delete
                                                 </button>
                                             </div>
@@ -116,7 +134,7 @@ function createUserGroup() {
                                     </tr>
                                 </tbody>
                             </table>
-                            <!-- Pagination - Updated to match Quizzes style -->
+                            <!-- Pagination -->
                             <Pagination :links="groups.links" class="mt-6" />
                         </div>
                         <div v-else class="text-center py-12">
@@ -133,23 +151,76 @@ function createUserGroup() {
                                 </p>
                                 <!-- Offer the create button again in the empty state -->
                                 <div class="mt-4">
-                                    <Link :href="route('examiner.groups.create', organization.slug)"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                                    <button 
+                                        @click="createUserGroup"
+                                        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
+                                    >
+                                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
                                         Create New Group
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <!-- The standalone Pagination component below the table/empty state is removed
-                             as it's now integrated into the table section or not needed for empty state -->
                     </div>
                 </div>
             </div>
         </div>
         <FeatureLimitModal 
-        v-model="showModal"
-        :featureName="modalFeature"
-        :message="modalMessage"
+            v-model="showModal"
+            :featureName="modalFeature"
+            :message="modalMessage"
         />
     </AppLayout>
 </template>
+
+<style scoped>
+/* Enhanced green-themed styling */
+.bg-green-600 {
+    background-color: #10B981;
+}
+
+.bg-green-700:hover {
+    background-color: #059669;
+}
+
+.focus\:ring-green-300:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Green-themed text links */
+.text-green-600 {
+    color: #10B981;
+}
+
+.text-green-800:hover {
+    color: #059669;
+}
+
+/* Green-themed background */
+.bg-green-50 {
+    background-color: #ecfdf5;
+}
+
+/* Border styling */
+.border-gray-100 {
+    border-color: #f3f4f6;
+}
+
+/* Transition effects */
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flex {
+        flex-direction: column;
+    }
+    
+    .gap-2 > *:not(:last-child) {
+        margin-bottom: 0.5rem;
+    }
+}
+</style>

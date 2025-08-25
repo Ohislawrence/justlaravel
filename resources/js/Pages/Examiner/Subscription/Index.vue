@@ -1,51 +1,95 @@
 <template>
-    <AppLayout title="Subscription Plans">
-        <template #header>
-      <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-          Choose a Subscription Plan
-        </h2>
-        <div v-if="activeSubscription" class="text-sm text-green-600">
-          Current Plan: {{ activeSubscription.plan.name }}
-          <span v-if="activeSubscription.plan.slug !== 'free-tier'">
-            (Expires {{ formatDate(activeSubscription.ends_at) }})
-          </span>
-          <span v-else>(Limited)</span>
-        </div>
+  <AppLayout title="Subscription Plans">
+      <template #header>
+    <div class="flex justify-between items-center">
+      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        Choose a Subscription Plan
+      </h2>
+      <div v-if="activeSubscription" class="text-sm text-green-600">
+        Current Plan: {{ activeSubscription.plan.name }}
+        <span v-if="activeSubscription.plan.slug !== 'free-tier'">
+          (Expires {{ formatDate(activeSubscription.ends_at) }})
+        </span>
+        <span v-else>(Limited)</span>
       </div>
-    </template>
-  
-      <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <PlanCard 
-              v-for="plan in plans"
-              :key="plan.id"
-              :plan="plan"
-              :current-subscription="activeSubscription"
-            />
-          </div>
-        </div>
-      </div>
-    </AppLayout>
+    </div>
   </template>
-  
+
+    <div class="py-12">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <PlanCard 
+            v-for="plan in plans"
+            :key="plan.id"
+            :plan="plan"
+            :current-subscription="activeSubscription"
+          />
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+
 <script setup>
 import { computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PlanCard from '@/Components/Subscription/PlanCard.vue';
 
 const props = defineProps({
-  plans: Array,
-  organization: Object
+plans: Array,
+organization: Object
 });
 
 const activeSubscription = computed(() => {
-  return props.organization.active_subscription || props.organization.current_subscription;
+return props.organization.active_subscription || props.organization.current_subscription;
 });
 
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString();
+return new Date(dateString).toLocaleDateString();
 };
 </script>
+
+<style scoped>
+/* Custom styles to enhance the green theme */
+.text-green-600 {
+  color: #10B981;
+}
+
+/* Ensure any green elements use our green palette */
+.text-green-500 {
+  color: #22c55e;
+}
+
+.text-green-700 {
+  color: #16a34a;
+}
+
+/* If there are any green backgrounds */
+.bg-green-50 {
+  background-color: #ecfdf5;
+}
+
+.bg-green-100 {
+  background-color: #d1fae5;
+}
+
+/* Green border for current plan indicator */
+.border-green-500 {
+  border-color: #10B981;
+}
+
+/* Hover effects for green elements */
+.hover\:text-green-700:hover {
+  color: #16a34a;
+}
+
+.hover\:bg-green-50:hover {
+  background-color: #ecfdf5;
+}
+
+/* Focus rings */
+.focus\:ring-green-500:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+</style>

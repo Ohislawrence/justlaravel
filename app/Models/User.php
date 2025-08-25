@@ -3,9 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -71,6 +74,30 @@ class User extends Authenticatable
         ];
     }
 
+    protected function gate(): void
+    {
+        Gate::define('viewTelescope', function (User $user) {
+            return in_array($user->email, [
+                'lawrenceohis@gmail.com',
+            ]);
+        });
+    }
+
+    public function activeGroups()
+    {
+        return $this->belongsToMany(Group::class, 'group_members')
+                    ->withPivot(['joined_at', 'left_at', 'change_reason'])
+                    ->wherePivotNull('left_at');
+    }
+
+    public function currentGroup()
+    {
+        return $this->belongsToMany(Group::class, 'group_members')
+                    ->withPivot(['joined_at', 'left_at', 'change_reason'])
+                    ->wherePivotNull('left_at')
+                    ->latest('group_members.joined_at')
+                    ->limit(1);
+    }
 
     public function groups()
     {

@@ -20,6 +20,8 @@ class Group extends Model
         'settings' => 'array'
     ];
 
+   
+
     public function organization()
     {
         return $this->belongsTo(Organization::class);

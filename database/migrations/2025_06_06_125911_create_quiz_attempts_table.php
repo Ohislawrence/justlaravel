@@ -19,12 +19,12 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->integer('time_spent')->nullable(); // in seconds
-            $table->integer('score')->nullable();
+            $table->decimal('score')->nullable();
             $table->integer('max_score')->nullable();
             $table->decimal('percentage', 5, 2)->nullable();
             $table->boolean('is_passed')->default(false);
             $table->json('answers')->nullable(); // Serialized answers
-            $table->json('grading_data')->nullable();
+            $table->string('grading_data')->nullable();
             $table->text('feedback')->nullable();
             $table->timestamps();
         });

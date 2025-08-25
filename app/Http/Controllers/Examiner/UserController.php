@@ -106,11 +106,11 @@ class UserController extends Controller
         $checkExaminee = $examineeLimit < $currentexamineeCount;
         
         if (!$checkExaminer) {
-            return response('Forbidden access.', Response::HTTP_FORBIDDEN);
+            return response('Your current plan does not allow you to create more examiners.', Response::HTTP_FORBIDDEN);
         }
 
         if (!$checkExaminee) {
-            return response('Forbidden access.', Response::HTTP_FORBIDDEN);
+            return response('Your current plan does not allow you to create more Students/Examinee.', Response::HTTP_FORBIDDEN);
         }
         
         $validated = $request->validate([
@@ -197,7 +197,6 @@ class UserController extends Controller
     {
         $organization = auth()->user()->organizations()->first();
         $organizationId = $organization->id;
-    
         // Load necessary relationships
         $user->load([
             'groups',
@@ -213,61 +212,61 @@ class UserController extends Controller
             'roles' => ModelsRole::all()->pluck('name'),
             'designations' => $organization->designations()->get(), // Corrected relationship
             'initialUserType' => $user->getRoleNames()->first(),
-            'initialGroups' => $user->groups->pluck('id')->toArray(),
+            'initialGroups' => $user->groups()->get(),
             'organizationMember' => $user->organizationMember, // Pass the full member record
         ]);
     }
 
     public function update(Request $request, User $user)
     {
-        //dd($request->designation_id);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'user_type' => ['sometimes', 'in:admin,examiner,examinee'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'groups' => ['sometimes', 'array'],
-            'groups.*' => ['exists:groups,id'],
+            'group_id' => ['nullable', 'exists:groups,id'], // Single group ID
             'quizzes' => ['sometimes', 'array'],
             'quizzes.*' => ['exists:quizzes,id'],
-            'designation_id' => ['nullable' ],
+            'designation_id' => ['nullable'],
             'unique_code' => ['nullable'],
         ]);
-    
+
         // Get the current organization ID
         $organizationId = auth()->user()->organizations()->first()->id;
-    
+
         DB::transaction(function () use ($validated, $request, $user, $organizationId) {
             // Update basic user info
             $user->update([
                 'name' => $validated['name'],
             ]);
-    
+
             // Update password if provided
             if (!empty($validated['password'])) {
                 $user->update([
                     'password' => Hash::make($validated['password']),
                 ]);
             }
-    
+
             // Update role if provided
             if (!empty($validated['user_type'])) {
                 // Remove all current roles first
                 $user->syncRoles([$validated['user_type']]);
             }
-    
+
             // Update organization member details
             $user->organizationMember()->update([
                 'designation_id' => $validated['designation_id'] ?? null,
                 'unique_code' => $validated['unique_code'] ?? null
             ]);
-    
-            // Sync groups if provided
-            if (isset($validated['groups'])) {
-                $user->groups()->sync($validated['groups']);
+
+            // Sync single group if provided
+            if (isset($validated['group_id'])) {
+                $user->groups()->sync([$validated['group_id']]);
+            } else {
+                // If no group selected, remove all groups
+                $user->groups()->detach();
             }
-    
         });
-    
+
         return redirect()->route('examiner.user.index')
             ->with('success', 'User updated successfully');
     }

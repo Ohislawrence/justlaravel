@@ -74,7 +74,7 @@ import Cta from '@/Components/Cta.vue';
                         </div>
                         <h3 class="text-lg sm:text-xl font-semibold mb-3 text-gray-900">Mobile-First Design</h3>
                         <p class="text-gray-600 mb-4 text-sm sm:text-base">Seamlessly create and take quizzes on any device. Optimized for low-bandwidth environments.</p>
-                        <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Offline Capability</div>
+                        <div class="text-xs sm:text-sm text-emerald-600 font-medium">✓ Quiz on moblie device</div>
                     </div>
 
                     <!-- Feature 4: Local Language Support -->
@@ -168,7 +168,7 @@ import Cta from '@/Components/Cta.vue';
                             </svg>
                         </div>
                         <h3 class="text-lg sm:text-xl font-semibold mb-3 text-gray-900">Custom Branding</h3>
-                        <p class="text-gray-600 mb-4 text-sm sm:text-base">Add your school's logo, colors, and custom messages to create a personalized experience.</p>
+                        <p class="text-gray-600 mb-4 text-sm sm:text-base">Add your organization's logo, colors, and custom messages to create a personalized experience.</p>
                         <div class="text-xs sm:text-sm text-teal-600 font-medium">✓ White-label Options</div>
                     </div>
 

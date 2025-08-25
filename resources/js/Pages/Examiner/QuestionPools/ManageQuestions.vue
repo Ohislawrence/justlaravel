@@ -5,25 +5,25 @@
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Question Pool Management</h1>
           <p class="text-sm text-gray-600 mt-1">
-            Managing questions for: <span class="font-medium text-indigo-600">{{ pool.name }}</span>
+            Managing questions for: <span class="font-medium text-green-600">{{ pool.name }}</span>
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3">
           <Link 
             :href="route('examiner.question-pools.ai-generator', { questionPool: pool.id })"
-            class="btn-primary inline-flex items-center gap-2"
+            class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" />
             </svg>
             Generate with AI
           </Link>
           <Link 
             :href="route('examiner.pools.questions.create', pool.id)"
-            class="btn-secondary inline-flex items-center gap-2"
+            class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             Add Question
           </Link>
@@ -41,7 +41,7 @@
                 <h2 class="text-xl font-semibold text-gray-900">Current Questions</h2>
                 <p class="text-sm text-gray-600">Questions currently in this pool</p>
               </div>
-              <span class="badge-primary">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 {{ pool.questions.length }} {{ pool.questions.length === 1 ? 'question' : 'questions' }}
               </span>
             </div>
@@ -56,7 +56,7 @@
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
                           <p class="text-gray-800 font-medium line-clamp-2" v-html="question.question"></p>
-                          <span class="badge-question-type" :class="questionTypeClass(question.type)">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :class="questionTypeClass(question.type)">
                             {{ formatQuestionType(question.type) }}
                           </span>
                         </div>
@@ -69,19 +69,19 @@
                   <div class="flex items-center gap-2">
                     <Link 
                       :href="route('examiner.pools.questions.edit', {pool: pool.id, question: question.id})"
-                      class="btn-icon"
+                      class="inline-flex items-center p-2 rounded-full text-gray-400 hover:text-green-600 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
                       title="Edit question"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </Link>
                     <button
                       @click="removeQuestion(question)"
-                      class="btn-icon-danger"
+                      class="inline-flex items-center p-2 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
                       title="Remove from pool"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -101,10 +101,10 @@
               <div class="mt-6">
                 <Link 
                   :href="route('examiner.pools.questions.create', pool.id)"
-                  class="btn-primary inline-flex items-center gap-2"
+                  class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                  <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   Create New Question
                 </Link>
@@ -121,7 +121,7 @@
                 <h2 class="text-xl font-semibold text-gray-900">Available Questions</h2>
                 <p class="text-sm text-gray-600">Select questions to add to this pool</p>
               </div>
-              <span class="badge-primary">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 {{ availableQuestions.length }} available
               </span>
             </div>
@@ -139,12 +139,12 @@
                         v-model="selectedQuestions" 
                         :value="question.id" 
                         type="checkbox" 
-                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded transition-colors duration-200"
                       >
                     </div>
                     <div class="ml-3 text-sm">
                       <label :for="`question-${question.id}`" class="font-medium text-gray-700 cursor-pointer">
-                        <span class="inline-block mr-2 badge-question-type-sm" :class="questionTypeClass(question.type)">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mr-2" :class="questionTypeClass(question.type)">
                           {{ formatQuestionType(question.type) }}
                         </span>
                         <span v-html="question.question"></span>
@@ -158,14 +158,14 @@
               <button
                 @click="addQuestions"
                 :disabled="selectedQuestions.length === 0"
-                class="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2"
+                class="inline-flex items-center justify-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition"
                 :class="{ 'opacity-50 cursor-not-allowed': selectedQuestions.length === 0 }"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 Add Selected Questions
-                <span v-if="selectedQuestions.length > 0" class="badge-count">
+                <span v-if="selectedQuestions.length > 0" class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-white bg-opacity-90 text-green-800 text-xs font-medium ml-2">
                   {{ selectedQuestions.length }}
                 </span>
               </button>
@@ -219,8 +219,8 @@ const formatQuestionType = (type) => {
 
 const questionTypeClass = (type) => {
   return {
-    'multiple_choice': 'bg-blue-100 text-blue-800',
-    'true_false': 'bg-green-100 text-green-800',
+    'multiple_choice': 'bg-green-100 text-green-800',
+    'true_false': 'bg-blue-100 text-blue-800',
     'short_answer': 'bg-purple-100 text-purple-800',
     'essay': 'bg-yellow-100 text-yellow-800',
     'fill_in_blank': 'bg-red-100 text-red-800',
@@ -260,35 +260,51 @@ const removeQuestion = (question) => {
   overflow: hidden;
 }
 
-.badge-primary {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800;
+/* Enhanced green-themed styling */
+.bg-green-600 {
+    background-color: #10B981;
 }
 
-.badge-count {
-  @apply inline-flex items-center justify-center h-6 w-6 rounded-full bg-white bg-opacity-90 text-indigo-800 text-xs font-medium;
+.bg-green-700:hover {
+    background-color: #059669;
 }
 
-.badge-question-type {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+.focus\:ring-green-500:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
 }
 
-.badge-question-type-sm {
-  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+/* Green-themed text */
+.text-green-600 {
+    color: #10B981;
 }
 
-.btn-primary {
-  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+.text-green-800 {
+    color: #065f46;
 }
 
-.btn-secondary {
-  @apply inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+/* Green-themed backgrounds */
+.bg-green-100 {
+    background-color: #ecfdf5;
 }
 
-.btn-icon {
-  @apply p-2 rounded-full text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+/* Border styling */
+.border-gray-100 {
+    border-color: #f3f4f6;
 }
 
-.btn-icon-danger {
-  @apply p-2 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500;
+/* Transition effects */
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flex {
+        flex-direction: column;
+    }
+    
+    .gap-3 > *:not(:last-child) {
+        margin-bottom: 0.75rem;
+    }
 }
 </style>

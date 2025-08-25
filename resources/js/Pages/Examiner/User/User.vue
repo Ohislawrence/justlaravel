@@ -91,11 +91,11 @@ function addUser() {
                         <!-- Buttons aligned to the right, stacked on small screens -->
                         <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center mb-6 gap-2">
                             <button @click="openDesignationModal"
-                                class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                                class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
                                 <i class="bx bx-plus mr-1"></i> New Designation
                             </button>
                             <button @click="addUser"
-                                class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                                class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
                                 <i class="bx bx-plus mr-1"></i> Add User
                             </button>
                         </div>
@@ -144,14 +144,14 @@ function addUser() {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span v-if="user.organization_member?.designation"
-                                                class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
                                                 {{ user.organization_member.designation.name }}
                                             </span>
                                             <span v-else class="text-sm text-gray-500">-</span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800">
                                                 {{ user.organization_member.unique_code || 'No ID' }}
                                             </span>
                                         </td>
@@ -168,7 +168,7 @@ function addUser() {
                                              <!-- Action Buttons - Styled like Quizzes -->
                                              <div class="flex justify-start items-center gap-2">
                                                 <Link :href="route('examiner.user.edit', user.id)"
-                                                    class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition duration-150 ease-in-out">
+                                                    class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded-md transition duration-150 ease-in-out">
                                                     Edit
                                                 </Link>
                                                 <button @click="deleteUser(user.id)"
@@ -215,7 +215,7 @@ function addUser() {
                             Cancel
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                             :disabled="designationForm.processing">
                             <span v-if="designationForm.processing">Creating...</span>
                             <span v-else>Create Designation</span>
@@ -232,3 +232,67 @@ function addUser() {
     />
     </AppLayout>
 </template>
+
+<style scoped>
+/* Custom styles to enhance the green theme */
+.bg-green-600 {
+    background-color: #10B981;
+}
+
+.hover\:bg-green-700:hover {
+    background-color: #059669;
+}
+
+.text-green-600 {
+    color: #10B981;
+}
+
+.text-green-800 {
+    color: #065f46;
+}
+
+.text-green-900:hover {
+    color: #065f46;
+}
+
+.bg-green-50 {
+    background-color: #ecfdf5;
+}
+
+.hover\:bg-green-100:hover {
+    background-color: #d1fae5;
+}
+
+.bg-green-100 {
+    background-color: #d1fae5;
+}
+
+.bg-emerald-100 {
+    background-color: #ecfdf5;
+}
+
+.text-emerald-800 {
+    color: #10B981;
+}
+
+/* Focus ring for buttons */
+.focus\:ring-green-500:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Table header */
+thead .bg-gray-50 {
+    background-color: #f8fafc;
+}
+
+/* Hover effect for table rows */
+tr:hover {
+    background-color: #f0fdf4;
+}
+
+/* Button focus states */
+button:focus, .focus\:outline-none:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+</style>

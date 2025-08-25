@@ -13,7 +13,7 @@
                 <span class="text-white font-bold text-lg">Q</span>
               </div>
               <div class="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
-                QuizPortal
+                ExamPortal
               </div>
             </Link></div>
   
@@ -93,13 +93,13 @@
                       <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                     </div>
                     <div class="text-3xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                      QuizPortal
+                      ExamPortal
                     </div>
                   </div>
                 </div>
                 <!-- Description -->
                 <p class="text-gray-400 text-lg leading-relaxed max-w-md">
-                  The complete quiz platform designed for Nigerian educational institutions, corporations, and training organizations.
+                  The complete exam platform designed for Nigerian educational institutions, corporations, and training organizations.
                 </p>
                 <!-- Social Links -->
                 <div class="flex space-x-4">
@@ -179,18 +179,18 @@
                     <div class="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"></div>
                   </h3>
                   <nav class="space-y-3">
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    <Link :href="route('help.index')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Help Center
-                    </a>
+                    </Link>
                     <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Contact Support
                     </a>
-                    <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    <Link :href="route('help.index')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                       <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       Tutorials
-                    </a>
+                    </Link>
                   </nav>
                 </div>
               </div>
@@ -202,7 +202,7 @@
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
               <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <div class="flex items-center space-x-4 text-sm text-gray-400">
-                  <span>&copy; 2024 QuizPortal Nigeria. All rights reserved.</span>
+                  <span>&copy; 2025 ExamPortal Nigeria. All rights reserved.</span>
                   <div class="hidden sm:flex items-center space-x-2">
                     <span>•</span>
                     <span class="flex items-center">

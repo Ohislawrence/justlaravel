@@ -76,14 +76,36 @@ const togglePriceField = () => {
 
         <!-- Flash Messages -->
         <div v-if="flash.success" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ flash.success }}
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                <span class="block sm:inline">{{ flash.success }}</span>
+                <button
+                    type="button" 
+                    @click="flash.success = null"
+                    class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    aria-label="Close success message"
+                >
+                    <span class="sr-only">Close</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
 
         <div v-if="flash.error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {{ flash.error }}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                <span class="block sm:inline">{{ flash.error }}</span>
+                <button
+                    type="button" 
+                    @click="flash.error = null"
+                    class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    aria-label="Close error message"
+                >
+                    <span class="sr-only">Close</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -178,7 +200,7 @@ const togglePriceField = () => {
                                                         type="number"
                                                         min="0"
                                                         step="0.01"
-                                                        class="block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                                                        class="block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                                                         @blur="formatPrice"
                                                     />
                                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -212,18 +234,28 @@ const togglePriceField = () => {
                                 <div class="flex justify-end pt-6 border-t border-gray-200">
                                     <Link
                                         :href="route('examiner.quiz-groups.index', props.organization.id)"
-                                        class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                                     >
                                         Cancel
                                     </Link>
-                                    <PrimaryButton
+                                    <button
                                         type="submit"
-                                        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                        :class="{ 'opacity-25': form.processing }"
+                                        class="ml-3 inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 flex items-center"
+                                        :class="{ 'opacity-25 cursor-not-allowed': form.processing }"
                                         :disabled="form.processing"
                                     >
-                                        Create Group
-                                    </PrimaryButton>
+                                        <svg v-if="!form.processing" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        <span v-if="form.processing" class="flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Creating...
+                                        </span>
+                                        <span v-else>Create Group</span>
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -243,5 +275,59 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
     -moz-appearance: textfield;
+}
+
+/* Enhanced green-themed styling */
+.bg-green-600 {
+    background-color: #10B981;
+}
+
+.bg-green-700:hover {
+    background-color: #059669;
+}
+
+.focus\:ring-green-500:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Green-themed checkbox */
+input[type="checkbox"]:checked {
+    background-color: #10B981;
+    border-color: #10B981;
+}
+
+/* Green-themed select arrow */
+select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2310B981' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Input focus states */
+input:focus, select:focus, textarea:focus {
+    border-color: #10B981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Hover effects */
+button:hover, .hover\:bg-gray-50:hover {
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
+
+/* Disabled state */
+.opacity-25 {
+    opacity: 0.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .px-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
 }
 </style>
