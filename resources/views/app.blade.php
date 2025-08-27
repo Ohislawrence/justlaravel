@@ -11,12 +11,12 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title inertia>{{ config('app.name', 'Quiz Portal Online') }}</title>
+    <title inertia>{{ config('app.name', 'Exam Portal Online') }}</title>
 
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon-quizportal.png') }}" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon-examportal.png') }}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
