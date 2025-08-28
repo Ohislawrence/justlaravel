@@ -23,6 +23,8 @@ class Organization extends Model
         'official_phone_number',
         'official_email',
         'official_Whatsapp_contact',
+        'created_by',
+        'last_updated_by',
     ];
 
     /*

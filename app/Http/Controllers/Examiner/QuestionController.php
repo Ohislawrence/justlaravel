@@ -85,6 +85,7 @@ class QuestionController extends Controller
         ]);
 
         $validated['is_required'] = $request->boolean('is_required');
+        $validated['created_by'] = auth()->id();
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');

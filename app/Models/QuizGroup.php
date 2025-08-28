@@ -15,7 +15,8 @@ class QuizGroup extends Model
         'price',
         'is_active',
         'parent_id',
-        'organization_id'
+        'organization_id',
+        'created_by'
     ];
 
     public function quizzes()

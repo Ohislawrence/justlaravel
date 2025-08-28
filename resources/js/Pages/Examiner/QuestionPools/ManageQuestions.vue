@@ -1,5 +1,5 @@
 <template>
-  <AppLayout>
+  <AppLayout title="Question Pool Management">
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div>

@@ -12,7 +12,9 @@ class GradingSystem extends Model
         'type',
         'grade_ranges',
         'description',
-        'is_default'
+        'is_default',
+        'last_updated_by',
+        'created_by'
     ];
 
     protected $casts = [

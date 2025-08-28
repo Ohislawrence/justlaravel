@@ -14,6 +14,7 @@ class Product extends Model
     'currency',
     'is_active',
     'settings',
+    'created_by'
     ];
     
     public function items()

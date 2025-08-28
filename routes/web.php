@@ -45,6 +45,12 @@ Route::get('terms-of-service', [FrontPageController::class, 'tos'])->name('tos')
 Route::get('cookie-policy', [FrontPageController::class, 'cookie'])->name('cookie');
 Route::get('/blogs', [FrontPageController::class, 'allBlogs'])->name('blogs.index');
 Route::get('/blogs/{blog:slug}', [FrontPageController::class, 'show'])->name('blogs.show');
+Route::prefix('for')->group(function () {
+    Route::get('hr', [FrontPageController::class, 'hr'])->name('hr');
+    Route::get('learning-development', [FrontPageController::class, 'ld'])->name('learning-development');
+    Route::get('certifications', [FrontPageController::class, 'certifications'])->name('certifications');
+    Route::get('schools', [FrontPageController::class, 'schools'])->name('schools');
+});
 Route::prefix('help')->group(function () {
     Route::get('/', [HelpCenterController::class, 'index'])->name('help.index');
     Route::get('/search', [HelpCenterController::class, 'search'])->name('help.search');

@@ -24,7 +24,9 @@ class Question extends Model
         'settings',
         'pools',
         'organization_id',
-        'is_ai'
+        'is_ai',
+        'created_by',
+        'last_updated_by'
     ];
 
     protected $casts = [

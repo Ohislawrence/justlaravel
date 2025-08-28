@@ -82,6 +82,8 @@ class PoolQuestionController extends Controller
         
         $validated['is_required'] = $request->boolean('is_required');
         $validated['organization_id'] = $organization->id;
+        $validated['created_by'] = auth()->id();
+        
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
@@ -121,7 +123,7 @@ class PoolQuestionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        //last_updated_by
     }
 
     /**

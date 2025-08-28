@@ -17,48 +17,48 @@ return new class extends Migration
         });
 
         Schema::table('categories', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('certificates', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('designations', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('grading_systems', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('groups', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('organizations', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('questions', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('question_pools', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
         Schema::table('quizzes', function (Blueprint $table) {
-            $table->integer('created_by');
-            $table->integer('last_updated_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('last_updated_by')->nullable();
         });
 
     }

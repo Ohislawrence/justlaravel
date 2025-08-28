@@ -33,10 +33,7 @@ class QuestionPoolAIController extends Controller
 
     public function generate(Request $request, QuestionGeneratorService $questionService)
     {
-        $organization = auth()->user()->organizations()->first();
-        if (!$organization->canGenerateAiQuestion()) {
-            return response('Forbidden access.', Response::HTTP_FORBIDDEN);
-        }
+        
 
         $validated = $request->validate([
             'source_type' => 'required|in:topic,article',

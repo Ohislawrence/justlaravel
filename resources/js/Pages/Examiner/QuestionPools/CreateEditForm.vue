@@ -24,26 +24,7 @@
                   <InputError :message="form.errors.name" class="mt-2" />
                 </div>
 
-                <!-- Associated Quiz -->
-                <div v-if="quizzes.length > 0">
-                  <label class="block text-sm font-medium text-gray-700">
-                    Associated Quiz (Leave blank for global pool)
-                  </label>
-                  <select 
-                    v-model="form.quiz_id" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 transition-colors duration-200"
-                  >
-                    <option :value="null">Global Pool</option>
-                    <option 
-                      v-for="quiz in quizzes" 
-                      :key="quiz.id" 
-                      :value="quiz.id"
-                    >
-                      {{ quiz.title }}
-                    </option>
-                  </select>
-                  <InputError :message="form.errors.quiz_id" class="mt-2" />
-                </div>
+                
 
                 <!-- Description -->
                 <div>
@@ -56,19 +37,7 @@
                   <InputError :message="form.errors.description" class="mt-2" />
                 </div>
 
-                <!-- Questions to Show -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">
-                    Questions to Show (Leave blank to show all)
-                  </label>
-                  <input 
-                    v-model="form.questions_to_show" 
-                    type="number" 
-                    min="1" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 transition-colors duration-200"
-                  >
-                  <InputError :message="form.errors.questions_to_show" class="mt-2" />
-                </div>
+                
 
                 <!-- Form Actions -->
                 <div class="flex justify-end space-x-3 pt-4">

@@ -13,6 +13,8 @@ class QuestionPool extends Model
         'questions_to_show',
         'is_global',
         'organization_id',
+        'created_by',
+        'last_updated_by'
     ];
 
     public function quiz()

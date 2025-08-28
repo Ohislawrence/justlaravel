@@ -69,13 +69,7 @@
       </div>
     </div>
 
-    <!-- Debug info (remove in production) -->
-    <div class="mt-4 p-2 bg-gray-100 rounded text-xs">
-      <strong>Debug:</strong><br>
-      Options: {{ localValue.options }}<br>
-      Correct Answers: {{ localValue.correct_answers }}<br>
-      Multiple Selection: {{ localValue.settings.multiple_selection }}
-    </div>
+    
   </div>
 </template>
 

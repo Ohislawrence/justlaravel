@@ -58,27 +58,16 @@ class QuestionPoolController extends Controller
         if($currentPoolCount < $PoolLimit){
 
             $validated = $request->validate([
-                'quiz_id' => [
-                    'nullable',
-                    'exists:quizzes,id',
-                    function ($attribute, $value, $fail) use ($organization) {
-                        if ($value && !Quiz::where('id', $value)
-                            ->where('organization_id', $organization->id)
-                            ->where('user_id', auth()->id())
-                            ->exists()) {
-                            $fail('The selected quiz is invalid.');
-                        }
-                    }
-                ],
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'questions_to_show' => 'nullable|integer|min:1',
             ]);
 
             $validated['is_global'] = false;
+            $validated['created_by'] = auth()->id();
             $validated['organization_id'] = $organization->id;
 
             QuestionPool::create($validated);
+
 
             return redirect()->route('examiner.question-pools.index')
                 ->with('success', 'Question pool created successfully.');
@@ -129,7 +118,7 @@ class QuestionPoolController extends Controller
             'questions_to_show' => 'nullable|integer|min:1',
             'is_global' => 'boolean',
         ]);
-
+        $validated['last_updated_by'] = auth()->id();
         $questionPool->update($validated);
 
         return redirect()->route('examiner.question-pools.index')

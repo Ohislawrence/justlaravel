@@ -18,6 +18,8 @@ class Certificate extends Model
         'issued_at',
         'expires_at',
         'metadata',
+        'last_updated_by',
+        'created_by',
     ];
 
    

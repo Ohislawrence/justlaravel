@@ -113,4 +113,25 @@ class FrontPageController extends Controller
         return Inertia::render('FrontPages/Contact');
     }
 
+    //who it's for
+    public function hr()
+    {
+        return Inertia::render('FrontPages/Whoitsfor/HumanResource');
+    }
+
+    public function ld()
+    {
+        return Inertia::render('FrontPages/Whoitsfor/LearningDevelopment');
+    }
+
+    public function certifications()
+    {
+        return Inertia::render('FrontPages/Whoitsfor/Certifications');
+    }
+
+    public function schools()
+    {
+        return Inertia::render('FrontPages/Whoitsfor/Schools');
+    }
+
 }

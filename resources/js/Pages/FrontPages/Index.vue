@@ -31,7 +31,7 @@
             </Link>
           </div>
           <div class="text-sm text-gray-500">
-            No credit card required
+            No payment required to start
           </div>
         </div>
       </section>
@@ -403,8 +403,19 @@
     ];
 
     // Helper function to format price
-const formatPrice = (price) => {
-    return price === 0 ? 'Free' : `₦${price.toLocaleString()}`;
+    const formatPrice = (price) => {
+    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+    
+    if (isNaN(numericPrice)) return 'Invalid price';
+    if (numericPrice === 0) return 'Free';
+    
+    // Check if it's a whole number
+    const isWholeNumber = numericPrice % 1 === 0;
+    
+    return `₦${numericPrice.toLocaleString('en-NG', {
+        minimumFractionDigits: isWholeNumber ? 0 : 2,
+        maximumFractionDigits: isWholeNumber ? 0 : 2
+    })}`;
 };
 
 // Helper function to get feature value

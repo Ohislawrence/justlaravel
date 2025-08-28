@@ -19,6 +19,30 @@
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex space-x-1">
           <Link :href="route('features')" class="px-3 py-1.5 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Features</Link>
+          
+          <!-- Who It's For Dropdown (Desktop) -->
+          <div class="relative" 
+               @mouseenter="startDesktopDropdownTimer"
+               @mouseleave="clearDesktopDropdownTimer">
+            <button class="px-3 py-1.5 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm flex items-center">
+              Who It's For
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div v-show="desktopDropdownOpen" 
+                 class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-100 transition-all duration-200 z-50 border border-gray-100"
+                 @mouseenter="keepDropdownOpen"
+                 @mouseleave="closeDesktopDropdown">
+              <Link :href="route('hr')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Human Resource</Link>
+              <Link :href="route('learning-development')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Learning & Development</Link>
+              <Link :href="route('certifications')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Certifications</Link>
+              <Link :href="route('schools')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Schools & Educational Centers</Link>
+            </div>
+          </div>
+          
           <Link :href="route('pricing')" class="px-3 py-1.5 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Pricing</Link>
           <Link :href="route('blogs.index')" class="px-3 py-1.5 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Blog</Link>
           <Link :href="route('contact')" class="px-3 py-1.5 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Contact</Link>
@@ -54,6 +78,25 @@
       <div v-if="mobileMenuOpen" class="md:hidden mt-3 py-3 border-t border-gray-100">
         <nav class="flex flex-col space-y-2">
           <Link :href="route('features')" class="px-3 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Features</Link>
+          
+          <!-- Who It's For Dropdown (Mobile) -->
+          <div class="relative">
+            <button @click="mobileDropdownOpen = !mobileDropdownOpen" class="px-3 py-1.5 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm flex items-center justify-between w-full">
+              <span>Who It's For</span>
+              <svg class="w-4 h-4 transition-transform duration-200" :class="mobileDropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Mobile Dropdown Menu -->
+            <div v-show="mobileDropdownOpen" class="pl-6 mt-2 space-y-2">
+              <Link :href="route('hr')" class="block px-3 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Human Resource</Link>
+              <Link :href="route('learning-development')" class="block px-3 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Learning & Development</Link>
+              <Link :href="route('certifications')" class="block px-3 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Certifications</Link>
+              <Link :href="route('schools')" class="block px-3 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600">Schools & Educational Centers</Link>
+            </div>
+          </div>
+          
           <Link :href="route('pricing')"  class="px-3 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Pricing</Link>
           <Link :href="route('blogs.index')" class="px-3 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Blog</Link>
           <Link :href="route('contact')" class="px-3 py-2 text-gray-600 hover:text-emerald-600 transition rounded-lg hover:bg-emerald-50 text-sm">Contact</Link>
@@ -130,18 +173,23 @@
                   <div class="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
                 </h3>
                 <nav class="space-y-3">
-                  <Link :href="route('features')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                  
+                  <Link :href="route('hr')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                     <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    Features
+                    Human Resource
                   </Link>
-                  <Link :href="route('pricing')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                  <Link :href="route('learning-development')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                     <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    Pricing
+                    Learning & Development
                   </Link>
-                  <a href="#" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                  <Link :href="route('certifications')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                     <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    Integrations
-                  </a>
+                    Certifications
+                  </Link>
+                  <Link :href="route('schools')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    Schools & Educational Centers
+                  </Link>
                 </nav>
               </div>
 
@@ -164,6 +212,10 @@
                     <div class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     Contact
                   </Link>
+                  <Link :href="route('pricing')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    Pricing
+                  </Link>
                 </nav>
               </div>
 
@@ -185,6 +237,10 @@
                   <Link :href="route('help.index')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
                     <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     Tutorials
+                  </Link>
+                  <Link :href="route('features')" class="group flex items-center text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1">
+                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    Features
                   </Link>
                 </nav>
               </div>
@@ -234,6 +290,9 @@ import CookiesConsent from '@/Components/CookiesConsent.vue'
 
 // state
 const mobileMenuOpen = ref(false)
+const mobileDropdownOpen = ref(false)
+const desktopDropdownOpen = ref(false)
+let desktopDropdownTimer = null
 
 // access Inertia page object
 const page = usePage()
@@ -243,8 +302,34 @@ watch(
   () => page.url,
   () => {
     mobileMenuOpen.value = false
+    mobileDropdownOpen.value = false
   }
 )
+
+// Desktop dropdown with delay to prevent accidental closure
+const startDesktopDropdownTimer = () => {
+  if (desktopDropdownTimer) {
+    clearTimeout(desktopDropdownTimer)
+  }
+  desktopDropdownOpen.value = true
+}
+
+const clearDesktopDropdownTimer = () => {
+  desktopDropdownTimer = setTimeout(() => {
+    desktopDropdownOpen.value = false
+  }, 150) // 150ms delay before closing
+}
+
+const keepDropdownOpen = () => {
+  if (desktopDropdownTimer) {
+    clearTimeout(desktopDropdownTimer)
+  }
+  desktopDropdownOpen.value = true
+}
+
+const closeDesktopDropdown = () => {
+  desktopDropdownOpen.value = false
+}
 </script>
 
 <style scoped>

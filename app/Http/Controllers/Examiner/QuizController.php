@@ -183,6 +183,7 @@ class QuizController extends Controller
             'certificate_pass_percentage' => $validated['certificate_pass_percentage'] ?? 70,
             'certificate_expiry_days' => $validated['certificate_expiry_days'] ?? null,
             'grading_system_id' => $validated['grading_system_id'] ?? null,
+            'created_by' => auth()->id(),
         ];
     
         $quiz = $organization->quizzes()->create($quizData);
@@ -296,6 +297,7 @@ class QuizController extends Controller
             'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
             'grading_system_id' => ['nullable', 'integer', 'min:0'],
+            'last_updated_by' =>  auth()->id(),
         ]);
 
         // Only update slug if title changed

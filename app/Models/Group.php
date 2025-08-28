@@ -14,6 +14,8 @@ class Group extends Model
         'description',
         'settings',
         'slug',
+        'created_by',
+        'last_updated_by'
     ];
 
     protected $casts = [
