@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout2.vue';
+import { router } from '@inertiajs/vue3';
 
 defineProps({
     categories: Array,

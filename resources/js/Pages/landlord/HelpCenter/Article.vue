@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3'; // Added router import
 import AdminLayout from '@/Layouts/AppLayout.vue';
 import { ref } from 'vue';
 import RichtextEditorNormal from '@/Components/RichtextEditorNormal.vue';
@@ -23,6 +23,7 @@ const editingArticle = ref(null);
 const editArticle = (article) => {
     editingArticle.value = article;
     form.title = article.title;
+    form.slug = article.slug; // Added slug population
     form.content = article.content;
     form.category_id = article.category_id;
     form.is_featured = article.is_featured;
@@ -35,19 +36,31 @@ const submitForm = () => {
             onSuccess: () => {
                 editingArticle.value = null;
                 form.reset();
+            },
+            onError: (errors) => {
+                console.log('Update errors:', errors); // For debugging
             }
         });
     } else {
         form.post(route('landlord.articles.store'), {
-            onSuccess: () => form.reset()
+            onSuccess: () => form.reset(),
+            onError: (errors) => {
+                console.log('Create errors:', errors); // For debugging
+            }
         });
     }
 };
 
 const deleteArticle = (id) => {
     if (confirm('Are you sure you want to delete this article?')) {
-        Inertia.delete(route('landlord.articles.destroy', id));
+        router.delete(route('landlord.articles.destroy', id)); // Fixed: use router instead of Inertia
     }
+};
+
+// Optional: Add a method to cancel editing
+const cancelEdit = () => {
+    editingArticle.value = null;
+    form.reset();
 };
 </script>
 
@@ -73,7 +86,15 @@ const deleteArticle = (id) => {
                                 <div>
                                     <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
                                     <input v-model="form.title" type="text" id="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">
+                                    <div v-if="form.errors.title" class="text-red-500 text-xs mt-1">{{ form.errors.title }}</div>
                                 </div>
+                                <div>
+                                    <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
+                                    <input v-model="form.slug" type="text" id="slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">
+                                    <div v-if="form.errors.slug" class="text-red-500 text-xs mt-1">{{ form.errors.slug }}</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
                                     <select v-model="form.category_id" id="category_id" class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm">
@@ -81,16 +102,18 @@ const deleteArticle = (id) => {
                                         <option v-for="category in categories" :key="category.id" :value="category.id">
                                             {{ category.name }}
                                         </option>
-                                </select>
+                                    </select>
+                                    <div v-if="form.errors.category_id" class="text-red-500 text-xs mt-1">{{ form.errors.category_id }}</div>
                                 </div>
                             </div>
                             <div>
-                            <label class="block text-sm font-medium text-gray-700">Content</label>
-                            <RichtextEditorNormal 
-                                v-model="form.content" 
-                                :error="form.errors.content"
-                                class="mt-1"
-                            />
+                                <label class="block text-sm font-medium text-gray-700">Content</label>
+                                <RichtextEditorNormal 
+                                    v-model="form.content" 
+                                    :error="form.errors.content"
+                                    class="mt-1"
+                                />
+                                <div v-if="form.errors.content" class="text-red-500 text-xs mt-1">{{ form.errors.content }}</div>
                             </div>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div class="flex items-center">
@@ -103,11 +126,11 @@ const deleteArticle = (id) => {
                                 </div>
                             </div>
                             <div class="flex justify-end space-x-3">
-                                <button v-if="editingArticle" @click="editingArticle = null; form.reset()" type="button" class="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                <button v-if="editingArticle" @click="cancelEdit" type="button" class="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                     Cancel
                                 </button>
                                 <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-emerald-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" :disabled="form.processing">
-                                    {{ editingArticle ? 'Update' : 'Create' }} Article
+                                    {{ form.processing ? 'Processing...' : (editingArticle ? 'Update' : 'Create') }} Article
                                 </button>
                             </div>
                         </form>
