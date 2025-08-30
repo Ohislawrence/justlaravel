@@ -1,16 +1,21 @@
-<x-mail::message>
-# Welcome to {{ config('app.name') }}
+{{-- resources/views/emails/exams/welcomeEmail.blade.php --}}
+@component('mail::message')
+# Welcome to Examportal!
 
 Hello {{ $user->name }},
 
-Thank you for registering with {{ config('app.name') }}! We're excited to have you on board.
 
-To get started, please verify your email address by clicking the button below:
+@component('mail::panel')
+## Your Login Details
+
+- **Email:** {{ $user->email }}
+- **Password:** 
 
 
-
-If you didn't create an account, no further action is required.
+@component('mail::subcopy')
+This email was sent from Examportal. If you have any questions, please contact your administrator.
+@endcomponent
 
 Thanks,<br>
-The {{ config('app.name') }} Team
-</x-mail::message>
+{{ config('app.name') }}
+@endcomponent
