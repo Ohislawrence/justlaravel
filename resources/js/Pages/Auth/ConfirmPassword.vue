@@ -34,8 +34,14 @@ const submit = () => {
         <div class="max-w-md w-full space-y-8">
             <!-- Branding Section -->
             <div class="text-center">
-                <div class="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 flex items-center justify-center shadow-md mb-4">
-                    <span class="text-white font-bold text-2xl">Q</span>
+                <div class="items-center justify-center mb-4">
+                    <Link :href="route('home')" class="flex items-center">
+                        <img 
+                        src="/images/logo.png" 
+                        alt="ExamPortal Logo" 
+                        class=""
+                        />
+                    </Link>
                 </div>
                 <h2 class="text-3xl font-bold tracking-tight text-gray-900">
                     Confirm Password

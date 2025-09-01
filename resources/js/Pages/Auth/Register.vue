@@ -14,6 +14,7 @@ const form = useForm({
     organization: '',
     password_confirmation: '',
     terms: false,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 });
 
 const submit = () => {
@@ -32,11 +33,17 @@ const submit = () => {
         <div class="max-w-md w-full space-y-8">
             <!-- Branding Section -->
             <div class="text-center">
-                <div class="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 flex items-center justify-center shadow-md mb-4">
-                    <span class="text-white font-bold text-2xl">Q</span>
+                <div class="items-center justify-center mb-4">
+                    <Link :href="route('home')" class="flex items-center">
+                        <img 
+                        src="/images/logo.png" 
+                        alt="ExamPortal Logo" 
+                        class=""
+                        />
+                    </Link>
                 </div>
                 <h2 class="text-3xl font-bold tracking-tight text-gray-900">
-                    Create your account
+                    Create exam/quiz in minutes!
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">
                     Already have an account?
@@ -92,34 +99,7 @@ const submit = () => {
                         <InputError class="mt-2 text-sm text-red-600" :message="form.errors.email" />
                     </div>
 
-                    <!-- Password Input -->
-                    <div>
-                        <InputLabel for="password" value="Password" class="block text-sm font-medium text-gray-700 mb-1" />
-                        <TextInput
-                            id="password"
-                            v-model="form.password"
-                            type="password"
-                            class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                            required
-                            autocomplete="new-password"
-                        />
-                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.password" />
-                    </div>
-
-                    <!-- Confirm Password Input -->
-                    <div>
-                        <InputLabel for="password_confirmation" value="Confirm Password" class="block text-sm font-medium text-gray-700 mb-1" />
-                        <TextInput
-                            id="password_confirmation"
-                            v-model="form.password_confirmation"
-                            type="password"
-                            class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                            required
-                            autocomplete="new-password"
-                        />
-                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.password_confirmation" />
-                    </div>
-
+                    
                      <!-- Terms and Privacy Policy Checkbox -->
                     <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature">
                         <div class="flex items-start">

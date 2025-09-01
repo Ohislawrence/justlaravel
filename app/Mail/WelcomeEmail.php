@@ -13,13 +13,15 @@ class WelcomeEmail extends Mailable
 {
     use Queueable, SerializesModels;
     public $user;
+    public $resetUrl;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user)
+    public function __construct($user, $resetUrl)
     {
         $this->user = $user;
+        $this->resetUrl = $resetUrl;
     }
 
     /**
@@ -39,9 +41,10 @@ class WelcomeEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'mails.welcomeEmail',
+            markdown: 'emails.exams.welcomeEmail',
             with: [
                 'user' => $this->user,
+                'resetUrl' => $this->resetUrl,
             ],
         );
     }

@@ -2,16 +2,16 @@
   <div
     class="bg-white rounded-lg shadow-md overflow-hidden border"
     :class="{
-      'border-blue-500 ring-2 ring-blue-200': isCurrentPlan,
+      'border-green-500 ring-2 ring-green-200': isCurrentPlan,
     }"
   >
     <div class="p-6">
       <!-- Plan Header -->
       <div class="flex justify-between items-start">
-        <h3 class="text-2xl font-bold">{{ plan.name }}</h3>
+        <h3 class="text-2xl font-bold text-gray-900">{{ plan.name }}</h3>
         <span
           v-if="isCurrentPlan"
-          class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full self-center"
+          class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full self-center font-medium"
         >
           Current Plan
         </span>
@@ -21,11 +21,11 @@
       <div class="mt-6">
         <div class="text-center">
           <div v-if="isFreePlan">
-            <span class="text-4xl font-bold">FREE</span>
+            <span class="text-4xl font-bold text-green-700">FREE</span>
           </div>
           <div v-else>
             <!-- Display price based on selected billing cycle -->
-            <span class="text-4xl font-bold">
+            <span class="text-4xl font-bold text-green-700">
               ₦{{
                 billingCycle === 'yearly'
                   ? yearlyPrice
@@ -34,44 +34,53 @@
                   : monthlyPrice
               }}
             </span>
-            <span class="text-gray-600">/{{ billingCycleDisplay }}</span>
+            <span class="text-gray-600 ml-1">/{{ billingCycleDisplay }}</span>
           </div>
         </div>
 
         <!-- Yearly Discount Info -->
         <div
           v-if="plan.yearly_price && !isFreePlan"
-          class="text-center text-sm text-gray-500 mt-2"
+          class="text-center text-sm text-green-600 mt-2 font-medium"
         >
-          Billed yearly: ₦{{ yearlyPrice }} (Save {{ yearlyDiscount }}%)
+          <span class="inline-flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Save {{ yearlyDiscount }}% with yearly billing
+          </span>
         </div>
       </div>
 
       <!-- Features List -->
       <div class="mt-6">
-        <ul class="space-y-2">
+        <ul class="space-y-3">
           <li
             v-for="(value, feature) in plan.features"
             :key="feature"
             class="flex items-start"
           >
-            <svg
-              class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            <span class="ml-2 text-gray-700"
-              ><span class="font-medium">{{ feature }}</span
-              >: {{ value }}</span
-            >
+            <div class="flex-shrink-0 mt-1">
+              <svg
+                class="h-5 w-5 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <span class="text-gray-700 block">
+                <span class="font-semibold text-gray-900">{{ feature }}</span>
+                <span class="text-gray-600">: {{ value }}</span>
+              </span>
+            </div>
           </li>
         </ul>
       </div>
@@ -80,21 +89,22 @@
       <div class="mt-8 space-y-4">
         <!-- Hide selector for free plans or if only one cycle exists -->
         <div v-if="!isFreePlan && hasMultipleBillingOptions" class="mt-4">
-          <label for="billing-cycle" class="block text-sm font-medium text-gray-700 mb-1">Billing Cycle</label>
+          <label for="billing-cycle" class="block text-sm font-medium text-gray-700 mb-2">Billing Cycle</label>
           <select
             id="billing-cycle"
             v-model="billingCycle"
             :disabled="isCurrentPlan"
-            class="w-full border border-gray-300 rounded-md p-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            class="w-full border border-green-300 rounded-lg p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:border-green-500 bg-white transition-all duration-200"
           >
-            <option value="monthly">Monthly (₦{{ monthlyPrice }})</option>
+            <option value="monthly" class="py-2">Monthly (₦{{ monthlyPrice }})</option>
             <option
               v-if="plan.quarterly_price"
               value="quarterly"
+              class="py-2"
             >
               Quarterly (₦{{ quarterlyPrice }})
             </option>
-            <option v-if="plan.yearly_price" value="yearly">
+            <option v-if="plan.yearly_price" value="yearly" class="py-2">
               Yearly (₦{{ yearlyPrice }})
             </option>
           </select>
@@ -102,16 +112,16 @@
 
         <button
           @click="subscribe"
-          class="w-full py-3 px-4 rounded-md font-medium transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          class="w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           :class="{
-            'bg-blue-600 hover:bg-blue-700 text-white': !isCurrentPlan,
-            'bg-gray-200 text-gray-600 cursor-not-allowed': isCurrentPlan,
+            'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl': !isCurrentPlan,
+            'bg-gray-100 text-gray-400 cursor-not-allowed': isCurrentPlan,
           }"
           :disabled="isCurrentPlan || isSubmitting"
         >
-          <span v-if="isSubmitting">
+          <span v-if="isSubmitting" class="flex items-center justify-center">
             <svg
-              class="animate-spin -ml-1 mr-2 h-4 w-4 inline text-white"
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -132,7 +142,12 @@
             </svg>
             Processing...
           </span>
-          <span v-else>{{ isCurrentPlan ? 'Current Plan' : 'Subscribe Now' }}</span>
+          <span v-else class="flex items-center justify-center">
+            <svg v-if="isCurrentPlan" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ isCurrentPlan ? 'Current Plan' : 'Subscribe Now' }}
+          </span>
         </button>
       </div>
     </div>
@@ -144,7 +159,6 @@ import { ref, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 
 const page = usePage();
-// const csrfToken = computed(() => page.props.csrf_token); // Not needed if using Inertia router.post
 const isSubmitting = ref(false);
 
 const props = defineProps({
@@ -161,7 +175,6 @@ const props = defineProps({
 const billingCycle = ref('monthly'); // Default to monthly
 
 // --- Computed Properties ---
-
 const monthlyPrice = computed(() => {
   return props.plan.monthly_price ? props.plan.monthly_price.toLocaleString() : '0';
 });
@@ -184,7 +197,6 @@ const isCurrentPlan = computed(() => {
 });
 
 const isFreePlan = computed(() => {
-  // More robust check for a free plan
   return (
     props.plan.monthly_price == 0 &&
     props.plan.quarterly_price == 0 &&
@@ -192,7 +204,6 @@ const isFreePlan = computed(() => {
   );
 });
 
-// Determine display text for the billing period (e.g., "month", "year")
 const billingCycleDisplay = computed(() => {
   switch (billingCycle.value) {
     case 'quarterly':
@@ -204,7 +215,6 @@ const billingCycleDisplay = computed(() => {
   }
 });
 
-// Check if there are multiple billing options to show the selector
 const hasMultipleBillingOptions = computed(() => {
     const options = [
         props.plan.monthly_price,
@@ -215,9 +225,7 @@ const hasMultipleBillingOptions = computed(() => {
 });
 
 // --- Methods ---
-
 const subscribe = () => {
-  // Prevent action if already submitting or on the current plan
   if (isSubmitting.value || isCurrentPlan.value) {
     return;
   }
@@ -234,7 +242,6 @@ const subscribe = () => {
       onFinish: () => {
         isSubmitting.value = false;
       },
-      // Consider adding onError or onSuccess if specific UI updates are needed
     }
   );
 };

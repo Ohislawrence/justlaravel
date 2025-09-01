@@ -8,7 +8,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import draggable from 'vuedraggable';
 
 
-const appName = import.meta.env.VITE_APP_NAME || 'QuizPortal';
+const appName = import.meta.env.VITE_APP_NAME || 'ExamPortal';
 
 
 // Configure axios to send credentials with every request

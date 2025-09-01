@@ -8,7 +8,7 @@
             <div>
               <h2 class="text-xl font-semibold">Attempt Details</h2>
               <p class="text-gray-600 mt-2">
-                User: {{ attempt?.user?.name || 'Unknown User' }} ({{ attempt?.user?.email || 'No email' }})
+                Examinee: {{ attempt?.user?.name || 'Unknown User' }} ({{ attempt?.user?.email || 'No email' }})
               </p>
               <p class="text-gray-600">
                 Completed: {{ formatDateTime(attempt?.completed_at) }}

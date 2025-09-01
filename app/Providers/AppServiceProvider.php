@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendLoginNotification;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
                 ];
             },
         ]);
+
+        Event::listen(
+            SendLoginNotification::class,
+        );
 
         
     }

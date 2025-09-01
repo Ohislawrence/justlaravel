@@ -13,8 +13,13 @@ class HelpCenterController extends Controller
     {
         return Inertia::render('HelpCenter/Index', [
             'categories' => HelpCategory::with(['articles' => function($query) {
-                $query->published()->orderBy('title');
-            }])->orderBy('order')->get(),
+                    $query->published()->orderBy('title');
+                }])
+                ->whereHas('articles', function($query) {
+                    $query->published();
+                })
+                ->orderBy('order')
+                ->get(),
             'featuredArticles' => HelpArticle::published()
                 ->featured()
                 ->orderBy('views', 'desc')
@@ -50,7 +55,7 @@ class HelpCenterController extends Controller
 
         $article->incrementViews();
 
-        return Inertia::render('HelpCenter/Article', [  // Changed from 'Articles' to 'Article' to match standard naming
+        return Inertia::render('HelpCenter/Article', [  
             'article' => $article,
             'relatedArticles' => HelpArticle::with('category') // Eager load for related articles
                 ->published()

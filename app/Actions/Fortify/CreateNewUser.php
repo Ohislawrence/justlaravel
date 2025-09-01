@@ -2,15 +2,19 @@
 
 namespace App\Actions\Fortify;
 
+use App\Mail\WelcomeEmail;
 use App\Models\Organization;
 use App\Models\OrganizationMember;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -27,14 +31,15 @@ class CreateNewUser implements CreatesNewUsers
             'name' => ['required', 'string', 'max:255'],
             'organization' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
-            'password' => Hash::make($input['password']),
+            'password' => Hash::make(Str::random(16)),
+            'timezone' => $input['timezone'],
+            'is_active' => 1,
         ]);
         $user->assignRole(['examiner']);
 
@@ -67,6 +72,17 @@ class CreateNewUser implements CreatesNewUsers
             'is_active' => true,
             'is_trial' => false,
         ]);
+
+        $token = Password::createToken($user);
+        
+
+        $resetUrl = url(route('password.reset', [
+            'token' => $token,
+            'email' => $user->email,
+        ], false));
+        
+
+        Mail::to($user->email)->queue(new WelcomeEmail($user, $resetUrl));
         
         return $user;
     }

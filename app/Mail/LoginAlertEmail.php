@@ -13,12 +13,15 @@ class LoginAlertEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public $user;
+    public $ip;
+    public $time;
+
+    public function __construct($user, $ip, $time)
     {
-        //
+        $this->user = $user;
+        $this->ip = $ip;
+        $this->time = $time;
     }
 
     /**
@@ -27,7 +30,7 @@ class LoginAlertEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Login Alert Email',
+            subject: 'New Login to Your ExamPortal Online Account',
         );
     }
 
@@ -38,6 +41,11 @@ class LoginAlertEmail extends Mailable
     {
         return new Content(
             markdown: 'emails.exams.loginAlertEmail',
+            with:[
+                'user' => $this->user,
+                'ip'   => $this->ip,
+                'time' => $this->time,
+            ]
         );
     }
 

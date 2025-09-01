@@ -1,12 +1,15 @@
-<x-mail::message>
-# Introduction
+@component('mail::message')
+# Hello {{ $user->name }},
 
-The body of your message.
+A new login was detected on your **ExamPortal Online** account.
 
-<x-mail::button :url="''">
-Button Text
-</x-mail::button>
+**Details:**
+- Time: {{ $time }}
+- IP Address: {{ $ip }}
+
+If this was you, no action is needed.  
+If this wasn’t you, please [reset your password]({{ route('password.request') }}) immediately.
 
 Thanks,<br>
-{{ config('app.name') }}
-</x-mail::message>
+**ExamPortal Online Team**
+@endcomponent

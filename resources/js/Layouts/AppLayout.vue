@@ -1,19 +1,22 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { usePage } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import Dropdown from '@/Components/Dropdown.vue';
 
-const isMenuOpen = ref(false);
 const page = usePage();
+const isMenuOpen = ref(false);
 const showingNavigationDropdown = ref(false);
 
 // Dropdown states
 const quizzesDropdownOpen = ref(false);
 const membersDropdownOpen = ref(false);
 const settingsDropdownOpen = ref(false);
+
+// Your existing userRole computed property
+const userRole = computed(() => page.props.auth.user.role);
+
+
+
 
 defineProps({
     title: String,
@@ -27,7 +30,6 @@ const currentOrganizationName = computed(() =>
     'My Organization'
 );
 
-const userRole = computed(() => page.props.auth.user.role);
 const showOrgIcon = computed(() => !isLandlord.value);
 const showRoleBadge = computed(() => page.props.auth.user?.role);
 
@@ -56,6 +58,9 @@ const toggleDropdown = (dropdown) => {
         settingsDropdownOpen.value = !settingsDropdownOpen.value;
     }
 };
+
+
+
 </script>
 
 <style scoped>
@@ -321,6 +326,15 @@ const toggleDropdown = (dropdown) => {
                             </li>
                         </ul>
                     </li>
+                    <li  class="menu-item">
+                    <a href="javascript:void(0)" 
+                        class="dropdown-item py-2 px-3 hover:bg-emerald-50 rounded-md transition-colors duration-150"
+                        @click="startTour(userRole)">
+                        <i class="bx bx-info-circle me-2 text-emerald-600"></i>
+                        <span class="align-middle">Show Tutorial</span>
+                    </a>
+                    </li>
+                    
                 </ul>
                 <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1" v-if="$page.props.auth.user.role === 'examinee'">
