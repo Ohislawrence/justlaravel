@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Blog;
 use App\Models\SubscriptionPlan;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class FrontPageController extends Controller
 {
@@ -31,6 +32,12 @@ class FrontPageController extends Controller
         return Inertia::render('FrontPages/Index', [
             'recentBlogs' => $recentBlogs,
             'plans' => $plans,
+            'meta' => [
+                'title' => 'Revolutionize Assessment with AI-Powered Quiz/Test Creation',
+                'description' => 'The complete exam platform designed for Nigerian educational institutions, corporations, and training organizations. Create, customize, and deploy intelligent assessments that drive real learning outcomes.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
         ]);
     }
 
@@ -43,6 +50,12 @@ class FrontPageController extends Controller
 
         return Inertia::render('FrontPages/Blogs/Index', [
             'blogs' => $blogs,
+            'meta' => [
+                'title' => 'Updates and News',
+                'description' => 'Tips, insights, and best practices for Nigerian educators to enhance learning outcomes and student engagement.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
         ]);
     }
 
@@ -65,12 +78,25 @@ class FrontPageController extends Controller
         return Inertia::render('FrontPages/Blogs/Show', [
             'blog' => $blog->load(['categories', 'user']),
             'relatedBlogs' => $relatedBlogs,
+            'meta' => [
+                'title' => $blog->title,
+                'description' => Str::of(strip_tags($blog->content))->limit(40),
+                'image' => url('/storage/' . $blog->featured_image),
+                'url' => url()->current()
+        ]
         ]);
     }
     
     public function features()
     {
-        return Inertia::render('FrontPages/Features');
+        return Inertia::render('FrontPages/Features',[
+            'meta' => [
+                'title' => 'Features',
+                'description' => 'Discover the comprehensive set of tools designed to make creating, delivering, and analyzing quizzes effortless for Nigerian educators.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
+            ]);
     }
     public function pricing()
     {
@@ -84,13 +110,26 @@ class FrontPageController extends Controller
                 return $plan;
             });
             return Inertia::render('FrontPages/Pricing',[
-            'plans' => $plans
+            'plans' => $plans,
+            'meta' => [
+                'title' => 'Pricing',
+                'description' => 'Flexible pricing options designed for individual teachers, schools, and large institutions. All plans are priced in Nigerian Naira (₦).',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
         ]);
     }
 
     public function aboutUs()
     {
-        return Inertia::render('FrontPages/About');
+        return Inertia::render('FrontPages/About',[
+            'meta' => [
+                'title' => 'About Us',
+                'description' => 'We are on a mission to revolutionize education in Nigeria by providing innovative, accessible, and culturally relevant assessment tools.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
+            ]);
     }
 
     public function tos()
@@ -110,23 +149,51 @@ class FrontPageController extends Controller
 
     public function contact()
     {
-        return Inertia::render('FrontPages/Contact');
+        return Inertia::render('FrontPages/Contact',[
+            'meta' => [
+                'title' => 'Contact Us',
+                'description' => 'Reach out to us, we are available.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
+            ]);
     }
 
     //who it's for
     public function hr()
     {
-        return Inertia::render('FrontPages/Whoitsfor/HumanResource');
+        return Inertia::render('FrontPages/Whoitsfor/HumanResource',[
+            'meta' => [
+                'title' => 'HR Solutions',
+                'description' => 'Streamline hiring, training, and employee development with our powerful assessment platform designed specifically for HR teams.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
+            ]);
     }
 
     public function ld()
     {
-        return Inertia::render('FrontPages/Whoitsfor/LearningDevelopment');
+        return Inertia::render('FrontPages/Whoitsfor/LearningDevelopment',[
+            'meta' => [
+                'title' => 'Learning & Development',
+                'description' => 'Create engaging training programs, measure learning outcomes, and develop talent with our powerful assessment platform.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
+            ]);
     }
 
     public function certifications()
     {
-        return Inertia::render('FrontPages/Whoitsfor/Certifications');
+        return Inertia::render('FrontPages/Whoitsfor/Certifications',[
+            'meta' => [
+                'title' => 'Certifications',
+                'description' => 'Create, deliver, and manage professional certification exams with our secure, scalable platform.',
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+        ]
+            ]);
     }
 
     public function schools()
@@ -135,10 +202,10 @@ class FrontPageController extends Controller
             'meta' => [
                 'title' => 'Schools & Educational Centers',
                 'description' => 'Empower educators with smart assessment tools that save time, engage students, and improve learning outcomes.',
-                'image' => asset('images/dynamic-image.jpg'),
+                'image' => asset('images/examportalonlineimage.png'),
                 'url' => url()->current()
-    ]
-        ]);
+        ]
+            ]);
     }
 
 }

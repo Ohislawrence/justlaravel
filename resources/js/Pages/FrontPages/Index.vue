@@ -3,7 +3,19 @@
     <!-- Use the new layout component -->
      
     <AppLayout2>
-        <Head title="Home" />
+        <Head title="Revolutionize Assessment with AI-Powered Quiz/Test Creation">
+          <meta name="description" :content="meta.description">
+        <meta property="og:title" :content="meta.title">
+        <meta property="og:description" :content="meta.description">
+        <meta property="og:image" :content="meta.image">
+        <meta property="og:url" :content="meta.url">
+        <meta property="og:type" content="website">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" :content="meta.title">
+        <meta name="twitter:description" :content="meta.description">
+        <meta name="twitter:image" :content="meta.image">
+        </Head> 
       <!-- All your existing homepage-specific content goes here -->
       <!-- Hero Section -->
       <section class="container mx-auto px-4 sm:px-6 py-16 md:py-28 relative overflow-hidden">
@@ -20,7 +32,7 @@
             Revolutionize Assessment <br> with AI-Powered Quiz/Test Creation
           </h1>
           <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-            The complete quiz platform designed for Nigerian educational institutions, corporations, and training organizations. Create, customize, and deploy intelligent assessments that drive real learning outcomes.
+            The complete exam platform designed for Nigerian educational institutions, corporations, and training organizations. Create, customize, and deploy intelligent assessments that drive real learning outcomes.
           </p>
           <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
             <Link :href="route('register')" class="px-6 sm:px-8 py-3.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium transform hover:scale-[1.02] duration-300">
@@ -124,7 +136,7 @@
         <div class="container mx-auto px-4 sm:px-6">
           <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by Nigerian organizations</h2>
-            <p class="text-lg sm:text-xl text-gray-600">See what businesses and institutions are saying about QuizPortal Nigeria.</p>
+            <p class="text-lg sm:text-xl text-gray-600">See what businesses and institutions are saying about ExamPortal Online Nigeria.</p>
           </div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
             <!-- Testimonial Cards - Copied directly -->
@@ -138,7 +150,7 @@
                   <div class="text-xs sm:text-sm text-gray-500">Teacher</div>
                 </div>
               </div>
-              <p class="text-gray-600 mb-4 text-sm sm:text-base">"QuizPortal has revolutionized how we conduct assessments. The AI question generation saves me hours of work every week."</p>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"ExamPortal has revolutionized how we conduct assessments. The AI question generation saves me hours of work every week."</p>
               <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
             </div>
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
@@ -151,7 +163,7 @@
                   <div class="text-xs sm:text-sm text-gray-500">HR</div>
                 </div>
               </div>
-              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The features in QuizPortal is a game-changer. Our staffs can now take text even at home even on weekend."</p>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The features in ExamPortal is a game-changer. Our staffs can now take text even at home even on weekend."</p>
               <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
             </div>
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
@@ -269,7 +281,7 @@
                               }">
                             Start Free Trial
                         </Link>
-                        <a v-else href="mailto:sales@quizportal.online" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
+                        <a v-else href="mailto:sales@examportal.online" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
                             Contact Sales
                         </a>
                     </div>
@@ -346,7 +358,7 @@
                                                 QP
                                             </span>
                                         </div>
-                                        <span class="text-xs text-gray-600">Quiz Portal</span>
+                                        <span class="text-xs text-gray-600">Exam Portal</span>
                                     </div>
                                     <span class="text-xs text-gray-500">3 min read</span>
                                 </div>

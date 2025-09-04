@@ -8,7 +8,19 @@ defineProps({
 </script>
 
 <template>
-    <Head title="About Us - QuizPortal" />
+    <Head title="About Us">
+        <meta name="description" :content="meta.description">
+        <meta property="og:title" :content="meta.title">
+        <meta property="og:description" :content="meta.description">
+        <meta property="og:image" :content="meta.image">
+        <meta property="og:url" :content="meta.url">
+        <meta property="og:type" content="website">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" :content="meta.title">
+        <meta name="twitter:description" :content="meta.description">
+        <meta name="twitter:image" :content="meta.image">
+    </Head> 
     <AppLayout2>
         <!-- Hero Section -->
         <section class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-16 sm:py-24 overflow-hidden">
@@ -42,13 +54,13 @@ defineProps({
                     </div>
                     <div class="prose prose-emerald max-w-none text-gray-700 text-lg">
                         <p class="mb-6">
-                            QuizPortal Nigeria was born out of a deep understanding of the unique challenges faced by educators across our great nation. Our founders, a team of passionate educators and technologists, saw firsthand how traditional assessment methods were holding back both teachers and students.
+                            ExamPortal Nigeria was born out of a deep understanding of the unique challenges faced by educators across our great nation. Our founders, a team of passionate educators and technologists, saw firsthand how traditional assessment methods were holding back both teachers and students.
                         </p>
                         <p class="mb-6">
                             In 2020, we set out to build a platform that wasn't just another quiz tool, but a comprehensive solution designed specifically for the Nigerian educational context. We focused on understanding local curricula, infrastructure limitations, and pedagogical needs.
                         </p>
                         <p class="mb-6">
-                            Today, QuizPortal is trusted by thousands of teachers and hundreds of schools across all 36 states. We are proud to be part of the movement driving educational excellence in Nigeria, one quiz at a time.
+                            Today, ExamPortal is trusted by thousands of teachers and hundreds of schools across all 36 states. We are proud to be part of the movement driving educational excellence in Nigeria, one quiz at a time.
                         </p>
                     </div>
                 </div>
@@ -96,7 +108,7 @@ defineProps({
                 <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
                     <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
                     <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                        These principles guide everything we do at QuizPortal Nigeria.
+                        These principles guide everything we do at ExamPortal Nigeria.
                     </p>
                 </div>
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
@@ -183,7 +195,7 @@ defineProps({
                 <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
                     <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
                     <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                        The passionate individuals driving QuizPortal Nigeria forward.
+                        The passionate individuals driving ExamPortal Nigeria forward.
                     </p>
                 </div>
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
