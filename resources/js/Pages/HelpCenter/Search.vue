@@ -6,6 +6,7 @@ defineProps({
     results: Array,
     query: String,
     categories: Array,
+    meta: Object,
 });
 </script>
 

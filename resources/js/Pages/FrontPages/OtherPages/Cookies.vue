@@ -5,7 +5,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
 </script>
 
 <template>
-    <Head title="Cookie Policy - QuizPortal NG" />
+    <Head title="Cookie Policy" />
     <AppLayout2>
         <!-- Hero Section -->
         <section class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-16 sm:py-24 overflow-hidden">
@@ -26,7 +26,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
                         Cookie Policy
                     </h1>
                     <p class="text-lg sm:text-xl text-gray-700 mb-10 max-w-2xl mx-auto">
-                        Learn how we use cookies and similar technologies to enhance your experience on QuizPortal.
+                        Learn how we use cookies and similar technologies to enhance your experience on ExamPortal.
                     </p>
                 </div>
             </div>
@@ -43,7 +43,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
 
                         <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-4">1. Introduction</h2>
                         <p>
-                            QuizPortal Nigeria ("we," "us," or "our") uses cookies and similar tracking technologies on our website <a :href="route('home')" class="text-emerald-600 hover:underline">quizportal.ng</a> (the "Site") and in our services (the "Services"). This Cookie Policy explains what cookies are, how we use them, the types of cookies we use, your choices regarding cookies, and how you can manage your cookie preferences.
+                            ExamPortal Nigeria ("we," "us," or "our") uses cookies and similar tracking technologies on our website <a :href="route('home')" class="text-emerald-600 hover:underline">examportal.online</a> (the "Site") and in our services (the "Services"). This Cookie Policy explains what cookies are, how we use them, the types of cookies we use, your choices regarding cookies, and how you can manage your cookie preferences.
                         </p>
                         <p>
                             By using our Site or Services, you consent to the use of cookies in accordance with this Cookie Policy. If you do not agree to the use of cookies, you should adjust your browser settings accordingly or refrain from using our Site and Services.
@@ -121,7 +121,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
                             You can control and/or delete cookies as you wish. You can delete all cookies that are already on your device and you can set most browsers to prevent them from being placed. However, if you do this, you may have to manually adjust some preferences every time you visit a site and some services and functionalities may not work.
                         </p>
                         <p class="mt-4">
-                            Most web browsers automatically accept cookies, but you can modify your browser setting to decline cookies if you prefer. If you choose to decline cookies, you may not be able to fully experience the interactive features of the QuizPortal Services or websites you visit.
+                            Most web browsers automatically accept cookies, but you can modify your browser setting to decline cookies if you prefer. If you choose to decline cookies, you may not be able to fully experience the interactive features of the ExamPortal Services or websites you visit.
                         </p>
                         <p class="mt-4">
                             To find information relating to other browsers, visit the browser developer's website.
@@ -140,7 +140,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
                             If you have any questions about this Cookie Policy, please contact us at:
                         </p>
                         <p class="mt-4">
-                            <strong>Email:</strong> <a href="mailto:privacy@quizportal.ng" class="text-emerald-600 hover:underline">privacy@quizportal.ng</a><br>
+                            <strong>Email:</strong> <a href="mailto:privacy@examportal.online" class="text-emerald-600 hover:underline">privacy@examportal.online</a><br>
                             <strong>Address:</strong> Lagos, Nigeria
                         </p>
                     </div>
@@ -156,7 +156,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
                     We're here to help. Contact our support team for any cookie-related inquiries.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="mailto:privacy@quizportal.ng" class="px-6 sm:px-8 py-3.5 bg-white text-emerald-600 rounded-xl hover:bg-gray-100 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium">
+                    <a href="mailto:privacy@examportal.online" class="px-6 sm:px-8 py-3.5 bg-white text-emerald-600 rounded-xl hover:bg-gray-100 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium">
                         Email Us
                     </a>
                     <a :href="route('contact')" class="px-6 sm:px-8 py-3.5 border-2 border-white text-white rounded-xl hover:bg-white/10 transition text-base sm:text-lg font-medium">

@@ -384,6 +384,7 @@
   const props = defineProps({
     recentBlogs: Array,
     plans: Array,
+    meta: Object,
     });
 
 

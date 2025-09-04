@@ -59,6 +59,7 @@ class CreateNewUser implements CreatesNewUsers
             'user_id' => $user->id,
             'role' => 'overseer',
             'permissions' => null ,
+            'unique_code' => null,
         ]);
 
         $freePlan = SubscriptionPlan::where('slug', 'free-tier')->first();

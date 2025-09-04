@@ -7,6 +7,7 @@ import { router } from '@inertiajs/vue3';
 defineProps({
     categories: Array,
     featuredArticles: Array,
+    meta: Object,
 });
 
 const searchQuery = ref('');

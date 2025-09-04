@@ -2,10 +2,26 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout2 from '@/Layouts/AppLayout2.vue';
 import Cta from '@/Components/Cta.vue';
+
+const props = defineProps({
+    meta: Object,
+});
 </script>
 
 <template>
-    <Head title="Schools & Educational Centers - QuizPortal NG" />
+    <Head title="Schools & Educational Centers">
+        <meta property="og:title" :content="meta.title">
+        <meta property="og:description" :content="meta.description">
+        <meta property="og:image" :content="meta.image">
+        <meta property="og:url" :content="meta.url">
+        <meta property="og:type" content="website">
+
+        <!-- Twitter Card Meta -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" :content="meta.title">
+        <meta name="twitter:description" :content="meta.description">
+        <meta name="twitter:image" :content="meta.image">
+    </Head> 
     <AppLayout2>
         <!-- Hero Section -->
         <section class="relative bg-gradient-to-br from-emerald-50 via-white to-green-50 py-16 sm:py-24 overflow-hidden">
@@ -222,7 +238,7 @@ import Cta from '@/Components/Cta.vue';
                 <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
                     <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Educational Use Cases</h2>
                     <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                        How schools are using QuizPortal to enhance teaching and learning
+                        How schools are using ExamPortal to enhance teaching and learning
                     </p>
                 </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -290,7 +306,7 @@ import Cta from '@/Components/Cta.vue';
                 <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
                     <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by Nigerian Schools</h2>
                     <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                        See what educators are saying about QuizPortal
+                        See what educators are saying about ExamPortal
                     </p>
                 </div>
                 <div class="max-w-4xl mx-auto bg-emerald-50 p-8 rounded-2xl shadow-sm border border-emerald-100">
@@ -304,7 +320,7 @@ import Cta from '@/Components/Cta.vue';
                         </div>
                     </div>
                     <p class="text-lg text-gray-700 italic">
-                        "QuizPortal has revolutionized assessment in our school. Our teachers save 10+ hours weekly on test creation and grading, and our students are more engaged with the interactive format. The WAEC and JAMB alignment features have significantly improved our exam preparation results."
+                        "ExamPortal has revolutionized assessment in our school. Our teachers save 10+ hours weekly on test creation and grading, and our students are more engaged with the interactive format. The WAEC and JAMB alignment features have significantly improved our exam preparation results."
                     </p>
                     <div class="mt-6 flex items-center">
                         <div class="flex text-yellow-400">
@@ -333,7 +349,7 @@ import Cta from '@/Components/Cta.vue';
         <!-- CTA Section -->
         <Cta 
             title="Transform Your School's Assessment Process Today"
-            description="Join thousands of Nigerian educational institutions that trust QuizPortal for their assessment needs."
+            description="Join thousands of Nigerian educational institutions that trust ExamPortal for their assessment needs."
             :primaryAction="{ label: 'Start Free Trial', url: route('register') }"
             :secondaryAction="{ label: 'Schedule Demo', url: route('contact') }"
         />

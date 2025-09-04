@@ -8,6 +8,7 @@ defineProps({
     article: Object,
     relatedArticles: Array,
     categories: Array,
+    meta: Object,
 });
 
 const isMobile = ref(false);

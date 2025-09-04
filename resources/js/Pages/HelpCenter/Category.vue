@@ -6,6 +6,7 @@ defineProps({
     category: Object,
     articles: Array,
     categories: Array,
+    meta: Object,
 });
 </script>
 

@@ -131,7 +131,14 @@ class FrontPageController extends Controller
 
     public function schools()
     {
-        return Inertia::render('FrontPages/Whoitsfor/Schools');
+        return Inertia::render('FrontPages/Whoitsfor/Schools',[
+            'meta' => [
+                'title' => 'Schools & Educational Centers',
+                'description' => 'Empower educators with smart assessment tools that save time, engage students, and improve learning outcomes.',
+                'image' => asset('images/dynamic-image.jpg'),
+                'url' => url()->current()
+    ]
+        ]);
     }
 
 }

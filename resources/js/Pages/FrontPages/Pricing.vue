@@ -7,6 +7,7 @@ import Cta from '@/Components/Cta.vue';
 
 const props = defineProps({
     plans: Array,
+    meta: Object,
     });
 
 // Refs to manage the open state of each FAQ item

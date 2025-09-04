@@ -41,11 +41,6 @@
 
     <!-- Page CSS -->
 
-    <!-- Helpers -->
-    <script src="{{ asset('assets/vendor/js/helpers.js')}}"></script>
-
-
-    <script src="{{ asset('assets/js/config.js')}}"></script>
     @routes
     @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
     @inertiaHead

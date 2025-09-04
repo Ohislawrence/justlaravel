@@ -2,6 +2,10 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout2 from '@/Layouts/AppLayout2.vue';
 import Cta from '@/Components/Cta.vue';
+
+const props = defineProps({
+    meta: Object,
+});
 </script>
 
 <template>

@@ -11,9 +11,8 @@ import Cta from '@/Components/Cta.vue';
 
 // Define props for success message or pre-filled data if needed
 const props = defineProps({
-    status: String, // For success message
-    // You could also pass pre-filled data like user name/email if logged in
-    // userData: Object
+    status: String, 
+    meta: Object,
 });
 
 const form = useForm({

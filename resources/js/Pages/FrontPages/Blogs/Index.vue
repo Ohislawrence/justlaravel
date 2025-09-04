@@ -6,6 +6,7 @@ import Cta from '@/Components/Cta.vue';
 
 defineProps({
     blogs: Object,
+    meta: Object,
 });
 </script>
 

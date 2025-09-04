@@ -6,7 +6,8 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
 
 defineProps({
     blog: Object,
-    relatedBlogs: Object, // Assuming this is an array of blog post objects
+    relatedBlogs: Object,
+    meta: Object,
 });
 </script>
 
