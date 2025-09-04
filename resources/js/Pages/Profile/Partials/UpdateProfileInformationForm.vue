@@ -16,6 +16,7 @@ const form = useForm({
     name: props.user.name,
     email: props.user.email,
     photo: null,
+    idnumber:props.user.organizationMember.unique_code,
 });
 
 const verificationLinkSent = ref(null);
@@ -84,9 +85,9 @@ const clearPhotoFileInput = () => {
     <!-- Assuming this component is used within AppLayout or similar -->
     <!-- <AppLayout title="Profile Information"> -->
         <!-- If not within AppLayout, uncomment the above and the closing tag -->
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        
+            
+                
                     <div class="p-6 bg-white border-b border-gray-200">
                         <div class="max-w-3xl">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6">Profile Information</h2>
@@ -163,8 +164,7 @@ const clearPhotoFileInput = () => {
                                         v-model="form.email"
                                         type="email"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        required
-                                        autocomplete="username"
+                                        readonly
                                     />
                                     <InputError :message="form.errors.email" class="mt-2" />
 
@@ -185,6 +185,18 @@ const clearPhotoFileInput = () => {
                                             A new verification link has been sent to your email address.
                                         </div>
                                     </div>
+                                </div>
+                                <!-- idnumber -->
+                                <div class="mb-6">
+                                    <InputLabel for="idnumber" value="Identification Number" class="mb-2" />
+                                    <TextInput
+                                        id="idnumber"
+                                        v-model="form.idnumber"
+                                        type="text"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                       readonly
+                                    />
+                                    <InputError :message="form.errors.idnumber" class="mt-2" />
                                 </div>
 
                                 <div class="flex items-center gap-4">
@@ -209,9 +221,9 @@ const clearPhotoFileInput = () => {
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                
+            
+        
     <!-- </AppLayout> -->
 </template>
 

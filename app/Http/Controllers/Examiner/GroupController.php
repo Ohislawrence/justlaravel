@@ -353,13 +353,15 @@ class GroupController extends Controller
         }
     }
 
-    public function sendInvite(Request $request, Organization $organization, Group $group)
+    public function sendInvite(Request $request, Group $group)
     {
         $validated = $request->validate([
             'emails' => ['required', 'array'],
             'emails.*' => ['required', 'email']
         ]);
 
+        $organization = auth()->user()->organizations()->first();
+        
         // Filter out duplicates and existing members
         $existingInvitations = $group->invitations()
             ->whereIn('email', $validated['emails'])

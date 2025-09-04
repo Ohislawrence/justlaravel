@@ -156,7 +156,6 @@ const sendEmailInvites = async () => {
     skippedEmails.value = 0;
     try {
         const response = await router.post(route('examiner.groups.sendInvite', {
-            organization: props.organization.slug,
             group: props.group.id
         }), { 
             emails: formattedEmails.value 
@@ -493,115 +492,125 @@ const sendEmailInvites = async () => {
             </div>
         </div>
         <!-- Modal -->
-        <div v-if="showShareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all duration-200">
-                <div class="px-6 py-5 border-b border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            Share Registration Link for {{ group.name }}
-                        </h3>
-                        <button @click="showShareModal = false" class="text-gray-400 hover:text-gray-500">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="px-6 py-5">
-                    <div class="mb-5">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Registration Link</label>
-                        <div class="flex">
-                            <input type="text" :value="registrationLink" readonly
-                                class="flex-1 px-4 py-2.5 border border-gray-200 rounded-l-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 truncate">
-                            <button @click="copyLink"
-                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-r-lg transition-all duration-200 flex items-center">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-5">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Or send via email (comma-separated)
-                        </label>
-                        <div class="flex flex-col">
-                            <textarea v-model="emailInvites" 
-                                placeholder="Enter email addresses, separated by commas"
-                                rows="3"
-                                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
-                            </textarea>
-                            <!-- Email preview -->
-                            <div v-if="formattedEmails.length > 0" class="mt-3">
-                                <p class="text-sm text-gray-600 mb-2">Will send to:</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <span 
-                                        v-for="(email, index) in formattedEmails" 
-                                        :key="index"
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                    >
-                                        {{ email }}
-                                    </span>
-                                </div>
-                            </div>
-                            <!-- Validation error -->
-                            <p v-if="formattedEmails.length > 0 && !isValidEmails" class="mt-2 text-sm text-red-600 flex items-center">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Please enter valid email addresses
-                            </p>
-                            <!-- Send button -->
-                            <button @click="sendEmailInvites" 
-                                :disabled="!isValidEmails || isSending"
-                                :class="{
-                                    'bg-green-600 hover:bg-green-700': isValidEmails && !isSending,
-                                    'bg-green-400 cursor-not-allowed': !isValidEmails || isSending
-                                }"
-                                class="mt-3 inline-flex items-center justify-center w-full text-white px-4 py-2.5 rounded-lg transition-all duration-200">
-                                <svg v-if="isSending" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span v-if="isSending">Sending...</span>
-                                <span v-else>Send Invitations</span>
-                            </button>
-                            <!-- Success/error messages -->
-                            <div v-if="sendSuccess" class="mt-3 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
-                                <div class="flex">
-                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <p>Invitations sent successfully!</p>
-                                        <p v-if="skippedEmails > 0" class="mt-1 text-green-800">
-                                            {{ skippedEmails }} email(s) were already invited or members
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-if="sendError" class="mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                                <div class="flex">
-                                    <svg class="h-5 w-5 text-red-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <p>{{ sendError }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end">
-                    <button @click="showShareModal = false"
-                        class="inline-flex items-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
-                        Close
+<div v-if="showShareModal" class="fixed inset-0 bg-green-50 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-200 border border-green-100">
+        <!-- Header -->
+        <div class="px-5 py-4 border-b border-green-100 bg-green-50 rounded-t-xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-green-900 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Share Registration Link
+                </h3>
+                <button @click="showShareModal = false" class="text-green-500 hover:text-green-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <p class="text-xs text-green-600 mt-1 truncate">{{ group.name }}</p>
+        </div>
+
+        <!-- Content -->
+        <div class="px-5 py-4">
+            <!-- Registration Link -->
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-green-700 mb-2">Registration Link</label>
+                <div class="flex">
+                    <input type="text" :value="registrationLink" readonly
+                        class="flex-1 px-3 py-2 text-sm border border-green-200 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 truncate bg-green-50">
+                    <button @click="copyLink"
+                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-r-lg transition-all duration-200 flex items-center text-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
                     </button>
                 </div>
             </div>
+
+            <!-- Email Invites -->
+            <div>
+                <label class="block text-xs font-medium text-green-700 mb-2">
+                    Send via email (comma-separated)
+                </label>
+                <textarea v-model="emailInvites" 
+                    placeholder="Enter email addresses, separated by commas"
+                    rows="2"
+                    class="w-full px-3 py-2 text-sm border border-green-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-green-50">
+                </textarea>
+
+                <!-- Email preview -->
+                <div v-if="formattedEmails.length > 0" class="mt-3">
+                    <p class="text-xs text-green-600 mb-1">Will send to:</p>
+                    <div class="flex flex-wrap gap-1">
+                        <span 
+                            v-for="(email, index) in formattedEmails" 
+                            :key="index"
+                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700"
+                        >
+                            {{ email }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Validation error -->
+                <p v-if="formattedEmails.length > 0 && !isValidEmails" class="mt-2 text-xs text-red-600 flex items-center">
+                    <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Please enter valid email addresses
+                </p>
+
+                <!-- Send button -->
+                <button @click="sendEmailInvites" 
+                    :disabled="!isValidEmails || isSending"
+                    :class="{
+                        'bg-green-600 hover:bg-green-700': isValidEmails && !isSending,
+                        'bg-green-400 cursor-not-allowed': !isValidEmails || isSending
+                    }"
+                    class="mt-3 w-full text-white px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <svg v-if="isSending" class="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ isSending ? 'Sending...' : 'Send Invitations' }}</span>
+                </button>
+
+                <!-- Success/error messages -->
+                <div v-if="sendSuccess" class="mt-3 p-2 bg-green-50 text-green-700 rounded-lg text-xs border border-green-200">
+                    <div class="flex items-start">
+                        <svg class="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <p>Invitations sent successfully!</p>
+                            <p v-if="skippedEmails > 0" class="mt-0.5 text-green-600">
+                                {{ skippedEmails }} email(s) were already invited or members
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="sendError" class="mt-3 p-2 bg-red-50 text-red-700 rounded-lg text-xs border border-red-200">
+                    <div class="flex items-start">
+                        <svg class="h-4 w-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>{{ sendError }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3 bg-green-50 rounded-b-xl border-t border-green-100">
+            <button @click="showShareModal = false"
+                class="w-full text-xs px-3 py-2 border border-green-300 text-green-700 bg-white hover:bg-green-50 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 transition-all duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
     </AppLayout>
 <UserImport 
 :organization="organization"

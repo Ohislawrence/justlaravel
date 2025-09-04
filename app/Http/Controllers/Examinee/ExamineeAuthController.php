@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Examinee;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegisterWithOrganizationEmail;
 use App\Models\Group;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\Invitation;
+use App\Models\OrganizationMember;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
 
 class ExamineeAuthController extends Controller
 {
@@ -38,24 +45,71 @@ class ExamineeAuthController extends Controller
             'organization' => $organization,
             'group' => $group,
             'invitation' => $invitation,
+            'email' => $invitation->email,
             ]);
     }
 
-    public function Create(Request $request)
+
+
+    public function create(Request $request)
     {
         $credentials = $request->validate([
-            'unique_code' => 'required|string',
-            'password' => 'required|string',
+            'name'       => 'required|string|max:255',
+            'email'      => 'required|string|email|max:255',
+            'group'=> 'required',
+            'organization' => 'required',
+            'timezone' => 'required',
         ]);
 
-        if (Auth::guard('examinee')->attempt($credentials, $request->remember)) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('examinee.dashboard'));
+        $organization = Organization::where('id',$credentials['organization'])->first();
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            // Create new user if doesn't exist
+            $user = User::create([
+                'name'      => $credentials['name'],
+                'email'     => $credentials['email'],
+                'password' => Hash::make(Str::random(16)),
+                'timezone' => $credentials['timezone'],
+                'is_active' => 1,
+            ]);
+
+            // Assign role
+            $user->assignRole('examinee');
+
+        } else {
+            // Check if user is already in this organization
+            $existingMember = OrganizationMember::where('user_id', $user->id)
+                ->where('organization_id', $organization->id)
+                ->exists();
+                
+            if ($existingMember) {
+                return redirect()->back()->with('error', 'You are already a member of an organization.');
+            }
         }
 
-        return back()->withErrors([
-            'unique_code' => 'The provided credentials do not match our records.',
+        // Create organization membership with designation
+        OrganizationMember::create([
+            'organization_id' => $organization->id,
+            'user_id' => $user->id,
+            'role' => 'examinee',
+            'unique_code' =>  null,
+            'designation_id' =>  null,
         ]);
+
+        
+        $user->groups()->syncWithoutDetaching($credentials['group']);
+
+        $token = Password::createToken($user);
+        $resetUrl = url(route('password.reset', [
+            'token' => $token,
+            'email' => $user->email,
+        ], false));
+
+        Mail::to($user->email)->queue(new RegisterWithOrganizationEmail($user, $resetUrl,$organization));
+        
+        return back()->with('success', 'Your account has been created, an email has been sent to you to set your password.');
+
     }
 
     public function logout(Request $request)

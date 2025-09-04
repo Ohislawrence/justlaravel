@@ -43,7 +43,7 @@ class GroupInvitationMail extends Mailable implements ShouldQueue
                 'invitation' => $this->invitation,
                 'url' => route('organization.examinee.register', [
                     'organizationSlug' => $this->invitation->group->organization->slug,
-                    'userGroup' => $this->invitation->group->slug,
+                    'groupSlug' => $this->invitation->group->slug,
                 ]) . '?token=' . $this->invitation->token
             ]
         );

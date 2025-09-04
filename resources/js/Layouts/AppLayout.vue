@@ -1,7 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import OnboardingModal from '@/Components/OnboardingModal.vue';
+import HelpButton from '@/Components/HelpButton.vue';
 
 const page = usePage();
 const isMenuOpen = ref(false);
@@ -15,8 +17,48 @@ const settingsDropdownOpen = ref(false);
 // Your existing userRole computed property
 const userRole = computed(() => page.props.auth.user.role);
 
+// Onboarding state
+const showOnboardingModal = ref(false);
 
+// Check if user has completed onboarding
+const hasCompletedOnboarding = computed(() => page.props.auth.user.onboarding_completed);
 
+// Watch for page changes and check onboarding status
+watch(
+  () => page.props.auth.user, 
+  (newUser) => {
+    // Only show modal if user hasn't completed onboarding AND we're not already showing it
+    if (!newUser.onboarding_completed && !showOnboardingModal.value) {
+      // Small delay to let the page load first
+      setTimeout(() => {
+        showOnboardingModal.value = true;
+      }, 300);
+    }
+  },
+  { immediate: true } // Run immediately on component mount
+);
+
+const closeOnboardingModal = () => {
+  showOnboardingModal.value = false;
+};
+
+const onboardingCompleted = () => {
+  // Update the local state without refreshing the page
+  page.props.auth.user.onboarding_completed = true;
+  showOnboardingModal.value = false;
+};
+
+const restartOnboarding = () => {
+  window.axios.post(route('examiner.onboarding.restart'))
+    .then(() => {
+      page.props.auth.user.onboarding_completed = false;
+      // Show the modal immediately when restarting
+      showOnboardingModal.value = true;
+    })
+    .catch(error => {
+      console.error('Failed to restart onboarding:', error);
+    });
+};
 
 defineProps({
     title: String,
@@ -58,9 +100,6 @@ const toggleDropdown = (dropdown) => {
         settingsDropdownOpen.value = !settingsDropdownOpen.value;
     }
 };
-
-
-
 </script>
 
 <style scoped>
@@ -235,59 +274,62 @@ const toggleDropdown = (dropdown) => {
                             <div>Dashboard</div>
                         </ResponsiveNavLink>
                     </li>
+
+                    <li class="menu-item mt-0.5">
+                        <div class="px-3 py-1.5">
+                            <div class="flex items-center space-x-2 text-[9px] font-light text-emerald-400 uppercase tracking-wide">
+                                <svg class="w-3.5 h-3.5 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Exams & Questions</span>
+                            </div>
+                        </div>
+                        <hr class="border-t border-gray-100 mx-3 my-1">
+                    </li>
                     
                     <!-- Quizzes Dropdown -->
                     <li class="menu-item">
-                        <a href="javascript:void(0)" class="menu-link menu-toggle" @click="toggleDropdown('quizzes')">
-                            <div class="flex items-center justify-between w-full">
-                                <span>Exams</span>
-                                <i class="dropdown-icon" :class="{ 'rotated': quizzesDropdownOpen }">›</i>
+                        <ResponsiveNavLink :href="route('examiner.quiz-groups.index')"
+                            :active="route().current('examiner.quiz-groups.index')">
+                            <div>Exam Group</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item">
+                        <ResponsiveNavLink :href="route('examiner.quizzes.index')"
+                            :active="route().current('examiner.quizzes.index')">
+                            <div>Exam</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item">
+                        <ResponsiveNavLink :href="route('examiner.question-pools.index')"
+                            :active="route().current('examiner.question-pools.index')">
+                            <div>Question Pool</div>
+                        </ResponsiveNavLink>
+                    </li>
+                    <li class="menu-item mt-1">
+                        <div class="px-3 py-1.5">
+                            <div class="flex items-center space-x-2 text-[9px] font-light text-emerald-400 uppercase tracking-wide">
+                                <svg class="w-3.5 h-3.5 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Examinee & Certifications</span>
                             </div>
-                        </a>
-                        <ul class="menu-dropdown" :class="{ 'open': quizzesDropdownOpen, 'closed': !quizzesDropdownOpen }">
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.quiz-groups.index')"
-                                    :active="route().current('examiner.quiz-groups.index')">
-                                    <div>Exam Group</div>
-                                </ResponsiveNavLink>
-                            </li>
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.quizzes.index')"
-                                    :active="route().current('examiner.quizzes.index')">
-                                    <div>Exam</div>
-                                </ResponsiveNavLink>
-                            </li>
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.question-pools.index')"
-                                    :active="route().current('examiner.question-pools.index')">
-                                    <div>Question Pool</div>
-                                </ResponsiveNavLink>
-                            </li>
-                        </ul>
+                        </div>
+                        <hr class="border-t border-gray-100 mx-3 my-1">
                     </li>
                     
-                    <!-- Members Dropdown -->
+                    <!-- Members Dropdown -->  
+                     <li class="menu-item">
+                        <ResponsiveNavLink :href="route('examiner.user.index')"
+                            :active="route().current('examiner.user.index')">
+                            <div>Examinee</div>
+                        </ResponsiveNavLink>
+                    </li>
                     <li class="menu-item">
-                        <a href="javascript:void(0)" class="menu-link menu-toggle" @click="toggleDropdown('members')">
-                            <div class="flex items-center justify-between w-full">
-                                <span>Members</span>
-                                <i class="dropdown-icon" :class="{ 'rotated': membersDropdownOpen }">›</i>
-                            </div>
-                        </a>
-                        <ul class="menu-dropdown" :class="{ 'open': membersDropdownOpen, 'closed': !membersDropdownOpen }">
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.user.index')"
-                                    :active="route().current('examiner.user.index')">
-                                    <div>Users</div>
-                                </ResponsiveNavLink>
-                            </li>
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.groups.index')"
-                                    :active="route().current('examiner.groups.index')">
-                                    <div>User Group</div>
-                                </ResponsiveNavLink>
-                            </li>
-                        </ul>
+                        <ResponsiveNavLink :href="route('examiner.groups.index')"
+                            :active="route().current('examiner.groups.index')">
+                            <div>Examinee Group</div>
+                        </ResponsiveNavLink>
                     </li>
                     
                     <li class="menu-item">
@@ -296,43 +338,42 @@ const toggleDropdown = (dropdown) => {
                             <div>Certifications</div>
                         </ResponsiveNavLink>
                     </li>
+                    <li class="menu-item mt-1">
+                        <div class="px-3 py-1.5">
+                            <div class="flex items-center space-x-2 text-[9px] font-light text-emerald-400 uppercase tracking-wide">
+                                <svg class="w-3 h-3 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Settings</span>
+                            </div>
+                        </div>
+                        <hr class="border-t border-gray-100 mx-3 my-1">
+                    </li>
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('examiner.subscription.plans')"
                             :active="route().current('examiner.subscription.plans')">
                             <div>Subscription</div>
                         </ResponsiveNavLink>
                     </li>
-                    
-                    <!-- Settings Dropdown -->
                     <li class="menu-item">
-                        <a href="javascript:void(0)" class="menu-link menu-toggle" @click="toggleDropdown('settings')">
-                            <div class="flex items-center justify-between w-full">
-                                <span>Settings</span>
-                                <i class="dropdown-icon" :class="{ 'rotated': settingsDropdownOpen }">›</i>
-                            </div>
-                        </a>
-                        <ul class="menu-dropdown" :class="{ 'open': settingsDropdownOpen, 'closed': !settingsDropdownOpen }">
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.settings.index')"
-                                    :active="route().current('examiner.settings.index')">
-                                    <div>General Settings</div>
-                                </ResponsiveNavLink>
-                            </li>
-                            <li class="menu-item">
-                                <ResponsiveNavLink :href="route('examiner.grading-systems.index')"
-                                    :active="route().current('examiner.grading-systems.index')">
-                                    <div>Grading System</div>
-                                </ResponsiveNavLink>
-                            </li>
-                        </ul>
+                        <ResponsiveNavLink :href="route('examiner.settings.index')"
+                            :active="route().current('examiner.settings.index')">
+                            <div>General Settings</div>
+                        </ResponsiveNavLink>
                     </li>
-                    <li  class="menu-item">
-                    <a href="javascript:void(0)" 
-                        class="dropdown-item py-2 px-3 hover:bg-emerald-50 rounded-md transition-colors duration-150"
-                        @click="startTour(userRole)">
-                        <i class="bx bx-info-circle me-2 text-emerald-600"></i>
-                        <span class="align-middle">Show Tutorial</span>
-                    </a>
+                    <li class="menu-item">
+                        <ResponsiveNavLink :href="route('examiner.grading-systems.index')"
+                            :active="route().current('examiner.grading-systems.index')">
+                            <div>Grading System</div>
+                        </ResponsiveNavLink>
+                    </li>
+                        
+                    <li>
+                        <a href="javascript:void(0)" class="dropdown-item" @click="restartOnboarding">
+                            <i class="bx bx-map me-2 text-emerald-600"></i>
+                            <span class="align-middle">Show Welcome</span>
+                        </a>
                     </li>
                     
                 </ul>
@@ -566,5 +607,17 @@ const toggleDropdown = (dropdown) => {
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle" @click="toggleMobileMenu"></div>
     </div>
+
+    
     <!-- / Layout wrapper -->
+    <OnboardingModal 
+    :is-open="showOnboardingModal" 
+    @close="closeOnboardingModal" 
+    @completed="onboardingCompleted"
+    />
+<div v-if="$page.props.auth.user.role === 'examiner'">
+<HelpButton />
+</div>
+
+    
 </template>

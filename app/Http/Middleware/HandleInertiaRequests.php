@@ -52,6 +52,8 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'role' => $request->user()->roles->pluck('name')->first(),
                     'current_organization' => $request->user()->organizations()->first(),
+                    'organizationMember' => $request->user()->organizationMember()->first(),
+                    'onboarding_completed' => $request->user()->onboarding_completed,
                 ] : null,
             ],
             'csrf_token' => csrf_token(),

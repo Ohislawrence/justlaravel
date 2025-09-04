@@ -29,6 +29,7 @@ use App\Http\Controllers\Landlord\HelpCenterController as LandlordHelpCenterCont
 use App\Http\Controllers\Landlord\OrganizationController;
 use App\Http\Controllers\Landlord\OrganizationUserController;
 use App\Http\Controllers\Landlord\SubscriptionController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaystackWebhookController;
 use Illuminate\Foundation\Application;
@@ -65,6 +66,8 @@ Route::get('/quizzes/{quiz}/{token?}', [ExamineeQuizController::class, 'show'])
 //members Login
 Route::get('{organizationSlug?}/member/{groupSlug?}/register', [ExamineeAuthController::class, 'register'])
     ->name('organization.examinee.register');
+Route::post('create/member/create/create', [ExamineeAuthController::class, 'create'])
+    ->name('organization.examinee.create');
 
 Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handleWebhook']);
 
@@ -177,6 +180,9 @@ Route::middleware([
             Route::post('/{group}/import-users', [GroupController::class, 'importUsers'])->name('importUsers');
             Route::get('/import-template', [GroupController::class, 'importTemplate'])->name('importTemplate');
         });
+
+        Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+        Route::post('/onboarding/restart', [OnboardingController::class, 'restart'])->name('onboarding.restart');
         
         
         Route::resource('reports', ReportController::class);
@@ -277,7 +283,7 @@ Route::middleware([
         Route::get('quiz-groups/{quiz_group}/edit', [QuizGroupController::class, 'edit'])->name('quiz-groups.edit');
         Route::put('quiz-groups/{quiz_group}', [QuizGroupController::class, 'update'])->name('quiz-groups.update');
         Route::delete('quiz-groups/{quiz_group}', [QuizGroupController::class, 'destroy'])->name('quiz-groups.destroy');
-        Route::post('organizations/{organization}/groups/{group}/send-invite', 
+        Route::post('/groups/{group}/send-invite', 
             [GroupController::class, 'sendInvite'])
             ->name('groups.sendInvite');
 
