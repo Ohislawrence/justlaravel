@@ -608,14 +608,14 @@ const toggleDropdown = (dropdown) => {
         <div class="layout-overlay layout-menu-toggle" @click="toggleMobileMenu"></div>
     </div>
 
-    
+<div v-if="$page.props.auth.user.role === 'examiner'">    
     <!-- / Layout wrapper -->
     <OnboardingModal 
     :is-open="showOnboardingModal" 
     @close="closeOnboardingModal" 
     @completed="onboardingCompleted"
     />
-<div v-if="$page.props.auth.user.role === 'examiner'">
+
 <HelpButton />
 </div>
 

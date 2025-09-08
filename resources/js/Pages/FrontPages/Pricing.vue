@@ -68,19 +68,7 @@ const getPriceSuffix = () => {
 </script>
 
 <template>
-    <Head title="Pricing">
-        <meta name="description" :content="meta.description">
-        <meta property="og:title" :content="meta.title">
-        <meta property="og:description" :content="meta.description">
-        <meta property="og:image" :content="meta.image">
-        <meta property="og:url" :content="meta.url">
-        <meta property="og:type" content="website">
-
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" :content="meta.title">
-        <meta name="twitter:description" :content="meta.description">
-        <meta name="twitter:image" :content="meta.image">
-    </Head>
+    <Head title="Pricing" />
     <AppLayout2>
          <!-- Hero Section -->
         <section class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-16 sm:py-24 overflow-hidden">

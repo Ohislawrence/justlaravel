@@ -29,8 +29,9 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'organization' => ['required', 'string', 'max:255'],
+            'organization' => ['required', 'string', 'max:255', 'unique:organizations'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'industry' => ['required', 'string', 'max:255'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
@@ -49,7 +50,7 @@ class CreateNewUser implements CreatesNewUsers
             'description' => null,
             'logo' => null,
             'website' => null,
-            'industry' => null,
+            'industry' => $input['industry'] ?? null,
             'settings' => null,
             'is_active' => 1,
         ]);

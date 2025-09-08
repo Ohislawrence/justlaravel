@@ -11,9 +11,21 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title inertia>{{ config('app.name', 'Exam Portal Online') }}</title>
-
-    <meta name="description" content="" />
+    <title inertia>{{ 'Exam Portal Online' }}</title>
+    
+    <meta name="author" content="Lawrence Ohis"/>
+    @if(isset($page['props']['meta']))
+        <meta name="twitter:card"
+              content="{{ 'summary_large_image' }}"/>
+        <meta name="twitter:site" content="@examportalonline"/>
+        <meta property="og:title"
+              content="{{ (isset($page['props']['meta']['title'])) ? ('My Website | '.$page['props']['meta']['title']) : 'My Website | Page' }}"/>
+        <meta property="og:description"
+              content="{{ (isset($page['props']['meta']['description'])) ? $page['props']['meta']['description'] : '' }}"/>
+        <meta property="og:image"
+              content="{{  (isset($page['props']['meta']['image'])) ? $page['props']['meta']['image'] : asset('/images/examportalonlineimage.png') }}"/>
+    @endif
+    <meta property="og:url" content="{{ url()->current() }}"/>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon-examportal.png') }}" />

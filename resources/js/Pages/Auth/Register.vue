@@ -7,6 +7,13 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 
+const props = defineProps({
+    industries: {
+        type: Array,
+        required: true,
+    },
+});
+
 const form = useForm({
     name: '',
     email: '',
@@ -14,6 +21,7 @@ const form = useForm({
     organization: '',
     password_confirmation: '',
     terms: false,
+    industry: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 });
 
@@ -98,7 +106,25 @@ const submit = () => {
                         />
                         <InputError class="mt-2 text-sm text-red-600" :message="form.errors.email" />
                     </div>
-
+                    <div>
+                        <InputLabel for="industry" value="Industry" class="block text-sm font-medium text-gray-700 mb-1" />
+                        <select
+                            id="industry"
+                            v-model="form.industry"
+                            class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm appearance-none bg-white"
+                            required
+                        >
+                            <option value="" disabled>Select your industry</option>
+                            <option
+                                v-for="industry in props.industries"
+                                :key="industry.id"
+                                :value="industry.name"
+                            >
+                                {{ industry.name }}
+                            </option>
+                        </select>
+                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.industry" />
+                    </div>
                     
                      <!-- Terms and Privacy Policy Checkbox -->
                     <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature">

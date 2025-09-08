@@ -3,19 +3,7 @@
     <!-- Use the new layout component -->
      
     <AppLayout2>
-        <Head title="Revolutionize Assessment with AI-Powered Quiz/Test Creation">
-          <meta name="description" :content="meta.description">
-        <meta property="og:title" :content="meta.title">
-        <meta property="og:description" :content="meta.description">
-        <meta property="og:image" :content="meta.image">
-        <meta property="og:url" :content="meta.url">
-        <meta property="og:type" content="website">
-
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" :content="meta.title">
-        <meta name="twitter:description" :content="meta.description">
-        <meta name="twitter:image" :content="meta.image">
-        </Head> 
+        <Head title="Revolutionize Assessment with AI-Powered Quiz/Test Creation" />
       <!-- All your existing homepage-specific content goes here -->
       <!-- Hero Section -->
       <section class="container mx-auto px-4 sm:px-6 py-16 md:py-28 relative overflow-hidden">
