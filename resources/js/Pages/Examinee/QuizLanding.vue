@@ -4,16 +4,15 @@
       <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
           <!-- Quiz Header -->
-          <div class="px-6 py-5 sm:px-8 sm:py-6 border-b border-gray-200 bg-gray-50">
+          <div class="px-6 py-5 sm:px-8 sm:py-6 border-b border-gray-200 bg-green-50">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ quiz.title }}</h1>
-            <div class="mt-2 flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-1">
+            <div class="mt-2 flex flex-wrap items-center text-sm text-gray-600 gap-x-4 gap-y-1">
               <span class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {{ totalQuestions }} {{ totalQuestions === 1 ? 'question' : 'questions' }}
               </span>
-              
             </div>
           </div>
 
@@ -30,16 +29,14 @@
             <!-- Quiz Details Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <!-- Timing -->
-              <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
                 <h3 class="text-md font-medium text-gray-900 flex items-center mb-3">
-                  <ClockIcon class="h-5 w-5 mr-2 text-gray-500" />
-                  Timing
+                  <ClockIcon class="h-5 w-5 mr-2 text-green-600" />
+                  <span class="font-medium text-green-700">Timing</span>
                 </h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                   <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 mr-2 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <ClockIcon class="h-4 w-4 mt-0.5 mr-2 text-gray-400 flex-shrink-0" />
                     <span>{{ quiz.time_limit ? `${quiz.time_limit} minutes` : 'No time limit' }}</span>
                   </li>
                   <li v-if="quiz.starts_at" class="flex items-start">
@@ -54,16 +51,14 @@
               </div>
 
               <!-- Grading -->
-              <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
                 <h3 class="text-md font-medium text-gray-900 flex items-center mb-3">
-                  <CheckCircleIcon class="h-5 w-5 mr-2 text-gray-500" />
-                  Grading
+                  <CheckCircleIcon class="h-5 w-5 mr-2 text-green-600" />
+                  <span class="font-medium text-green-700">Grading</span>
                 </h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                   <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 mr-2 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <CheckCircleIcon class="h-4 w-4 mt-0.5 mr-2 text-gray-400 flex-shrink-0" />
                     <span>Passing score: <span class="font-medium">{{ quiz.passing_score ? `${quiz.passing_score}%` : 'Not specified' }}</span></span>
                   </li>
                   <li v-if="attemptsRemaining !== null" class="flex items-start">
@@ -81,7 +76,7 @@
                 <p class="text-gray-700 mb-4">You need to sign in to access this quiz.</p>
                 <Link
                   :href="route('login')"
-                  class="inline-flex items-center px-5 py-2.5 bg-blue-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition ease-in-out duration-150"
+                  class="inline-flex items-center px-5 py-2.5 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition ease-in-out duration-150"
                 >
                   Sign In
                 </Link>
@@ -144,7 +139,7 @@
                   :disabled="!canStartQuiz"
                   :class="{
                     'opacity-50 cursor-not-allowed': !canStartQuiz,
-                    'inline-flex items-center px-6 py-3 bg-blue-600 border border-transparent rounded-md font-semibold text-base text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition ease-in-out duration-150': canStartQuiz
+                    'inline-flex items-center px-6 py-3 bg-green-600 border border-transparent rounded-md font-semibold text-base text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition ease-in-out duration-150': canStartQuiz
                   }"
                 >
                   Start Quiz

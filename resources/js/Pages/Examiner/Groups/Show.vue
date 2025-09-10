@@ -361,22 +361,22 @@ const sendEmailInvites = async () => {
                                         </svg>
                                         Current Members ({{ group.members.length }})
                                     </h4>
-                                    <div v-if="group.members.length > 0" class="space-y-3 max-h-80 overflow-y-auto p-1">
+                                    <div v-if="group.members.length > 0" class="space-y-1 max-h-60 overflow-y-auto p-1">
                                         <div v-for="member in group.members" :key="member.id" 
-                                            class="flex justify-between items-center p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                                            class="flex justify-between items-center p-2 bg-white rounded border border-gray-200 shadow-sm hover:shadow transition-all duration-200">
                                             <div class="flex items-center">
                                                 <input type="checkbox" 
                                                     :value="member.id" 
                                                     v-model="selectedUserIds"
-                                                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mr-3">
-                                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                                                    <span class="text-green-800 font-medium">{{ member.name.charAt(0) }}</span>
+                                                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mr-2">
+                                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                                                    <span class="text-green-800 font-medium text-xs">{{ member.name.charAt(0) }}</span>
                                                 </div>
-                                                <span class="ml-3 text-sm font-medium text-gray-800">{{ member.name }}</span>
+                                                <span class="ml-2 text-xs font-medium text-gray-800">{{ member.name }}</span>
                                             </div>
                                             <button @click="removeMember(member.id)" 
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200">
-                                                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-all duration-200">
+                                                <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                                 Remove
@@ -456,20 +456,20 @@ const sendEmailInvites = async () => {
                                         </svg>
                                         Assigned Quizzes
                                     </h4>
-                                    <div v-if="group.quizzes.length > 0" class="space-y-3 max-h-80 overflow-y-auto p-1">
+                                    <div v-if="group.quizzes.length > 0" class="space-y-1 max-h-60 overflow-y-auto p-1">
                                         <div v-for="quiz in group.quizzes" :key="quiz.id" 
-                                            class="flex justify-between items-center p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                                            class="flex justify-between items-center p-2 bg-white rounded border border-gray-200 shadow-sm hover:shadow transition-all duration-200">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <div class="flex-shrink-0 h-8 w-8 rounded bg-green-100 flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
                                                 </div>
-                                                <span class="ml-3 text-sm font-medium text-gray-800">{{ quiz.title }}</span>
+                                                <span class="ml-2 text-xs font-medium text-gray-800">{{ quiz.title }}</span>
                                             </div>
                                             <button @click="removeQuiz(quiz.id)" 
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200">
-                                                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-all duration-200">
+                                                <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                                 Remove

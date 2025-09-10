@@ -293,7 +293,7 @@ const updateOrganization = () => {
                                             />
                                             <InputError :message="organizationErrors.website" class="mt-2" />
                                         </div>
-
+                                        
                                         <div>
                                             <InputLabel for="org_industry" value="Industry" />
                                             <TextInput

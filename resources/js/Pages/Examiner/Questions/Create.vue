@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { Link, useForm } from '@inertiajs/vue3'
-import { ref, computed } from 'vue';
+import { Link, useForm, router } from '@inertiajs/vue3'
+import { ref, computed, watch, nextTick } from 'vue'; // Add nextTick
 import MultipleChoiceEditor from '@/Components/Questions/MultipleChoiceEditor.vue'
 import TrueFalseEditor from '@/Components/Questions/TrueFalseEditor.vue'
 import ShortAnswerEditor from '@/Components/Questions/ShortAnswerEditor.vue'
@@ -11,12 +11,12 @@ import MatchingEditor from '@/Components/Questions/MatchingEditor.vue'
 import OrderingEditor from '@/Components/Questions/OrderingEditor.vue'
 import InputError from '@/Components/InputError.vue'
 import FeatureLimitModal from '@/Components/FeatureLimitModal.vue'
-import useFeatureLimit from '@/composables/useFeatureLimit'
 
 const props = defineProps({
   quiz: Object,
   questionTypes: Object,
   question: Object,
+  pool:Object,
   currentQuestions: {
     type: Number,
     default: 10
@@ -27,7 +27,12 @@ const props = defineProps({
   }
 })
 
+// Add this ref
+const imageInput = ref(null)
+const forceRerender = ref(0) // Add this to force component re-render
+
 const form = useForm({
+  is_pool: props.pool?.id || null,
   type: props.question?.type || 'multiple_choice',
   question: props.question?.question || '',
   description: props.question?.description || '',
@@ -35,11 +40,13 @@ const form = useForm({
   points: props.question?.points || 1,
   time_limit: props.question?.time_limit || null,
   is_required: props.question?.is_required || false,
-  options: props.question?.options || null,
+  options: props.question?.options || [''],
   correct_answers: props.question?.correct_answers || [],
   settings: {
-    rubric: [],
-    distractors: []
+    randomize: props.question?.settings?.randomize || false,
+    multiple_selection: props.question?.settings?.multiple_selection || false,
+    rubric: props.question?.settings?.rubric || [],
+    distractors: props.question?.settings?.distractors || []
   }
 })
 
@@ -58,6 +65,24 @@ const imagePreview = ref(props.question?.image || null)
 const removeImage = ref(false)
 
 const editing = computed(() => !!props.question)
+
+// Watch for question type changes and reset form fields
+watch(() => form.type, (newType, oldType) => {
+  if (newType !== oldType) {
+    // Reset question-specific fields when type changes
+    form.options = ['']
+    form.correct_answers = []
+    form.settings = {
+      randomize: false,
+      multiple_selection: false,
+      rubric: [],
+      distractors: []
+    }
+    
+    // Force re-render of the question editor component
+    forceRerender.value++
+  }
+})
 
 function handleImageChange(event) {
   const file = event.target.files[0]
@@ -92,24 +117,14 @@ function removeCurrentImage() {
 
 function submitForm() {
   // feature check before submitting
-  const canAddQuestion = props.currentQuestions < props.questionLimit
-  if (!canAddQuestion) {
-    openFeatureModal(
-      'Add Question',
-      'You have reached the question limit. Upgrade your plan to add more questions.'
-    )
-    return
-  }
+  
 
   if (removeImage.value && editing.value) form.remove_image = true
 
-  if (editing.value) {
-    form.put(route('examiner.quizzes.questions.update', {
-      quiz: props.quiz.id,
-      question: props.question.id
-    }))
-  } else {
+  if (form.is_pool === null) {
     form.post(route('examiner.quizzes.questions.store', props.quiz.id))
+  }else{
+    form.post(route('examiner.pools.questions.store', props.pool.id))
   }
 }
 
@@ -122,7 +137,8 @@ function cancel() {
   <AppLayout :title="editing ? 'Edit Question' : 'Add Question'">
     <template #header>
       <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ editing ? 'Edit' : 'Create' }} Question for {{ quiz.title }} Quiz
+      Create Question for {{ props.pool ? props.pool.name : quiz.title }} {{ props.pool ? 'Question pool' : 'Exam' }}
+        
       </h2>
     </template>
 
@@ -240,13 +256,42 @@ function cancel() {
                 </div>
 
                 <!-- Question Type Specific Fields -->
-                <MultipleChoiceEditor v-if="form.type === 'multiple_choice'" v-model="form" />
-                <TrueFalseEditor v-if="form.type === 'true_false'" v-model="form" />
-                <ShortAnswerEditor v-if="form.type === 'short_answer'" v-model="form" />
-                <EssayEditor v-if="form.type === 'essay'" v-model="form" />
-                <FillInTheBlankEditor v-if="form.type === 'fill_in_the_blank'" v-model="form" />
-                <MatchingEditor v-if="form.type === 'matching'" v-model="form" />
-                <OrderingEditor v-if="form.type === 'ordering'" v-model="form" />
+                <!-- Add :key to force re-render when type changes -->
+                <MultipleChoiceEditor 
+                  v-if="form.type === 'multiple_choice'" 
+                  v-model="form" 
+                  :key="'multiple_choice-' + forceRerender" 
+                />
+                <TrueFalseEditor 
+                  v-if="form.type === 'true_false'" 
+                  v-model="form" 
+                  :key="'true_false-' + forceRerender" 
+                />
+                <ShortAnswerEditor 
+                  v-if="form.type === 'short_answer'" 
+                  v-model="form" 
+                  :key="'short_answer-' + forceRerender" 
+                />
+                <EssayEditor 
+                  v-if="form.type === 'essay'" 
+                  v-model="form" 
+                  :key="'essay-' + forceRerender" 
+                />
+                <FillInTheBlankEditor 
+                  v-if="form.type === 'fill_in_the_blank'" 
+                  v-model="form" 
+                  :key="'fill_in_the_blank-' + forceRerender" 
+                />
+                <MatchingEditor 
+                  v-if="form.type === 'matching'" 
+                  v-model="form" 
+                  :key="'matching-' + forceRerender" 
+                />
+                <OrderingEditor 
+                  v-if="form.type === 'ordering'" 
+                  v-model="form" 
+                  :key="'ordering-' + forceRerender" 
+                />
 
                 <InputError :message="form.errors.options" class="mt-2" v-if="form.errors.options" />
                 <InputError :message="form.errors.correct_answers" class="mt-2" v-if="form.errors.correct_answers" />
@@ -293,6 +338,8 @@ function cancel() {
     />
   </AppLayout>
 </template>
+
+
 
 <style scoped>
 /* Enhanced green-themed styling */

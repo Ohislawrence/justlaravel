@@ -12,13 +12,17 @@ use Illuminate\Queue\SerializesModels;
 class NewStudentAddedEmail extends Mailable
 {
     use Queueable, SerializesModels;
-
+    public $user;
+    public $resetUrl;
+    public $organization;
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($user, $resetUrl, $organization)
     {
-        //
+        $this->user = $user;
+        $this->resetUrl = $resetUrl;
+        $this->organization = $organization;
     }
 
     /**
@@ -27,7 +31,7 @@ class NewStudentAddedEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Student Added Email',
+            subject: 'You have been added to ' .$this->organization->name,
         );
     }
 

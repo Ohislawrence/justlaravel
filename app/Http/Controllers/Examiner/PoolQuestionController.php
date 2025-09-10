@@ -51,14 +51,11 @@ class PoolQuestionController extends Controller
     { 
         $organization = auth()->user()->organizations()->first();
         // Get subscription question limit
-        $questionsLimit = $organization->getQuestionsLimit();
+        
 
-        // Count current questions
-        $currentQuestionsCount = $organization->questions()->count();
-
-        if ($currentQuestionsCount >= $questionsLimit) {
+        if (!$organization->canAddQuestion()) {
             return redirect()->back()->withErrors([
-                'limit' => "You have reached your question limit of {$questionsLimit}. Upgrade your plan to add more."
+                'limit' => "You have reached your question limit. Upgrade your plan to add more."
             ]);
         }
         

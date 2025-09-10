@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuestionPool;
+use App\Services\ActivityService;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -33,36 +34,35 @@ class QuestionController extends Controller
     }
 
     // Show question creation form
-    public function create(Quiz $quiz)
+    public function create(?Quiz $quiz = null, ?QuestionPool $pool = null)
     {
         $questionTypes = [
             'multiple_choice' => 'Multiple Choice',
             'true_false' => 'True/False',
+            'essay' => 'Essay',
             'short_answer' => 'Short Answer',
             'fill_in_blank' => 'Fill in the Blank',
             'matching' => 'Matching',
             'ordering' => 'Ordering',
         ];
 
-        $pools = $quiz->questionPools()->get();
+        //$pools = $quiz->questionPools()->get();
 
         return Inertia::render('Examiner/Questions/Create', [
-            'quiz' => $quiz,
+            'quiz' => $quiz ?? null,
             'questionTypes' => $questionTypes,
-            'pools' => $pools,
+            'pool' => $pool ?? null,
         ]);
     }
 
     // Store a new question
-    public function store(Request $request, Quiz $quiz)
+    public function store(Request $request, ?Quiz $quiz = null, ?QuestionPool $pool = null)
     { 
         $organization = auth()->user()->organizations()->first();
         
-        $questionsLimit = $organization->getFeatureValue('questions_limit'); // Get subscription question limit
-        $currentQuestionsCount = $organization->questions()->count(); // Count current questions
-        if ($questionsLimit > $currentQuestionsCount ) {
+        if (!$organization->canAddQuestion()) {
             return redirect()->back()->withErrors([
-                'limit' => "You have reached your question limit of {$questionsLimit}. Upgrade your plan to add more."
+                'limit' => "You have reached your question limit. Upgrade your plan to add more."
             ]);
         }
         
@@ -74,7 +74,7 @@ class QuestionController extends Controller
             'time_limit' => 'nullable|integer|min:0',
             'is_required' => 'nullable|boolean',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // 5MB max
-            'options' => 'nullable|array|min:2', 
+            'options' => 'nullable|array', 
             'correct_answers' => 'nullable|array',
             'correct_answers.*' => ['required', function ($attribute, $value, $fail) {
                                     if (!is_string($value) && !is_int($value)) {
@@ -100,122 +100,127 @@ class QuestionController extends Controller
             $validated['image'] = Storage::url($imagePath);
             
         }
-
-        $question = $quiz->questions()->create($validated);
-
-       // ActivityService::logQuizCreated($pool, auth()->user());
-        
-        return redirect()->route('examiner.quizzes.questions.index', $quiz)
+        if($request->is_pool == null){
+            $question = $quiz->questions()->create($validated);
+            return redirect()->route('examiner.quizzes.questions.index', $quiz)
                          ->with('success', 'Question created successfully.');
-        
+        }else{
+            $question = Question::create($validated);
+            $pool->questions()->attach($question->id);
+            ActivityService::logQuizCreated($pool, auth()->user());
+            return redirect()->route('examiner.question-pools.manage-questions', $pool)
+                         ->with('success', 'Question created and added successfully.');
+        }
+   
     }
 
     // Show question edit form
-    public function edit(Quiz $quiz, Question $question)
+    public function edit(?Quiz $quiz = null, ?QuestionPool $pool = null, Question $question)
     {
         $questionTypes = [
             'multiple_choice' => 'Multiple Choice',
             'true_false' => 'True/False',
             'short_answer' => 'Short Answer',
             'essay' => 'Essay',
-            'fill_in_blank' => 'Fill in the Blank',
+            'fill_in_the_blank' => 'Fill in the Blank',
             'matching' => 'Matching',
             'ordering' => 'Ordering',
         ];
 
-        $pools = $quiz->questionPools()->get();
-        $question->load('pools');
+        //$pools = $quiz->questionPools()->get();
+        //$question->load('pools');
 
         return Inertia::render('Examiner/Questions/Edit', [
-            'quiz' => $quiz,
+            'quiz' => $quiz ?? null,
+            'pool' => $pool ?? null,
             'question' => $question,
             'questionTypes' => $questionTypes,
-            'pools' => $pools,
         ]);
     }
 
     // Update a question
-public function update(Request $request, Quiz $quiz, Question $question)
-{
-    // Ensure question belongs to the quiz
-    if ($question->quiz_id !== $quiz->id) {
-        abort(404);
-    }
-    
-    // Debug: Check what data is being received
-    // dd($request->all(), $request->files->all());
-    
-    // Validate the request
-    $validated = $request->validate([
-        'type' => 'required|string',
-        'question' => 'required|string',
-        'description' => 'nullable|string',
-        'points' => 'nullable|numeric|min:0',
-        'time_limit' => 'nullable|integer|min:0',
-        'is_required' => 'nullable|boolean', // Changed to nullable
-        'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // 5MB max
-        'remove_image' => 'nullable|boolean', // Flag to remove existing image
-        'options' => 'nullable|array|min:2', 
-        'correct_answers' => 'nullable|array',
-        'correct_answers.*' => ['nullable', function ($attribute, $value, $fail) {
-            if ($value !== null && !is_string($value) && !is_int($value)) {
-                $fail("The $attribute must be a string or integer.");
+    public function update(Request $request, ?Quiz $quiz = null, ?QuestionPool $pool = null, Question $question)
+    {
+        
+        // Debug: Check what data is being received
+        // dd($request->all(), $request->files->all());
+        
+        // Validate the request
+        $validated = $request->validate([
+            'type' => 'required|string',
+            'question' => 'required|string',
+            'description' => 'nullable|string',
+            'points' => 'nullable|numeric|min:0',
+            'time_limit' => 'nullable|integer|min:0',
+            'is_required' => 'nullable|boolean', // Changed to nullable
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // 5MB max
+            'remove_image' => 'nullable|boolean', // Flag to remove existing image
+            'options' => 'nullable|array', 
+            'correct_answers' => 'nullable|array',
+            'correct_answers.*' => ['nullable', function ($attribute, $value, $fail) {
+                if ($value !== null && !is_string($value) && !is_int($value)) {
+                    $fail("The $attribute must be a string or integer.");
+                }
+            }],
+            'settings' => 'nullable|array',
+        ]);
+
+        // Handle boolean conversion for is_required
+        $validated['is_required'] = $request->boolean('is_required');
+        $validated['organization_id'] = auth()->user()->organizations()->first()->id;
+        
+        // Handle image upload/removal
+        if ($request->boolean('remove_image')) {
+            // Delete existing image if it exists
+            if ($question->image) {
+                $this->deleteQuestionImage($question->image);
             }
-        }],
-        'settings' => 'nullable|array',
-    ]);
-
-    // Handle boolean conversion for is_required
-    $validated['is_required'] = $request->boolean('is_required');
-    $validated['organization_id'] = auth()->user()->organizations()->first();
-    
-    // Handle image upload/removal
-    if ($request->boolean('remove_image')) {
-        // Delete existing image if it exists
-        if ($question->image) {
-            $this->deleteQuestionImage($question->image);
+            $validated['image'] = null;
+        } elseif ($request->hasFile('image')) {
+            // Delete old image if it exists
+            if ($question->image) {
+                $this->deleteQuestionImage($question->image);
+            }
+            
+            $image = $request->file('image');
+            
+            // Generate unique filename
+            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            
+            // Store image in public disk under 'questions' folder
+            $imagePath = $image->storeAs('questions', $filename, 'public');
+            
+            // Save the full URL to database
+            $validated['image'] = Storage::url($imagePath);
         }
-        $validated['image'] = null;
-    } elseif ($request->hasFile('image')) {
-        // Delete old image if it exists
-        if ($question->image) {
-            $this->deleteQuestionImage($question->image);
+        // If neither remove_image nor new image file, keep existing image unchanged
+        
+        // Remove the remove_image flag from validated data before updating
+        unset($validated['remove_image']);
+
+        // Filter out null values to avoid overwriting existing data with null
+        $updateData = array_filter($validated, function ($value) {
+            return $value !== null;
+        });
+        
+        // Always include boolean fields even if they're false
+        $updateData['is_required'] = $validated['is_required'];
+        
+        // If image was set to null (for removal), include it
+        if (array_key_exists('image', $validated) && $validated['image'] === null) {
+            $updateData['image'] = null;
         }
-        
-        $image = $request->file('image');
-        
-        // Generate unique filename
-        $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-        
-        // Store image in public disk under 'questions' folder
-        $imagePath = $image->storeAs('questions', $filename, 'public');
-        
-        // Save the full URL to database
-        $validated['image'] = Storage::url($imagePath);
-    }
-    // If neither remove_image nor new image file, keep existing image unchanged
-    
-    // Remove the remove_image flag from validated data before updating
-    unset($validated['remove_image']);
 
-    // Filter out null values to avoid overwriting existing data with null
-    $updateData = array_filter($validated, function ($value) {
-        return $value !== null;
-    });
-    
-    // Always include boolean fields even if they're false
-    $updateData['is_required'] = $validated['is_required'];
-    
-    // If image was set to null (for removal), include it
-    if (array_key_exists('image', $validated) && $validated['image'] === null) {
-        $updateData['image'] = null;
+        $question->update($updateData);
+        
+        if($request->is_pool == null){
+            return redirect()->route('examiner.quizzes.questions.index', $quiz)
+                         ->with('success', 'Question updated successfully.');
+        }else{
+            return redirect()->route('examiner.question-pools.manage-questions', $pool)
+                         ->with('success', 'Question updated successfully.');
+        }
     }
-
-    $question->update($updateData);
-    
-    return redirect()->route('examiner.quizzes.questions.index', $quiz)
-                    ->with('success', 'Question updated successfully.');
-}
 
     /**
      * Helper method to delete question image

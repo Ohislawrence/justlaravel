@@ -137,32 +137,32 @@ class QuestionPoolController extends Controller
 
     // Manage pool questions
     public function manageQuestions(QuestionPool $pool)
-{
-    $pool->load(['questions' => function($query) {
-        $query->select(
-            'questions.id',
-            'questions.question',
-            'questions.type',
-            'questions.points'
-        );
-    }]);
+    {
+        $pool->load(['questions' => function($query) {
+            $query->select(
+                'questions.id',
+                'questions.question',
+                'questions.type',
+                'questions.points'
+            );
+        }]);
+        $organization = auth()->user()->organizations()->first();
+        $availableQuestions = Question::where('organization_id', $organization->id)->whereDoesntHave('pools', function($query) use ($pool) {
+                $query->where('question_pool_id', $pool->id);
+            })
+            ->select(
+                'id',
+                'question',
+                'type',
+                'points'
+            )
+            ->get();
 
-    $availableQuestions = Question::whereDoesntHave('pools', function($query) use ($pool) {
-            $query->where('question_pool_id', $pool->id);
-        })
-        ->select(
-            'id',
-            'question',
-            'type',
-            'points'
-        )
-        ->get();
-
-    return inertia('Examiner/QuestionPools/ManageQuestions', [
-        'pool' => $pool,
-        'availableQuestions' => $availableQuestions,
-    ]);
-}
+        return inertia('Examiner/QuestionPools/ManageQuestions', [
+            'pool' => $pool,
+            'availableQuestions' => $availableQuestions,
+        ]);
+    }
 
     // Attach questions to pool
     public function attachQuestions(Request $request, QuestionPool $pool)

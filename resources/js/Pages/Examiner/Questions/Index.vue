@@ -88,7 +88,7 @@ function confirmDelete(question) {
               </button>
             </div>
 
-            <div class="mb-8">
+            <div v-if="props.pools.length > 0" class="mb-8">
               <h4 class="font-medium mb-2">Question Pools</h4>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div v-for="pool in props.pools" :key="pool.id" class="border rounded-lg p-4 hover:bg-gray-50 transition-all duration-200">
@@ -109,7 +109,6 @@ function confirmDelete(question) {
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pools</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -128,12 +127,6 @@ function confirmDelete(question) {
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <span v-if="question.is_required" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
                       <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <PoolSelector 
-                        :pools="props.availablePools" 
-                        :question-id="question.id"
-                      />
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Link 

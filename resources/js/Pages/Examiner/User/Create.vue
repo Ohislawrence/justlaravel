@@ -15,15 +15,15 @@ const props = defineProps({
   currentexaminerCount: Number,
 });
 
+
 // Inertia form object
 const form = useForm({
   name: '',
   email: '',
   unique_code: '',
-  password: '',
   user_type: '',
   designation_id: null, 
-  groups: [],
+  group: null,
   notify_user: false,
 });
 
@@ -116,20 +116,6 @@ const submitForm = () => {
                   <div class="invalid-feedback" v-if="form.errors.unique_code">{{ form.errors.unique_code }}</div>
                 </div>
 
-                <!-- Password -->
-                <div class="mb-3">
-                  <label class="form-label" for="password">Password</label>
-                  <input
-                    v-model="form.password"
-                    type="password"
-                    class="form-control"
-                    id="password"
-                    placeholder="Password"
-                    :class="{ 'is-invalid': form.errors.password }"
-                  />
-                  <div class="invalid-feedback" v-if="form.errors.password">{{ form.errors.password }}</div>
-                </div>
-
                 <!-- User Type -->
                 <div class="mb-3">
                   <label for="user_type" class="form-label">User Type</label>
@@ -176,10 +162,10 @@ const submitForm = () => {
                   <select
                     v-model="form.group"
                     class="form-select"
-                    id="groups"
+                    id="group"
                     :class="{ 'is-invalid': form.errors.group }"
                   >
-                    <option disabled value="">-- Select a group --</option>
+                    <option disabled :value="null">-- Select a group --</option>
                     <option v-for="group in props.groups.data" :key="group.id" :value="group.id">
                       {{ group.name }}
                     </option>

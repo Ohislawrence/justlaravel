@@ -23,7 +23,7 @@
             </div>
             <div class="h-full bg-white shadow-xl overflow-y-auto">
               <div class="px-4 pt-5 pb-6 flex items-center">
-                <img class="h-8 w-auto" src="/images/logo.svg" alt="Your Company" />
+                <img class="h-8 w-auto" src="/images/logo.png" alt="ExamPortal" />
               </div>
               <div class="mt-6 px-2 space-y-1">
                 <Link
@@ -58,8 +58,8 @@
   };
   
   const navigation = [
-    { name: 'Home', href: route('home') },
-    { name: 'About', href: route('home') },
-    { name: 'Quizzes', href: route('home') },
+    { name: 'My Dashboard', href: route('examinee.dashboard') },
+    { name: 'My Quizzes', href: route('examinee.quizzes.index') },
+    { name: 'My History', href: route('examinee.history') },
   ];
   </script>

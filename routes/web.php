@@ -168,6 +168,8 @@ Route::middleware([
         Route::resource('user', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         //Route::resource('groups', GroupController::class)->except(['edit'])
         //->scoped(['organization' => 'slug']);
+
+        //groups
         Route::prefix('groups')->name('groups.')->group(function () {
             Route::resource('/', GroupController::class)->except(['edit'])
             ->scoped(['organization' => 'slug'])->parameters(['' => 'group']);
@@ -197,10 +199,10 @@ Route::middleware([
         Route::post('users/designations', [UserController::class, 'storeDesignation'])->name('users.designations.store');
 
         //Add new question pool
-        Route::get('pools/{pool}/questions', [PoolQuestionController::class, 'create'])->name('pools.questions.create');
-        Route::get('pools/{pool}/questions/{question}/edit', [PoolQuestionController::class, 'edit'])->name('pools.questions.edit');
-        Route::put('pools/{pool}/questions/{question}/update', [PoolQuestionController::class, 'update'])->name('pools.questions.update');
-        Route::post('pools/{pool}/post/questions', [PoolQuestionController::class, 'store'])->name('pools.questions.store');
+        Route::get('pools/{pool}/questions', [QuestionController::class, 'create'])->name('pools.questions.create');
+        Route::get('pools/{pool}/questions/{question}/edit', [QuestionController::class, 'edit'])->name('pools.questions.edit');
+        Route::put('pools/{pool}/questions/{question}/update', [QuestionController::class, 'update'])->name('pools.questions.update');
+        Route::post('pools/{pool}/post/questions', [QuestionController::class, 'store'])->name('pools.questions.store');
 
         //addRemove pool to quiz
         Route::post('/quizzes/{quiz}/pools', [QuizController::class, 'attachPool'])
@@ -209,6 +211,7 @@ Route::middleware([
         Route::delete('/quizzes/{quiz}/pools/{pool}', [QuizController::class, 'detachPool'])
             ->name('quizzes.detach-pool');
 
+        //Quizzes CRUD
         Route::post('/quizzes/{quiz}/toggle-publish', [QuizController::class, 'togglePublish'])
         ->name('quizzes.toggle-publish');
         Route::get('/quizzes/{quiz}/pools/{pool}/questions', [QuizController::class, 'getPoolQuestions']);

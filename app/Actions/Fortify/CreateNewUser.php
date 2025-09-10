@@ -30,7 +30,7 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'organization' => ['required', 'string', 'max:255', 'unique:organizations,name'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users'],
             'industry' => ['required', 'string', 'max:255'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
@@ -83,8 +83,10 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $user->email,
         ], false));
         
-
+       
         Mail::to($user->email)->queue(new WelcomeEmail($user, $resetUrl));
+        
+        
         
         return $user;
     }

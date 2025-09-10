@@ -75,7 +75,16 @@ class User extends Authenticatable
              'password' => 'hashed',
          ];
      }
-    
+     
+    public function receivesLoginNotifications(): bool
+    {
+        // You can add logic here to determine if user should receive notifications
+        // For example, only send to users who have opted in
+        return true; // Send to all users by default
+        
+        // Or based on user preference:
+        // return (bool) $this->notification_preferences['login_alerts'] ?? true;
+    }
 
     protected function gate(): void
     {

@@ -19,6 +19,8 @@ use App\Models\Quiz;
 use App\Services\UserImportService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use App\Notifications\QuizAssignedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class GroupController extends Controller
 {
@@ -111,7 +113,7 @@ class GroupController extends Controller
             'organization' => $organization,
             'group' => $group,
             'availableUsers' => $availableUsers,
-            'availableQuizzes' => $organization->quizzes()
+            'availableQuizzes' => $organization->quizzes()->where('is_published', 1)
                 ->whereNotIn('quizzes.id', $group->quizzes->pluck('id'))
                 ->get(),
             'allGroups' => $organization->groups()->get(),
@@ -313,10 +315,34 @@ class GroupController extends Controller
             'quiz_ids' => ['required', 'array'],
             'quiz_ids.*' => ['exists:quizzes,id'],
         ]);
+        
         $organization = auth()->user()->organizations()->first();
+        
+        // Get current assignments to detect new ones
+        $currentQuizIds = $group->quizzes()->pluck('quizzes.id')->toArray();
+        $newQuizIds = array_diff($validated['quiz_ids'], $currentQuizIds);
+        
+        // Sync quizzes
         $group->quizzes()->syncWithoutDetaching($validated['quiz_ids']);
-
-        return back()->with('success', 'Quizzes assigned to group');
+        
+        // Send notifications only for newly assigned quizzes - USING QUEUE
+        if (!empty($newQuizIds)) {
+            $newQuizzes = Quiz::whereIn('id', $newQuizIds)->get();
+            
+            foreach ($newQuizzes as $quiz) {
+                // Queue notifications for all members - THIS IS ASYNCHRONOUS
+                Notification::send($group->members, new QuizAssignedNotification($quiz, $group->name));
+            }
+            
+            $quizCount = count($newQuizIds);
+            $memberCount = $group->members->count();
+            
+            return back()->with('success', 
+                "Quizzes assigned to group. Notifications are being sent to {$memberCount} members for {$quizCount} new quiz(es) in the background."
+            );
+        }
+        
+        return back()->with('info', 'Quizzes assigned to group (no new quizzes to notify about).');
     }
 
     public function removeQuiz(Group $group, Quiz $quiz)

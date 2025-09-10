@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Examiner;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewStudentAddedEmail;
 use App\Models\Designation;
 use App\Models\Group;
 use App\Models\Organization;
@@ -20,6 +21,10 @@ use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Rules\Role;
 use Spatie\Permission\Models\Role as ModelsRole;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -34,7 +39,7 @@ class UserController extends Controller
         $currentexaminerCount = $organization->members()->role('examiner')->count();
         $currentexamineeCount = $organization->members()->role('examinee')->count();
 
-        $users = User::query()
+        $users = User::query()->whereKeyNot(Auth::id())
             ->with(['organizations', 'groups', 'roles','organizationMember.designation']) // Eager load relationships
             ->whereHas('organizations', function($query) use ($organizationId) {
                 $query->where('organizations.id', $organizationId);
@@ -104,24 +109,25 @@ class UserController extends Controller
 
         $checkExaminer = $examinerLimit < $currentexaminerCount;
         $checkExaminee = $examineeLimit < $currentexamineeCount;
-        
-        if (!$checkExaminer) {
-            return response('Your current plan does not allow you to create more examiners.', Response::HTTP_FORBIDDEN);
-        }
 
-        if (!$checkExaminee) {
+        
+        if($request->user_type == 'examinee'){
+            if ($checkExaminee == true) {
             return response('Your current plan does not allow you to create more Students/Examinee.', Response::HTTP_FORBIDDEN);
+            }
         }
+        if($request->user_type == 'examiner'){
+            if ($checkExaminer == true) {
+            return response('Your current plan does not allow you to create more examiners.', Response::HTTP_FORBIDDEN);
+            }
+        }
+        
         
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'email'      => 'required|string|email|max:255',
-            'password'   => 'sometimes|required|string|min:6',
             'user_type'  => 'required|in:admin,examiner,examinee',
-            'groups'     => 'nullable|array',
-            'groups.*'   => 'exists:groups,id',
-            'quizzes'    => 'nullable|array',
-            'quizzes.*'  => 'exists:quizzes,id',
+            'group'     => 'nullable',
             'notify_user' => ['boolean'],
             'unique_code' => 'nullable|string|unique:organization_members,unique_code',
             'designation_id' => 'nullable',
@@ -138,7 +144,9 @@ class UserController extends Controller
             $user = User::create([
                 'name'      => $validated['name'],
                 'email'     => $validated['email'],
-                'password'  => Hash::make($validated['password']),
+                'password'  => Hash::make(Str::random(16)),
+                'timezone' => $request->timezone ?? 'Lagos/Africa',
+                'is_active' => 1,
             ]);
 
             // Assign role
@@ -170,25 +178,11 @@ class UserController extends Controller
         ]);
 
         // Attach groups if provided
-        if (!empty($validated['groups'])) {
-            $user->groups()->syncWithoutDetaching($validated['groups']);
+        if (!empty($validated['group'])) {
+            $user->groups()->syncWithoutDetaching($validated['group']);
         }
 
-        // Attach quizzes if provided
-        if (!empty($validated['quizzes'])) {
-            $user->assignedQuizzes()->syncWithoutDetaching(
-                collect($validated['quizzes'])->mapWithKeys(function ($quizId) {
-                    return [
-                        $quizId => [
-                            'assigned_at' => now(),
-                            'due_date' => null,
-                            'is_passed' => false,
-                            'attempt_number' => 0
-                        ]
-                    ];
-                })
-            );
-        }
+        
 
         return redirect()->route('examiner.user.index')->with('success', 'User created successfully.');
     }

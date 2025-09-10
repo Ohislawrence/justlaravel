@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Link, useForm } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
+import { Link, useForm, router } from '@inertiajs/vue3';
+import { ref, computed, onMounted, watch } from 'vue';
 import MultipleChoiceEditor from '@/Components/Questions/MultipleChoiceEditor.vue';
 import TrueFalseEditor from '@/Components/Questions/TrueFalseEditor.vue';
 import ShortAnswerEditor from '@/Components/Questions/ShortAnswerEditor.vue';
@@ -12,8 +12,9 @@ import OrderingEditor from '@/Components/Questions/OrderingEditor.vue';
 import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
-  quiz: Object,
+  quiz: Object || null,
   questionTypes: Object,
+  pool: Object || null,
   question: {
     type: Object,
     required: true
@@ -21,6 +22,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+  is_pool: props.pool?.id || null,
   type: props.question.type || 'multiple_choice',
   question: props.question.question || '',
   description: props.question.description || '',
@@ -28,7 +30,7 @@ const form = useForm({
   points: props.question.points || 1,
   time_limit: props.question.time_limit || null,
   is_required: props.question.is_required || false,
-  options: props.question.options || null,
+  options: props.question.options || [''],
   correct_answers: props.question.correct_answers || [],
   settings: {
     rubric: props.question.settings?.rubric || [],
@@ -37,6 +39,7 @@ const form = useForm({
   },
 });
 
+const forceRerender = ref(0);
 const imagePreview = ref(props.question.image || null);
 const removeImage = ref(false);
 const originalImageUrl = ref(props.question.image || null);
@@ -100,22 +103,36 @@ function submitForm() {
     form.remove_image = true;
   }
 
-  form.put(route('examiner.quizzes.questions.update', {
+  
+  if (form.is_pool === null) {
+    form.put(route('examiner.quizzes.questions.update', {
     quiz: props.quiz.id, 
     question: props.question.id
-  }), {
-    preserveScroll: true,
-    onSuccess: () => {
-      router.visit(route('examiner.quizzes.questions.index', props.quiz.id));
-    },
-    onError: (errors) => {
-      console.log('Validation errors:', errors);
-    }
-  });
+    }), {
+      preserveScroll: true,
+      onSuccess: () => {
+        router.visit(route('examiner.quizzes.questions.index', props.quiz.id));
+      },
+      onError: (errors) => {
+        console.log('Validation errors:', errors);
+      }
+    });
+  }else{
+    form.put(route('examiner.pools.questions.update', {pool: props.pool.id, 
+    question: props.question.id}))
+  }
+
+
 }
 
+
 function cancel() {
-  router.visit(route('examiner.quizzes.questions.index', props.quiz.id));
+  if (form.is_pool === null) {
+    router.visit(route('examiner.quizzes.questions.index', props.quiz.id));
+  }else{
+    router.visit(route('examiner.question-pools.manage-questions', props.pool.id));
+  }
+  
 }
 
 onMounted(() => {
@@ -125,6 +142,12 @@ onMounted(() => {
       distractors: props.question.settings.distractors || [],
       ...props.question.settings
     };
+  }
+});
+
+watch(() => form.type, (newType, oldType) => {
+  if (newType !== oldType) {
+    forceRerender.value++
   }
 });
 
@@ -145,7 +168,7 @@ const imageInput = ref(null);
           <div class="p-6 bg-white border-b border-gray-200">
             
             <!-- Breadcrumb or back link -->
-            <div class="mb-6">
+            <div  v-if = "props.pool === null" class="mb-6">
               <Link 
                 :href="route('examiner.quizzes.questions.index', quiz.id)" 
                 class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium transition-colors duration-200"
@@ -154,6 +177,17 @@ const imageInput = ref(null);
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 ← Back to Questions
+              </Link>
+            </div>
+            <div  v-if = "props.pool.lenght > 0" class="mb-6">
+              <Link 
+                :href="route('examiner.question-pools.manage-questions', props.pool.id)" 
+                class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium transition-colors duration-200"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                ← Back to Pool
               </Link>
             </div>
 
@@ -282,33 +316,41 @@ const imageInput = ref(null);
                 </div>
 
                 <!-- Dynamic fields based on question type -->
-                <div v-if="form.type === 'multiple_choice'">
-                  <MultipleChoiceEditor v-model="form" />
-                </div>
-
-                <div v-if="form.type === 'true_false'">
-                  <TrueFalseEditor v-model="form" />
-                </div>
-
-                <div v-if="form.type === 'short_answer'">
-                  <ShortAnswerEditor v-model="form" />
-                </div>
-
-                <div v-if="form.type === 'essay'">
-                  <EssayEditor v-model="form" />
-                </div>
-
-                <div v-if="form.type === 'fill_in_blank'">
-                  <FillInTheBlankEditor v-model="form" />
-                </div>
-
-                <div v-if="form.type === 'matching'">
-                  <MatchingEditor v-model="form" />
-                </div>
-
-                <div v-if="form.type === 'ordering'">
-                  <OrderingEditor v-model="form" />
-                </div>
+                <MultipleChoiceEditor 
+                  v-if="form.type === 'multiple_choice'" 
+                  v-model="form" 
+                  :key="'multiple_choice-' + forceRerender" 
+                />
+                <TrueFalseEditor 
+                  v-if="form.type === 'true_false'" 
+                  v-model="form" 
+                  :key="'true_false-' + forceRerender" 
+                />
+                <ShortAnswerEditor 
+                  v-if="form.type === 'short_answer'" 
+                  v-model="form" 
+                  :key="'short_answer-' + forceRerender" 
+                />
+                <EssayEditor 
+                  v-if="form.type === 'essay'" 
+                  v-model="form" 
+                  :key="'essay-' + forceRerender" 
+                />
+                <FillInTheBlankEditor 
+                  v-if="form.type === 'fill_in_the_blank'" 
+                  v-model="form" 
+                  :key="'fill_in_the_blank-' + forceRerender" 
+                />
+                <MatchingEditor 
+                  v-if="form.type === 'matching'" 
+                  v-model="form" 
+                  :key="'matching-' + forceRerender" 
+                />
+                <OrderingEditor 
+                  v-if="form.type === 'ordering'" 
+                  v-model="form" 
+                  :key="'ordering-' + forceRerender" 
+                />
 
                 <!-- Display any nested validation errors -->
                 <div v-if="form.errors.options">

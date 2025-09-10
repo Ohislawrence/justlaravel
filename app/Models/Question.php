@@ -26,7 +26,8 @@ class Question extends Model
         'organization_id',
         'is_ai',
         'created_by',
-        'last_updated_by'
+        'last_updated_by',
+        'file_size'
     ];
 
     protected $casts = [
