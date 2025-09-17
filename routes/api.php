@@ -10,3 +10,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+Route::post('/quiz/{quiz}/attempt/{attempt}/save-progress', [QuizAttemptController::class, 'apiSaveProgress'])
+    ->name('api.quiz.save-progress')
+    ->middleware('auth:sanctum');

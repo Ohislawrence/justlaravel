@@ -36,7 +36,8 @@ class Quiz extends Model
         'certificate_pass_percentage',
         'certificate_expiry_days',
         'created_by',
-        'last_updated_by'
+        'last_updated_by',
+        'grading_system_id'
         
     ];
     protected $casts = [

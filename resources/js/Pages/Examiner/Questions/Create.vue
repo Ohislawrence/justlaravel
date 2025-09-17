@@ -131,6 +131,8 @@ function submitForm() {
 function cancel() {
   router.visit(route('examiner.quizzes.questions.index', props.quiz.id))
 }
+
+
 </script>
 
 <template>
@@ -159,6 +161,7 @@ function cancel() {
                   </select>
                   <InputError :message="form.errors.type" class="mt-2" />
                 </div>
+
 
                 <!-- Question Text -->
                 <div>
@@ -278,9 +281,9 @@ function cancel() {
                   :key="'essay-' + forceRerender" 
                 />
                 <FillInTheBlankEditor 
-                  v-if="form.type === 'fill_in_the_blank'" 
+                  v-if="form.type === 'fill_in_blank'" 
                   v-model="form" 
-                  :key="'fill_in_the_blank-' + forceRerender" 
+                  :key="'fill_in_blank-' + forceRerender" 
                 />
                 <MatchingEditor 
                   v-if="form.type === 'matching'" 

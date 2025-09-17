@@ -11,6 +11,9 @@
           <ClockIcon class="h-4 w-4 mr-1 text-gray-600" />
           <span :class="{ 'text-red-600 font-medium': timeRemaining <= 300, 'animate-pulse': timeRemaining <= 60 }">
             {{ formattedTimeRemaining }}
+            <span v-if="remainingTime !== null" class="text-xs text-gray-500 ml-1">
+              (resumed)
+            </span>
           </span>
         </div>
         <button
@@ -18,7 +21,8 @@
           class="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 focus:ring-offset-2 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors shadow-sm focus:outline-none focus:ring-2"
           :disabled="submitting"
         >
-          Submit Quiz
+          <span v-if="submitting">Submitting...</span>
+          <span v-else>Submit Quiz</span>
         </button>
       </div>
     </div>
@@ -175,7 +179,8 @@
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Submit Quiz
+          <span v-if="submitting">Submitting...</span>
+          <span v-else>Submit Quiz</span>
         </button>
       </div>
     </div>
@@ -302,8 +307,19 @@ const props = defineProps({
     type: Number,
     default: null
   },
+  remainingTime: { 
+    type: Number,
+    default: null
+  },
   attemptID: Number,
+  existingAnswers: {
+    type: Object,
+    default: () => ({})
+  }
 });
+
+
+
 
 const proctoringRef = ref(null)
 const proctoringData = ref({
@@ -314,9 +330,20 @@ const proctoringData = ref({
   proctoring_data: {}
 })
 
+const questionStartTime = ref(null);
+const questionTimers = ref({});
+const totalTimeSpent = ref(0);
+const questionTimeSpent = ref({});
+
+
 // Add these for error handling
 const showSubmissionError = ref(false);
 const submissionError = ref('');
+
+const currentQuestionId = computed(() => {
+  return currentQuestion.value?.id;
+});
+
 
 // Question type mapping
 const questionTypeLabel = (type) => {
@@ -350,8 +377,11 @@ const answers = ref([]);
 const showSubmitModal = ref(false);
 const showImageModal = ref(false);
 const submitting = ref(false);
-const timeRemaining = ref(props.timeLimit ? props.timeLimit * 60 : 0);
+const timeRemaining = ref(props.remainingTime ? props.remainingTime : (props.timeLimit ? props.timeLimit * 60 : 0));
 const timer = ref(null);
+
+const lastSaveTime = ref(Date.now());
+const isSaving = ref(false);
 
 // Computed properties
 const currentQuestion = computed(() => {
@@ -449,24 +479,149 @@ const handleCheatingPrevented = (type) => {
 // Initialize component
 onMounted(() => {
   console.log('Quiz component mounted');
-  console.log('Questions:', props.questions);
+
+  if (props.questions && props.questions.length > 0) {
+    answers.value = props.questions.map(question => {
+      return props.existingAnswers[question.id] !== undefined 
+        ? props.existingAnswers[question.id] 
+        : null;
+    });
+  }
+  
   // Initialize answers array
   if (props.questions && props.questions.length > 0) {
     answers.value = new Array(props.questions.length).fill(null);
   }
-  // Start timer if there's a time limit
+  
+  // Start timer with remaining time instead of full time
   if (props.timeLimit && props.timeLimit > 0) {
     startTimer();
   }
+  
+  // Start tracking time for the first question
+  startQuestionTimer();
+  
+  // If we have remaining time, update totalTimeSpent
+  if (props.remainingTime !== null && props.timeLimit) {
+    const elapsedTime = (props.timeLimit * 60) - props.remainingTime;
+    totalTimeSpent.value = Math.max(0, elapsedTime);
+  }
 });
+
+function startQuestionTimer() {
+  if (currentQuestionId.value) {
+    questionStartTime.value = Date.now();
+    
+    // Start a timer to periodically save progress
+    questionTimers.value[currentQuestionId.value] = setInterval(() => {
+      saveProgress();
+    }, 10000); 
+  }
+}
+
+// Update the stopQuestionTimer function to return time spent
+function stopQuestionTimer() {
+  if (currentQuestionId.value && questionStartTime.value) {
+    const timeSpent = Math.floor((Date.now() - questionStartTime.value) / 1000);
+    
+    // Store time spent for this question
+    if (!questionTimeSpent.value[currentQuestionId.value]) {
+      questionTimeSpent.value[currentQuestionId.value] = 0;
+    }
+    questionTimeSpent.value[currentQuestionId.value] += timeSpent;
+    
+    // Clear the interval timer
+    if (questionTimers.value[currentQuestionId.value]) {
+      clearInterval(questionTimers.value[currentQuestionId.value]);
+      delete questionTimers.value[currentQuestionId.value];
+    }
+    
+    return timeSpent;
+  }
+  return 0;
+}
+
+async function saveProgress() {
+  if (!currentQuestionId.value || !questionStartTime.value || isSaving.value) return;
+  
+  const now = Date.now();
+  const timeSpent = Math.floor((now - questionStartTime.value) / 1000);
+  const timeSinceLastSave = Math.floor((now - lastSaveTime.value) / 1000);
+  
+  // Only save if at least 2 seconds have passed since last save
+  if (timeSinceLastSave < 2) return;
+  
+  isSaving.value = true;
+  
+  try {
+    const response = await fetch(route('api.quiz.save-progress', { 
+      quiz: props.quiz.id,
+      attempt: props.attempt.id 
+    }), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        question_id: currentQuestionId.value,
+        answer: answers.value[currentQuestionIndex.value],
+        time_spent: timeSpent,
+        total_time_spent: totalTimeSpent.value + timeSpent
+      }),
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Save failed');
+    }
+    
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error('Save failed');
+    }
+    
+    // Update timers after successful save
+    questionStartTime.value = now;
+    lastSaveTime.value = now;
+    totalTimeSpent.value += timeSpent;
+  } catch (error) {
+    console.error('Failed to save progress:', error);
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+const periodicSaver = ref(null);
+
 
 // Cleanup
 onUnmounted(() => {
+  // Stop all question timers
+  Object.values(questionTimers.value).forEach(timerId => {
+    clearInterval(timerId);
+  });
+  
+  window.removeEventListener('beforeunload', handleBeforeUnload);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  
   if (timer.value) {
     clearInterval(timer.value);
   }
-  window.removeEventListener('beforeunload', handleBeforeUnload);
+
+  if (periodicSaver.value) {
+    clearInterval(periodicSaver.value);
+  }
 });
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    saveProgress();
+  }
+};
+
+document.addEventListener('visibilitychange', handleVisibilityChange);
 
 // Timer functions
 function startTimer() {
@@ -482,20 +637,85 @@ function startTimer() {
 
 // Navigation functions
 function nextQuestion() {
+  const timeSpent = stopQuestionTimer();
+  if (timeSpent > 0) {
+    totalTimeSpent.value += timeSpent;
+  }
+  
   if (currentQuestionIndex.value < props.questions.length - 1) {
     currentQuestionIndex.value++;
+    startQuestionTimer();
+  }
+}
+
+async function saveProgressImmediate() {
+  if (!currentQuestionId.value || !questionStartTime.value || isSaving.value) return;
+  
+  const now = Date.now();
+  const timeSpent = Math.floor((now - questionStartTime.value) / 1000);
+  
+  if (timeSpent <= 0) return;
+  
+  isSaving.value = true;
+  
+  try {
+    const response = await fetch(route('api.quiz.save-progress', { 
+      quiz: props.quiz.id,
+      attempt: props.attempt.id 
+    }), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        question_id: currentQuestionId.value,
+        answer: answers.value[currentQuestionIndex.value],
+        time_spent: timeSpent,
+        total_time_spent: totalTimeSpent.value + timeSpent
+      }),
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Save failed');
+    }
+    
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error('Save failed');
+    }
+    
+    totalTimeSpent.value += timeSpent;
+  } catch (error) {
+    console.error('Failed to save progress:', error);
+  } finally {
+    isSaving.value = false;
   }
 }
 
 function prevQuestion() {
+  const timeSpent = stopQuestionTimer();
+  if (timeSpent > 0) {
+    totalTimeSpent.value += timeSpent;
+  }
+  
   if (currentQuestionIndex.value > 0) {
     currentQuestionIndex.value--;
+    startQuestionTimer();
   }
 }
 
 function goToQuestion(index) {
+  const timeSpent = stopQuestionTimer();
+  if (timeSpent > 0) {
+    totalTimeSpent.value += timeSpent;
+  }
+  
   if (index >= 0 && index < props.questions.length) {
     currentQuestionIndex.value = index;
+    startQuestionTimer();
   }
 }
 
@@ -526,14 +746,56 @@ function updateAnswer(value) {
   answers.value[currentQuestionIndex.value] = value;
 }
 
+const handleBeforeUnload = (event) => {
+  const timeSpent = stopQuestionTimer();
+  if (timeSpent > 0) {
+    // Use sendBeacon for reliable delivery on page close
+    const data = new Blob([JSON.stringify({
+      question_id: currentQuestionId.value,
+      answer: answers.value[currentQuestionIndex.value],
+      time_spent: timeSpent,
+      total_time_spent: totalTimeSpent.value + timeSpent,
+      is_closing: true
+    })], { type: 'application/json' });
+    
+    navigator.sendBeacon(
+      route('api.quiz.save-progress', { 
+        quiz: props.quiz.id,
+        attempt: props.attempt.id 
+      }),
+      data
+    );
+  }
+};
+
+// Add beforeunload listener
+window.addEventListener('beforeunload', handleBeforeUnload);
+
+
 // Submission functions
 function confirmSubmit() {
   showSubmitModal.value = true;
 }
 
 const submitQuiz = async () => {
+  if (submitting.value) return;
+  
   submitting.value = true;
   showSubmitModal.value = false;
+
+  const finalTimeSpent = stopQuestionTimer();
+  if (finalTimeSpent > 0) {
+    totalTimeSpent.value += finalTimeSpent;
+    if (currentQuestionId.value) {
+      if (!questionTimeSpent.value[currentQuestionId.value]) {
+        questionTimeSpent.value[currentQuestionId.value] = 0;
+      }
+      questionTimeSpent.value[currentQuestionId.value] += finalTimeSpent;
+    }
+  }
+
+  // Calculate total time spent including any previous time
+  const totalElapsedTime = totalTimeSpent.value;
   
   try {
     // Validate we have required data
@@ -559,25 +821,47 @@ const submitQuiz = async () => {
     // Prepare answers
     const formattedAnswers = props.questions.reduce((acc, question, index) => {
       const answer = answers.value[index];
+      const questionId = question.id;
       
-      if (answer !== null && answer !== undefined && answer !== '' && question?.id) {
+      if (answer !== null && answer !== undefined && answer !== '' && questionId) {
         switch (question.type) {
           case 'ordering':
-            acc[question.id] = Array.isArray(answer) ? answer : [answer];
+            acc[questionId] = {
+              answer: Array.isArray(answer) ? answer : [answer],
+              time_spent: questionTimeSpent.value[questionId] || 0
+            };
             break;
           case 'fill_in_the_blank':
-            acc[question.id] = typeof answer === 'string' ? answer.trim() : answer;
+            acc[questionId] = {
+              answer: typeof answer === 'string' ? answer.trim() : answer,
+              time_spent: questionTimeSpent.value[questionId] || 0
+            };
             break;
           case 'matching':
             if (typeof answer === 'object' && answer !== null) {
-              acc[question.id] = Object.keys(answer).length > 0 ? answer : null;
+              acc[questionId] = {
+                answer: Object.keys(answer).length > 0 ? answer : null,
+                time_spent: questionTimeSpent.value[questionId] || 0
+              };
             } else {
-              acc[question.id] = null;
+              acc[questionId] = {
+                answer: null,
+                time_spent: questionTimeSpent.value[questionId] || 0
+              };
             }
             break;
           default:
-            acc[question.id] = answer;
+            acc[questionId] = {
+              answer: answer,
+              time_spent: questionTimeSpent.value[questionId] || 0
+            };
         }
+      } else {
+        // Include time spent even for unanswered questions
+        acc[questionId] = {
+          answer: null,
+          time_spent: questionTimeSpent.value[questionId] || 0
+        };
       }
       return acc;
     }, {});
@@ -586,8 +870,7 @@ const submitQuiz = async () => {
     const submissionData = {
       attempt_id: props.attempt.id,
       answers: formattedAnswers,
-      time_spent: props.timeLimit ? Math.max(0, props.timeLimit * 60 - timeRemaining.value) : null,
-      // Include proctoring data as separate fields, not nested
+      time_spent: totalTimeSpent.value,
       violation_count: proctoringData.value.violation_count || 0,
       fingerprint: proctoringData.value.fingerprint || null,
       fingerprint_components: proctoringData.value.fingerprint_components || null,
@@ -595,7 +878,7 @@ const submitQuiz = async () => {
       proctoring_data: proctoringData.value.proctoring_data || {}
     };
 
-    console.debug('Submission payload:', submissionData);
+    //console.debug('Submission payload:', submissionData);
     
     // Submit with proper error handling
     const response = await router.post(
@@ -621,6 +904,11 @@ const submitQuiz = async () => {
     throw error;
   }
 };
+
+// Clean up the event listener
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+});
 </script>
 
 <style scoped>

@@ -38,16 +38,14 @@
         <div class="mb-6">
             <ProctoringTable :attempts="violations" />
         </div>
-           
-        <!-- Questions & Responses -->
-        <div class="space-y-6">
-          <div v-for="question in questions" :key="question.id" class="bg-white shadow-sm sm:rounded-lg p-6 hover:shadow-md transition-shadow duration-200 border border-gray-100">
-            <QuestionResponseCard 
-              :question="question"
-              :response="question.responses?.[0]"
-            />
-          </div>
+
+        <!-- Question & answer -->
+        <div class="mb-6">
+        <QuestionAttempts
+        :responses="attempt.responses"
+        />
         </div>
+           
       </div>
     </div>
   </AppLayout>
@@ -58,6 +56,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import QuestionResponseCard from '@/Components/QuestionResponseCard.vue';
 import QuizPoolAnalysis from '@/Components/Tables/QuizPoolAnalysis.vue';
 import ProctoringTable from '@/Components/Tables/ProctoringTable.vue';
+import QuestionAttempts from '@/Components/QuestionAttempts.vue';
 
 const props = defineProps({
   quiz: {

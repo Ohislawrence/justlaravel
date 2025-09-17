@@ -304,17 +304,19 @@ const props = defineProps({
     required: true,
     default: () => []
   },
+  
   responses: {
     type: Array,
     required: true,
     default: () => []
-  }
+  },
+  quiztype: String,
 });
 
 const showResults = ref(false);
 
 // Determine quiz type
-const quizType = computed(() => props.attempt.quiz?.quiz_type || 'exam');
+const quizType = computed(() => props.quiztype || 'exam');
 
 // --- Computed Properties ---
 const score = computed(() => props.attempt?.score || 0);

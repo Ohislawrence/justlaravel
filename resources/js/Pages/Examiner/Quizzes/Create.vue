@@ -100,7 +100,9 @@ const submit = () => {
         certificate_expiry_days: form.certificate_expiry_days !== null 
             ? parseInt(form.certificate_expiry_days) 
             : null,
-        grading_system_id: form.grading_system_id
+        grading_system_id: form.grading_system_id !== null 
+            ? parseInt(form.grading_system_id) 
+            : null
     };
     
     form.transform(() => formData)

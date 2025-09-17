@@ -332,13 +332,23 @@ const selectedGradingSystem = computed(() => {
                                         <div v-if="selectedGradingSystem" class="mt-3 p-3 bg-green-50 rounded">
                                             <h4 class="font-medium">{{ selectedGradingSystem.name }} Grade Ranges:</h4>
                                             <div class="mt-2">
-                                                <div v-for="(range, index) in selectedGradingSystem.grade_ranges" :key="index" class="text-sm">
+                                                <div 
+                                                    v-for="(range, index) in Array.isArray(selectedGradingSystem.grade_ranges) ? selectedGradingSystem.grade_ranges : []" 
+                                                    :key="index" 
+                                                    class="text-sm"
+                                                >
                                                     {{ range.min }}% - {{ range.max }}%: {{ range.grade }} 
                                                     <span v-if="range.points">({{ range.points }} points)</span>
                                                     <span v-if="range.interpretation">- {{ range.interpretation }}</span>
                                                 </div>
+                                                
+                                                <!-- Show message if no grade ranges exist -->
+                                                <div v-if="!Array.isArray(selectedGradingSystem.grade_ranges) || selectedGradingSystem.grade_ranges.length === 0" class="text-sm text-gray-500">
+                                                    No grade ranges defined for this system.
+                                                </div>
                                             </div>
                                         </div>
+                                        
                                     </div>
                                 </div>
 

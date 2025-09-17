@@ -19,6 +19,22 @@ class QuizAttemptController extends Controller
 {
     public function start(Quiz $quiz, Request $request)
     {
+        $existingAttempt = QuizAttempt::where('quiz_id', $quiz->id)
+        ->where('user_id', $request->user()->id)
+        ->whereNull('completed_at')
+        ->latest()
+        ->first();
+
+        if ($existingAttempt) {
+            // Calculate remaining time for existing attempt
+            $elapsedTime = $existingAttempt->time_spent ?? 0;
+            $totalTimeLimit = $quiz->time_limit * 60;
+            // Resume existing attempt
+            return redirect()->route('examinee.attempt', [
+                'quiz' => $quiz->id,
+                'attempt' => $existingAttempt->id
+            ]);
+        }
         // Validate attempt limit
         if ($quiz->max_attempts) {
             $attempts = QuizAttempt::where('quiz_id', $quiz->id)
@@ -66,12 +82,39 @@ class QuizAttemptController extends Controller
         // Questions are already stored from start()
         $questions = $attempt->questions_data;
 
+        // Load existing responses
+        $existingResponses = QuestionResponse::where('attempt_id', $attempt->id)
+            ->get()
+            ->keyBy('question_id');
+
+        // Prepare answers array for frontend
+        $answers = [];
+        foreach ($questions as $index => $question) {
+            if (isset($existingResponses[$question['id']])) {
+                $response = $existingResponses[$question['id']];
+                
+                // Handle different answer formats
+                if (is_string($response->answer) && json_decode($response->answer) !== null) {
+                    $answers[$question['id']] = json_decode($response->answer, true);
+                } else {
+                    $answers[$question['id']] = $response->answer;
+                }
+            }
+        }
+
+        // Calculate remaining time
+        $elapsedTime = $attempt->time_spent ?? 0;
+        $totalTimeLimit = $quiz->time_limit * 60;
+        $remainingTime = max(0, $totalTimeLimit - $elapsedTime);
+
         return Inertia::render('Examinee/QuizPlayer', [
             'quiz' => $quiz->only('id', 'title', 'time_limit'),
             'attempt' => $attempt,
             'attemptID' => $attempt->id,
             'questions' => $questions,
-            'timeLimit' => $quiz->time_limit
+            'timeLimit' => $quiz->time_limit,
+            'remainingTime' => $remainingTime,
+            'existingAnswers' => $answers,
         ]);
     }
 
@@ -507,7 +550,7 @@ class QuizAttemptController extends Controller
                 'answer' => $this->formatAnswerForFrontend($response->answer, $response->question->type),
                 'is_correct' => (bool)$response->is_correct,
                 'points_earned' => $response->points_earned,
-                'grading_data' => $response->grading_data ? json_decode($response->grading_data, true) : null,
+                'grading_data' => $response->grading_data ? $response->grading_data : null,
             ];
         });
 
@@ -570,6 +613,7 @@ class QuizAttemptController extends Controller
     //added system - new
     public function submit(Request $request, Quiz $quiz)
     {
+
         $validated = $request->validate([
             'attempt_id' => 'required|exists:quiz_attempts,id',
             'answers' => 'required|array',
@@ -583,12 +627,21 @@ class QuizAttemptController extends Controller
     
         $attempt = QuizAttempt::findOrFail($validated['attempt_id']);
 
+        // Check if already submitted
+        if ($attempt->completed_at !== null && $attempt->status == null) {
+            return redirect()->route('examinee.quiz.results', [
+                'quiz' => $quiz->id,
+                'quiztype' => $quiz->quiz_type,
+                'attemptId' => $attempt->id,
+            ])->with('info', 'Quiz already submitted');
+        }
+
         // Check for serious proctoring violations
         $seriousViolations = $attempt->proctoringViolations()
             ->whereIn('violation_type', ['tab_switch', 'fullscreen_exit', 'multiple_displays'])
             ->count();
 
-        if ($seriousViolations > 3) { // Adjust threshold as needed
+        if ($seriousViolations > 5) { 
             return back()->with('error', 'Quiz submission rejected due to multiple proctoring violations.');
         }
 
@@ -606,7 +659,14 @@ class QuizAttemptController extends Controller
     
         foreach ($questions as $question) {
             $questionId = $question['id'];
-            $userAnswer = $validated['answers'][$questionId] ?? null;
+            $userAnswer = $validated['answers'][$questionId]['answer'] ?? null;
+            $timeSpent = $validated['answers'][$questionId]['time_spent'] ?? 0;
+
+            // Get time spent from existing response if available
+            $existingResponse = QuestionResponse::where('attempt_id', $attempt->id)
+                ->where('question_id', $questionId)
+                ->first();
+
             // Special handling for fill-in-the-blank to preserve array structure
             if ($question['type'] === 'fill_in_the_blank' && is_string($userAnswer)) {
                 $userAnswer = explode(' ', $userAnswer); // Only if frontend sends concatenated string
@@ -616,21 +676,35 @@ class QuizAttemptController extends Controller
             // Properly serialize array answers
             $answerValue = is_array($userAnswer) ? json_encode($userAnswer) : $userAnswer;
             
-            $responses[] = [
-                'attempt_id' => $attempt->id,
-                'question_id' => $questionId,
-                'answer' => $answerValue, // Now properly handles arrays
-                'is_correct' => $result['is_correct'],
-                'points_earned' => $result['points'],
-                'time_spent' => $validated['time_spent'] ?? null,
-                'grading_data' => json_encode($result['feedback']),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+            if ($existingResponse) {
+                $existingResponse->update([
+                    'answer' => $answerValue,
+                    'is_correct' => $result['is_correct'],
+                    'points_earned' => $result['points'],
+                    'grading_data' => json_encode($result['feedback']),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                $responses[] = [
+                    'attempt_id' => $attempt->id,
+                    'question_id' => $questionId,
+                    'answer' => $answerValue,
+                    'is_correct' => $result['is_correct'],
+                    'points_earned' => $result['points'],
+                    'time_spent' => $timeSpent,
+                    'grading_data' => json_encode($result['feedback']),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
     
             $score += $result['points'];
             $points += $question['points'];
         }
+
+       // if (!empty($responses)) {
+      //      QuestionResponse::insert($responses);
+       // }
 
         $passingScore = $quiz->passing_score ?? 50;
         
@@ -679,6 +753,7 @@ class QuizAttemptController extends Controller
         
         return redirect()->route('examinee.quiz.results', [
             'quiz' => $quiz->id,
+            'quiztype' => $quiz->quiz_type,
             'attemptId' => $attempt->id,
             'attempt' => $attempt,
         ]);
@@ -1017,4 +1092,108 @@ class QuizAttemptController extends Controller
         ];
     }
 
+
+
+    
+    public function saveProgress(Quiz $quiz, QuizAttempt $attempt, Request $request)
+    {
+        // Validate ownership
+        if ($attempt->user_id !== auth()->id() || $attempt->quiz_id !== $quiz->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'question_id' => 'required|exists:questions,id',
+            'answer' => 'nullable',
+            'time_spent' => 'required|integer|min:0',
+            'total_time_spent' => 'nullable|integer|min:0',
+            'is_closing' => 'nullable|boolean'
+        ]);
+
+        // Use a database transaction for safety
+        DB::transaction(function () use ($attempt, $validated) {
+            // Find or create response
+            $response = QuestionResponse::updateOrCreate(
+                [
+                    'attempt_id' => $attempt->id,
+                    'question_id' => $validated['question_id']
+                ],
+                [
+                    'answer' => $validated['answer'],
+                    'time_spent' => DB::raw('COALESCE(time_spent, 0) + ' . (int)$validated['time_spent']),
+                    'updated_at' => now()
+                ]
+            );
+
+            // Update total time spent if provided
+            if (isset($validated['total_time_spent'])) {
+                $attempt->update([
+                    'time_spent' => $validated['total_time_spent']
+                ]);
+            }
+        });
+
+        // Return an empty Inertia response instead of JSON
+        return back();
+    }
+
+    public function apiSaveProgress(Quiz $quiz, QuizAttempt $attempt, Request $request)
+    {
+        // Validate ownership
+        if ($attempt->user_id !== auth()->id() || $attempt->quiz_id !== $quiz->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        
+
+        $validated = $request->validate([
+            'question_id' => 'required|exists:questions,id',
+            'answer' => 'nullable',
+            'time_spent' => 'required|integer|min:0',
+            'total_time_spent' => 'nullable|integer|min:0',
+            'is_closing' => 'nullable|boolean'
+        ]);
+
+        try {
+            DB::transaction(function () use ($attempt, $validated) {
+                // Find existing response
+                $existingResponse = QuestionResponse::where('attempt_id', $attempt->id)
+                    ->where('question_id', $validated['question_id'])
+                    ->first();
+
+                $newTimeSpent = $validated['time_spent'];
+                
+                if ($existingResponse) {
+                    // Add to existing time_spent
+                    $existingResponse->update([
+                        'answer' => $validated['answer'],
+                        'time_spent' => $existingResponse->time_spent + $newTimeSpent,
+                        'updated_at' => now()
+                    ]);
+                } else {
+                    // Create new response with initial time
+                    QuestionResponse::create([
+                        'attempt_id' => $attempt->id,
+                        'question_id' => $validated['question_id'],
+                        'answer' => $validated['answer'],
+                        'time_spent' => $newTimeSpent,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                // Update total time spent if provided
+                if (isset($validated['total_time_spent'])) {
+                    $attempt->update([
+                        'time_spent' => $validated['total_time_spent']
+                    ]);
+                }
+            });
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Save progress failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Save failed: ' . $e->getMessage()], 500);
+        }
+    }
 }

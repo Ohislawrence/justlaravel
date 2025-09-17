@@ -335,7 +335,9 @@ Route::middleware([
         Route::get('/quiz/{quiz}/{attemptId}/result', [QuizAttemptController::class, 'result'])->name('quiz.results');
         Route::get('/quizzes/{quiz}/results/{attempt}/download', [QuizAttemptController::class, 'download'])
         ->name('quiz.results.download');
-
+        //save the time per question
+        Route::post('/quiz/{quiz}/attempt/{attempt}/save-progress', [QuizAttemptController::class, 'saveProgress'])
+            ->name('quiz.save-progress'); 
         //dashboard
         Route::get('dashboard', [ExamineeDashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('history', [ExamineeDashboardController::class, 'history'])->name('history');

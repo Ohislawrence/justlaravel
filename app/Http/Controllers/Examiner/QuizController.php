@@ -148,7 +148,7 @@ class QuizController extends Controller
             'certificate_template_id' => ['nullable', 'exists:certificate_templates,id'],
             'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
-            'grading_system_id' => ['nullable', 'integer', 'min:0'],
+            'grading_system_id' => ['nullable', 'integer', 'exists:grading_systems,id'],
         ]);
     
         $organization = auth()->user()->organizations()->first();
@@ -242,6 +242,22 @@ class QuizController extends Controller
     public function edit(Quiz $quiz)
     {
         $organization = auth()->user()->organizations()->first();
+        $gradingSystems = GradingSystem::where('is_default', true)
+        ->orWhere('organization_id', $organization->id)
+        ->get()
+        ->map(function ($system) {
+            // Ensure grade_ranges is properly formatted as an array
+            if (is_string($system->grade_ranges)) {
+                try {
+                    $system->grade_ranges = json_decode($system->grade_ranges, true);
+                } catch (\Exception $e) {
+                    $system->grade_ranges = [];
+                }
+            } elseif (!is_array($system->grade_ranges)) {
+                $system->grade_ranges = [];
+            }
+            return $system;
+        });
         return inertia('Examiner/Quizzes/Edit', [
             'quiz' => $quiz,
             'gradingSystems' => GradingSystem::where('is_default', true)
@@ -273,8 +289,6 @@ class QuizController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'instructions' => ['nullable', 'string'],
-            'quiz_type' => ['required', Rule::in(['test', 'exam', 'practice', 'survey'])],
-            'industry' => ['nullable', Rule::in(['education', 'corporate', 'hr', 'healthcare'])],
             'is_published' => ['boolean'],
             'is_public' => ['boolean'],
             'randomize_questions' => ['boolean'],
@@ -289,21 +303,20 @@ class QuizController extends Controller
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'settings' => ['nullable', 'array'],
-            'pools.*.questions_to_show' => 'required|integer|min:1',
-            'pools.*.questions' => 'array|min:1',
             'survey_thank_you_message' => ['nullable', 'string', 'max:500'],
             'enable_certificates' => ['boolean'],
             'certificate_template_id' => ['nullable', 'exists:certificate_templates,id'],
             'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
             'grading_system_id' => ['nullable', 'integer', 'min:0'],
-            'last_updated_by' =>  auth()->id(),
         ]);
 
         // Only update slug if title changed
         if ($quiz->title !== $validated['title']) {
             $validated['slug'] = Str::slug($validated['title']);
         }
+
+        $validated['last_updated_by'] = auth()->id();
 
         $quiz->update($validated);
 

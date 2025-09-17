@@ -143,7 +143,10 @@ class QuestionPoolController extends Controller
                 'questions.id',
                 'questions.question',
                 'questions.type',
-                'questions.points'
+                'questions.points',
+                'questions.is_ai',
+                'questions.is_required',
+                'questions.time_limit',
             );
         }]);
         $organization = auth()->user()->organizations()->first();
@@ -154,7 +157,10 @@ class QuestionPoolController extends Controller
                 'id',
                 'question',
                 'type',
-                'points'
+                'points',
+                'is_ai',
+                'is_required',
+                'time_limit',
             )
             ->get();
 
@@ -167,34 +173,45 @@ class QuestionPoolController extends Controller
     // Attach questions to pool
     public function attachQuestions(Request $request, QuestionPool $pool)
     {
-        //$this->authorize('update', $pool);
-        
         $request->validate([
             'question_ids' => 'required|array',
-            'question_ids.*' => [
-                'exists:questions,id',
-                function ($attribute, $value, $fail) use ($pool) {
-                    $validQuestion = Question::where('id', $value)
-                        ->when($pool->quiz_id, function($query) use ($pool) {
-                            $query->where('quiz_id', $pool->quiz_id);
-                        }, function($query) {
-                            $query->whereHas('quiz', function($q) {
-                                $q->where('organization_id', auth()->user()->organizations()->first()->id);
-                            });
-                        })
-                        ->exists();
-                    
-                    if (!$validQuestion) {
-                        $fail('One or more selected questions are invalid for this pool.');
-                    }
-                }
-            ],
+            'question_ids.*' => 'exists:questions,id',
         ]);
 
-        $pool->questions()->attach($request->question_ids);
+        // Get the organization
+        $organization = auth()->user()->organizations()->first();
+        
+        // Check if questions belong to the organization or are global (null organization_id)
+        $validQuestionIds = Question::whereIn('id', $request->question_ids)
+            ->where(function($query) use ($organization) {
+                $query->where('organization_id', $organization->id)
+                    ->orWhereNull('organization_id');
+            })
+            ->pluck('id')
+            ->toArray();
+
+        // Check if all provided question IDs are valid
+        $invalidQuestionIds = array_diff($request->question_ids, $validQuestionIds);
+        
+        if (!empty($invalidQuestionIds)) {
+            return redirect()->back()
+                ->with('error', 'One or more selected questions are not accessible for this organization.');
+        }
+
+        // Check if questions are already in the pool to avoid duplicates
+        $existingQuestionIds = $pool->questions()->whereIn('questions.id', $validQuestionIds)->pluck('questions.id')->toArray();
+        $newQuestionIds = array_diff($validQuestionIds, $existingQuestionIds);
+
+        if (empty($newQuestionIds)) {
+            return redirect()->back()
+                ->with('info', 'All selected questions are already in this pool.');
+        }
+
+        // Attach the new questions
+        $pool->questions()->attach($newQuestionIds);
 
         return redirect()->back()
-            ->with('success', 'Questions added to pool successfully.');
+            ->with('success', count($newQuestionIds) . ' questions added to pool successfully.');
     }
 
     // Detach question from pool

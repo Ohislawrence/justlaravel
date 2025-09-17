@@ -60,41 +60,7 @@ const deleteQuiz = (quiz) => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <!-- Success Message -->
-                <div v-if="flash.success" class="mb-4">
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                        <span class="block sm:inline">{{ flash.success }}</span>
-                        <button
-                            type="button" 
-                            @click="flash.success = null"
-                            class="absolute top-0 bottom-0 right-0 px-4 py-3"
-                            aria-label="Close success message"
-                        >
-                            <span class="sr-only">Close</span>
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Error Message -->
-                <div v-if="flash.error" class="mb-4">
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                        <span class="block sm:inline">{{ flash.error }}</span>
-                        <button
-                            type="button" 
-                            @click="flash.error = null"
-                            class="absolute top-0 bottom-0 right-0 px-4 py-3"
-                            aria-label="Close error message"
-                        >
-                            <span class="sr-only">Close</span>
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-4 sm:p-6 bg-white border-b border-gray-200">

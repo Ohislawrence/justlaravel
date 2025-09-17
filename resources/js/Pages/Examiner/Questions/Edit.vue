@@ -337,9 +337,9 @@ const imageInput = ref(null);
                   :key="'essay-' + forceRerender" 
                 />
                 <FillInTheBlankEditor 
-                  v-if="form.type === 'fill_in_the_blank'" 
+                  v-if="form.type === 'fill_in_blank'" 
                   v-model="form" 
-                  :key="'fill_in_the_blank-' + forceRerender" 
+                  :key="'fill_in_blank-' + forceRerender" 
                 />
                 <MatchingEditor 
                   v-if="form.type === 'matching'" 

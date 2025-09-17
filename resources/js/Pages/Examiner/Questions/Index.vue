@@ -33,6 +33,19 @@ const showModal = ref(false)
 const modalFeature = ref('')
 const modalMessage = ref('')
 
+const formatQuestionType = (type) => {
+  const types = {
+    'multiple_choice': 'MCQ',
+    'true_false': 'True/False',
+    'short_answer': 'Short Answer',
+    'essay': 'Essay',
+    'fill_in_blank': 'Fill Blank',
+    'matching': 'Matching',
+    'ordering': 'Ordering'
+  };
+  return types[type] || type;
+};
+
 function openFeatureModal(featureName, message) {
   modalFeature.value = featureName
   modalMessage.value = message
@@ -88,48 +101,91 @@ function confirmDelete(question) {
               </button>
             </div>
 
-            <div v-if="props.pools.length > 0" class="mb-8">
-              <h4 class="font-medium mb-2">Question Pools</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div v-for="pool in props.pools" :key="pool.id" class="border rounded-lg p-4 hover:bg-gray-50 transition-all duration-200">
-                  <div class="flex justify-between">
-                    <h5 class="font-medium">{{ pool.name }}</h5>
-                    <span class="text-sm text-gray-500">{{ pool.questions_count }} questions</span>
+            <div v-if="props.pools.length > 0" class="mb-6">
+              <h4 class="font-semibold text-gray-800 mb-3 text-sm">Question Pools</h4>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Link 
+                  v-for="pool in props.pools" 
+                  :key="pool.id" 
+                  :href="route('examiner.question-pools.manage-questions', { pool: pool.id })"
+                  class="border rounded-lg p-3 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm hover:border-green-200 group"
+                >
+                  <!-- Header -->
+                  <div class="flex justify-between items-center">
+                    <h5 class="font-medium text-gray-900 text-sm group-hover:text-green-700 transition-colors">
+                      {{ pool.name }}
+                    </h5>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                      {{ pool.questions_count }} {{ pool.questions_count === 1 ? 'Q' : 'Qs' }}
+                    </span>
                   </div>
-                  <p class="text-sm text-gray-600 mt-1">{{ pool.description }}</p>
-                </div>
+                  <!-- Description -->
+                  <p class="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed">
+                    {{ pool.description }}
+                  </p>
+                  <!-- Action -->
+                  <div class="mt-2 flex items-center text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Manage Questions</span>
+                    <svg class="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
               </div>
             </div>
 
+
             <div class="overflow-x-auto">
+              <div v-if="props.questions.length > 0" class="divide-y divide-gray-100"></div>
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Question</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr v-for="question in props.questions" :key="question.id" class="hover:bg-gray-50 transition-colors duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm font-medium text-gray-900">{{ question.question }}</div>
-                      <div class="text-sm text-gray-500" v-if="question.description">{{ question.description }}</div>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col">
+                        <!-- Question text -->
+                        <div class="text-sm font-medium text-gray-900 mb-2">{{ question.question }}</div>
+                        <!-- Metadata flags -->
+                        <div class="flex flex-wrap gap-2">
+                          <!-- Question Type -->
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ formatQuestionType(question.type) }}
+                          </span>
+                          
+                          <!-- Points -->
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {{ question.points }} pts
+                          </span>
+                          
+                          <!-- Time Limit -->
+                          <span v-if="question.time_limit" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            {{ question.time_limit }}s
+                          </span>
+                          
+                          <!-- Required Flag -->
+                          <span v-if="question.is_required" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Required
+                          </span>
+                          
+                          <!-- AI Generated Flag -->
+                          <span v-if="question.is_ai" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            AI Generated
+                          </span>
+                        </div>
+                      </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {{ questionTypeLabel(question.type) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {{ question.points }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span v-if="question.is_required" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
-                      <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link 
+                    
+                    <!-- Actions Column -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div class="flex justify-end space-x-2">
+                        <!-- Edit Button -->
+                        <Link 
                         :href="route('examiner.quizzes.questions.edit', {quiz: props.quiz.id, question: question.id})" 
                         class="inline-flex items-center text-green-600 hover:text-green-800 mr-3 transition-colors duration-150"
                       >
@@ -147,16 +203,17 @@ function confirmDelete(question) {
                         </svg>
                         Delete
                       </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
+              </div>
             </div>
             
           </div>
         </div>
       </div>
-    </div>
     <FeatureLimitModal 
       v-model="showModal"
       :featureName="modalFeature"

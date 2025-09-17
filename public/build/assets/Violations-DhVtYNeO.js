@@ -1,1 +1,0 @@
-import{m as a,c as i,o as e}from"./app-CNh7BjSf.js";const c={__name:"Violations",props:{violations:Array,attemptId:Number},setup(t){return(n,r)=>{const o=a("ShowProctor");return e(),i(o,{"attempt-id":t.attemptId,"initial-violations":t.violations},null,8,["attempt-id","initial-violations"])}}};export{c as default};
