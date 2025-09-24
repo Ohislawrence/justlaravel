@@ -43,7 +43,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
 
                         <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-4">Introduction</h2>
                         <p>
-                            ExamPortal online Nigeria ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <a :href="route('home')" class="text-emerald-600 hover:underline">examportal.online</a> (the "Site") and use our services (the "Services"). Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Site or use the Services.
+                            Testoria online Nigeria ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <a :href="route('home')" class="text-emerald-600 hover:underline">testoria.ng</a> (the "Site") and use our services (the "Services"). Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Site or use the Services.
                         </p>
                         <p>
                             We reserve the right to change this Privacy Policy at any time and will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date. Your continued use of the Site or Services after we post any such changes constitutes acceptance of those changes.
@@ -132,7 +132,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
                             If you have questions or comments about this Privacy Policy, please contact us at:
                         </p>
                         <p class="mt-4">
-                            <strong>Email:</strong> <a href="mailto:privacy@examportal.online" class="text-emerald-600 hover:underline">privacy@examportal.online</a><br>
+                            <strong>Email:</strong> <a href="mailto:privacy@testoria.ng" class="text-emerald-600 hover:underline">privacy@testoria.ng</a><br>
                             <strong>Address:</strong> Lagos, Nigeria
                         </p>
                     </div>
@@ -148,7 +148,7 @@ import AppLayout2 from '@/Layouts/AppLayout2.vue';
                     We're here to help. Contact our support team for any privacy-related inquiries.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="mailto:privacy@examportal.online" class="px-6 sm:px-8 py-3.5 bg-white text-emerald-600 rounded-xl hover:bg-gray-100 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium">
+                    <a href="mailto:privacy@testoria.ng" class="px-6 sm:px-8 py-3.5 bg-white text-emerald-600 rounded-xl hover:bg-gray-100 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium">
                         Email Us
                     </a>
                     <a :href="route('contact')" class="px-6 sm:px-8 py-3.5 border-2 border-white text-white rounded-xl hover:bg-white/10 transition text-base sm:text-lg font-medium">

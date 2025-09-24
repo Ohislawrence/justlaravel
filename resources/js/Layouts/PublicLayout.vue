@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'; // Added computed import
+import { ref, computed, onMounted } from 'vue'; 
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import MobileMenu from '@/Components/MobileMenu.vue';
 import FlashMessages from '@/Components/FlashMessages.vue';
@@ -17,6 +17,7 @@ const mobileMenuOpen = ref(false);
 
 // Helper: Check if user is logged in
 const isLoggedIn = computed(() => !!page.props.auth?.user);
+
 </script>
 
 <template>
@@ -35,7 +36,7 @@ const isLoggedIn = computed(() => !!page.props.auth?.user);
                             <img 
                                 class="h-4 sm:h-8 w-auto object-contain" 
                                 src="/images/logo.png" 
-                                alt="ExamPortal" 
+                                alt="Testoria NG" 
                             />
                             </div>
                         </Link>
@@ -139,18 +140,18 @@ const isLoggedIn = computed(() => !!page.props.auth?.user);
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="md:flex md:items-center md:justify-between">
                     <div class="flex justify-center space-x-6 md:order-2">
-                        <a href="https://facebook.com/examportalonline" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-green-600">
+                        <a href="https://facebook.com/Testoria NG" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-green-600">
                             <span class="sr-only">Facebook</span>
                             <Icon :icon="FacebookIcon" class="h-5 w-5" />
                         </a>
-                        <a href="https://twitter.com/examportalonline" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-green-600">
+                        <a href="https://twitter.com/TestoriaNG" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-green-600">
                             <span class="sr-only">Twitter</span>
                             <Icon :icon="TwitterIcon" class="h-5 w-5" />
                         </a>
                     </div>
                     <div class="mt-8 md:mt-0 md:order-1">
                         <p class="text-center text-sm text-gray-500">
-                            &copy; {{ new Date().getFullYear() }} Powered by <Link :href="route('home')" class="text-green-600 hover:underline">ExamPortal.online</Link>. All rights reserved.
+                            &copy; {{ new Date().getFullYear() }} Powered by <Link :href="route('home')" class="text-green-600 hover:underline">Testoria NG</Link>. All rights reserved.
                         </p>
                     </div>
                 </div>

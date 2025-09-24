@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use App\Notifications\UserLoginNotification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Stevebauman\Location\Facades\Location;
 
 class SendLoginNotification implements ShouldQueue
 {
@@ -24,13 +25,24 @@ class SendLoginNotification implements ShouldQueue
             $request = request();
             
             // Get client IP address (handling proxies)
-            $ipAddress = $request->getClientIp();
+            $ipAddress = request()->ip();
+            
+            if($ipAddress == '127.0.0.1')
+            {
+                $location = 'Home';
+            }else{
+                $currentUserInfo = Location::get($ipAddress);
+                $country = $currentUserInfo->countryName;
+                $city =$currentUserInfo->cityName;
+                $location = $city.', '.$country;
+            }
+           
             
             // Get user agent
-            $userAgent = $request->userAgent();
+            $userAgent = request()->header('User-Agent');
             
             // Send notification
-            Notification::send($user, new UserLoginNotification($ipAddress, $userAgent));
+            Notification::send($user, new UserLoginNotification($location, $userAgent));
             
             // Optional: Log the login
             Log::info('Login notification sent to user: ' . $user->email, [

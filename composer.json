@@ -18,6 +18,7 @@
         "mews/purifier": "^3.4",
         "phpoffice/phpspreadsheet": "^5.0",
         "spatie/laravel-permission": "^6.19",
+        "stevebauman/location": "^7.6",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

@@ -13,16 +13,16 @@ class UserLoginNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $ipAddress;
+    public $location;
     public $userAgent;
     public $loginTime;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($ipAddress, $userAgent)
+    public function __construct($location, $userAgent)
     {
-        $this->ipAddress = $ipAddress;
+        $this->location = $location;
         $this->userAgent = $userAgent;
         $this->loginTime = Carbon::now();
     }
@@ -48,7 +48,7 @@ class UserLoginNotification extends Notification implements ShouldQueue
             ->greeting('Hello ' . $notifiable->name . '!')
             ->line('A new login was detected on your account:')
             ->line('**Time:** ' . $this->loginTime->format('F j, Y \a\t g:i A'))
-            ->line('**IP Address:** ' . $this->ipAddress)
+            ->line('**Location:** ' . $this->location)
             ->line('**Device/Browser:** ' . $this->userAgent)
             ->line('If this was you, you can ignore this message.')
             ->line('If you don\'t recognize this activity, please secure your account immediately.')
@@ -64,10 +64,10 @@ class UserLoginNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'ip_address' => $this->ipAddress,
+            'ip_address' => $this->location,
             'user_agent' => $this->userAgent,
             'login_time' => $this->loginTime,
-            'message' => 'New login detected from IP: ' . $this->ipAddress,
+            'message' => 'New login detected from IP: ' . $this->location,
         ];
     }
 

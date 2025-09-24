@@ -28,16 +28,7 @@ class AIService
                 ['role' => 'user', 'content' => $prompt],
             ],
         ]);
-        /** 
-        $response = Http::timeout(120)->post('http://localhost:1234/v1/chat/completions', [
-            'model' => 'google/gemma-3-12b',
-            'max_tokens' => 512,
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a quiz generator AI.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
-        */
+        
         if ($response->failed()) {
             throw new Exception('AI API request failed');
         }

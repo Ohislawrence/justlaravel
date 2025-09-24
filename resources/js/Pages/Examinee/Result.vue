@@ -9,8 +9,8 @@
           </svg>
           <h3 class="mt-2 text-lg font-medium text-gray-900">Thank You!</h3>
           <p class="mt-1 text-sm text-gray-500">We appreciate your feedback.</p>
-          <p v-if="attempt.quiz?.survey_thank_you_message" class="mt-4 text-gray-700">
-            {{ attempt.quiz.survey_thank_you_message }}
+          <p v-if="quiz?.survey_thank_you_message" class="mt-4 text-gray-700">
+            {{ quiz.survey_thank_you_message }}
           </p>
           <button
             @click="closeTab"
@@ -67,7 +67,7 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                   <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Test Completed</h1>
-                  <p class="text-gray-600 mt-1">{{ attempt.quiz?.title }}</p>
+                  <p class="text-gray-600 mt-1">{{ quiz?.title }}</p>
                 </div>
                 <span
                   :class="[
@@ -304,19 +304,23 @@ const props = defineProps({
     required: true,
     default: () => []
   },
+  quiz: {
+    type: Object,
+    required: true
+  },
   
   responses: {
     type: Array,
     required: true,
     default: () => []
   },
-  quiztype: String,
+  
 });
 
 const showResults = ref(false);
 
 // Determine quiz type
-const quizType = computed(() => props.quiztype || 'exam');
+const quizType = computed(() => props.quiz.quiz_type || 'exam');
 
 // --- Computed Properties ---
 const score = computed(() => props.attempt?.score || 0);

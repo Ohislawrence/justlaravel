@@ -135,7 +135,6 @@ class QuizController extends Controller
             'randomize_answers' => ['boolean'],
             'show_correct_answers' => ['boolean'],
             'show_leaderboard' => ['boolean'],
-            'enable_discussions' => ['boolean'],
             'max_attempts' => ['nullable', 'integer', 'min:0'],
             'max_participants' => ['nullable', 'integer', 'min:0'],
             'time_limit' => ['nullable', 'integer', 'min:1'],
@@ -149,6 +148,8 @@ class QuizController extends Controller
             'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
             'grading_system_id' => ['nullable', 'integer', 'exists:grading_systems,id'],
+            'require_guest_info' => ['nullable','boolean'],
+            'guest_info_required' => ['nullable', Rule::in(['none', 'name', 'email', 'both'])],
         ]);
     
         $organization = auth()->user()->organizations()->first();
@@ -184,6 +185,8 @@ class QuizController extends Controller
             'certificate_expiry_days' => $validated['certificate_expiry_days'] ?? null,
             'grading_system_id' => $validated['grading_system_id'] ?? null,
             'created_by' => auth()->id(),
+            'require_guest_info' => $validated['require_guest_info'],
+            'guest_info_required' => $validated['guest_info_required'],
         ];
     
         $quiz = $organization->quizzes()->create($quizData);
@@ -290,12 +293,12 @@ class QuizController extends Controller
             'description' => ['nullable', 'string'],
             'instructions' => ['nullable', 'string'],
             'is_published' => ['boolean'],
+            'quiz_type' => ['required', Rule::in(['test', 'exam', 'practice', 'survey'])],
             'is_public' => ['boolean'],
             'randomize_questions' => ['boolean'],
             'randomize_answers' => ['boolean'],
             'show_correct_answers' => ['boolean'],
             'show_leaderboard' => ['boolean'],
-            'enable_discussions' => ['boolean'],
             'max_attempts' => ['nullable', 'integer', 'min:0'],
             'max_participants' => ['nullable', 'integer', 'min:0'],
             'time_limit' => ['nullable', 'integer', 'min:1'],

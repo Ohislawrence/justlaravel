@@ -18,6 +18,7 @@ class QuizAnalysisController extends Controller
     public function index(Quiz $quiz)
     {
         $service = new QuizAnalysisService($quiz);
+        $analysis = $service->getGeneralAnalysis();
         return Inertia::render('Examiner/QuizAnalysis/Index', [
             'quiz' => $quiz->load('groups', 'questionPools'),
             'questionpools' => (object)$quiz->questionPools,
@@ -31,7 +32,7 @@ class QuizAnalysisController extends Controller
             'attempt' => $quiz->attempts()->with(['responses.question'])
                     ->where('quiz_id', $quiz->id)
                     ->get(),
-            'questionStats' => $service->getGeneralAnalysis()['question_stats'],
+            'questionStats' => $analysis['question_stats'],
         ]);
     }
 

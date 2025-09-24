@@ -182,7 +182,7 @@ const toggleDropdown = (dropdown) => {
                             <!-- Main Brand Text -->
                             <span
                                 class="app-brand-text font-bold text-gray-800 dark:text-blue group-hover:text-emerald-600 transition-colors duration-200">
-                                <span v-if="isLandlord">ExamPortal</span>
+                                <span v-if="isLandlord">Testoria NG</span>
                                 <template v-else>
                                     <!-- Organization name with optional icon -->
                                     <svg v-if="showOrgIcon" class="w-4 h-4 mr-1 inline opacity-70 text-emerald-500" fill="none"
@@ -586,7 +586,7 @@ const toggleDropdown = (dropdown) => {
                             class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
                             <div class="mb-2 mb-md-0">
                                 ©2025
-                                <a href="https://examportal.online    " target="_blank" class="footer-link fw-bolder text-emerald-600">ExamPortal
+                                <a href="https://testoria.ng" target="_blank" class="footer-link fw-bolder text-emerald-600">Testoria NG
                                     Online</a>
                             </div>
                             <div>

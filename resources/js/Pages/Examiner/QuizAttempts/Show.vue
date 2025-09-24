@@ -2,26 +2,45 @@
   <AppLayout :title="`Attempt #${attempt?.attempt_number || 'Unknown'}`">
     <div class="py-6">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Attempt Summary -->
-        <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6 border-l-4" :class="attempt?.is_passed ? 'border-green-500' : 'border-red-500'">
-          <div class="flex justify-between items-start">
-            <div>
-              <h2 class="text-xl font-semibold">Attempt Details</h2>
-              <p class="text-gray-600 mt-2">
-                Examinee: {{ attempt?.user?.name || 'Unknown User' }} ({{ attempt?.user?.email || 'No email' }})
-              </p>
-              <p class="text-gray-600">
-                Completed: {{ formatDateTime(attempt?.completed_at) }}
-              </p>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-3">
+          {{ attempt?.user?.name || 'Unknown User' }}'s attempt #{{ attempt?.attempt_number || 'Unknown' }} 
+        </h2>
+       <!-- Attempt Summary -->
+        <div class="bg-white shadow-sm rounded-xl border-2 p-6 mb-6 transition-shadow duration-200"
+            :class="attempt?.is_passed ? 'border-green-500 shadow-green-50/30' : 'border-red-500 shadow-red-50/30'">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="flex-1">
+              <div class="space-y-1.5">
+                <p class="text-sm">
+                  <span class="font-semibold text-gray-900">Examinee:</span>
+                  <span class="ml-1 text-gray-900">{{ attempt?.user?.name || 'Unknown User' }}</span>
+                  <span class="text-gray-500 ml-2">({{ attempt?.user?.email || 'No email' }})</span>
+                </p>
+                <p class="text-sm text-gray-600 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Completed: <span class="font-medium ml-1">{{ formatDateTime(attempt?.completed_at) }}</span>
+                </p>
+              </div>
             </div>
-            <div class="text-right">
-              <span class="px-3 py-1 rounded-full text-sm font-medium"
-                :class="attempt?.is_passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                Score: {{ attempt?.percentage || 0 }}%
-              </span>
-              <p class="text-sm text-gray-500 mt-1">
-                Time: {{ formatTime(attempt?.time_spent) }}
-              </p>
+            <div class="flex flex-col items-start lg:items-end space-y-2">
+              <div class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold shadow-sm"
+                  :class="attempt?.is_passed 
+                    ? 'bg-green-50 text-green-700 border border-green-200' 
+                    : 'bg-red-50 text-red-700 border border-red-200'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        :d="attempt?.is_passed ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'" />
+                </svg>
+                {{ attempt?.percentage || 0 }}%
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Time Spent: <span class="font-medium ml-1">{{ formatTime(attempt?.time_spent) }}</span>
+              </div>
             </div>
           </div>
         </div>

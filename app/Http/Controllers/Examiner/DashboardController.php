@@ -98,21 +98,27 @@ class DashboardController extends Controller
     //questionlimits
     $UsedQuestion = $organization->questions()->count();
     $AllowedQuestionLimit = $organization->getFeatureValue('questions_limit');
-    $percentageQuestionUsed = ($UsedQuestion/$AllowedQuestionLimit) * 100;
+    $percentageQuestionUsed = ((float)($AllowedQuestionLimit ?? 0) > 0)
+    ? round(((float)($UsedQuestion ?? 0) / (float)$AllowedQuestionLimit) * 100, 2)
+    : 0;
     $remainingQuestion = $AllowedQuestionLimit - $UsedQuestion;
     //AttemptsLimits
     $UsedAttempt = $organization->quizAttempts()->whereBetween('quiz_attempts.created_at', [
                     $planCurrent->starts_at,
                     $planCurrent->ends_at])->count();
     $AllowedAttemptLimit = $organization->getFeatureValue('quiz_attempts_limit');
-    $percentageAttempt = ($UsedAttempt/$AllowedAttemptLimit) * 100;
+    $percentageAttempt = ((float)($AllowedAttemptLimit ?? 0) > 0)
+    ? round(((float)($UsedAttempt ?? 0) / (float)$AllowedAttemptLimit) * 100, 2)
+    : 0;
     $remainingAttempts = $AllowedAttemptLimit - $UsedAttempt;
     //AiQuestionLimits
     $UsedAiQuestion = $organization->questions()->where('is_ai', true)->whereBetween('created_at', [
                         $planCurrent->starts_at,
                         $planCurrent->ends_at])->count();
     $AllowedAiQuestiontLimit = $organization->getFeatureValue('ai_question_generation');
-    $percentageAiused = ($UsedAiQuestion/$AllowedAiQuestiontLimit) * 100;
+    $percentageAiused = ((float)($AllowedAiQuestiontLimit ?? 0) > 0)
+    ? round(((float)($UsedAiQuestion ?? 0) / (float)$AllowedAiQuestiontLimit) * 100, 2)
+    : 0;
     $remainingAiQuestion = $AllowedAiQuestiontLimit - $UsedAiQuestion;
 
     

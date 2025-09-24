@@ -32,6 +32,9 @@ class QuizAttempt extends Model
         'status',
         'proctoring_data',
         'violation_count',
+        'guest_id',
+        'guest_email',
+        'guest_name',
     ];
 
     protected $casts = [

@@ -6,35 +6,72 @@
         <Head title="Revolutionize Assessment with AI-Powered Quiz/Test Creation" />
       <!-- All your existing homepage-specific content goes here -->
       <!-- Hero Section -->
-      <section class="container mx-auto px-4 sm:px-6 py-16 md:py-28 relative overflow-hidden">
+      <section class="container mx-auto px-2 sm:px-3 py-8 md:py-14 relative overflow-hidden">
         <!-- Background Elements -->
         <div class="absolute inset-0 opacity-5">
           <div class="absolute top-10 left-5 w-40 h-40 bg-emerald-500 rounded-full blur-3xl"></div>
           <div class="absolute bottom-10 right-5 w-52 h-52 bg-teal-400 rounded-full blur-3xl"></div>
         </div>
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-          <div class="mb-6 inline-flex items-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium border border-emerald-100">
-            🇳🇬 Made for Nigerian
+
+        <div class="max-w-6xl mx-auto relative z-10">
+          <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+            <!-- Left: Text Content -->
+            <div class="w-full lg:w-1/2 text-left space-y-6">
+              <div class="inline-flex items-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium border border-emerald-100">
+                🇳🇬 Made for Nigerians
+              </div>
+
+              <!-- Animated Headline -->
+              <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                <Transition name="fade" mode="out-in">
+                  <span
+                    :key="currentHeadlineIndex"
+                    class="bg-gradient-to-r from-gray-900 via-emerald-700 to-teal-500 bg-clip-text text-transparent block"
+                  >
+                    {{ headlines[currentHeadlineIndex] }}
+                  </span>
+                </Transition>
+              </h1>
+
+              <p class="text-lg sm:text-xl text-gray-600 max-w-xl">
+                The complete exam platform designed for Nigerian educational institutions, corporations, and training organizations. Create, customize, and deploy intelligent assessments that drive real learning outcomes.
+              </p>
+
+              <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                <Link
+                  :href="route('register')"
+                  class="px-6 sm:px-8 py-3.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-base sm:text-lg font-medium transform hover:scale-[1.02] duration-300"
+                >
+                  Get started for FREE
+                </Link>
+              </div>
+
+              <div class="text-sm text-gray-500 mt-4">
+                No payment required to start
+              </div>
+            </div>
+
+            <!-- Right: Image Carousel -->
+            <div class="w-full lg:w-3/5 flex justify-center lg:justify-end">
+              <div class="relative rounded-2xl overflow-hidden max-w-2xl w-full h-80 sm:h-96 md:h-[28rem] lg:h-[32rem] transform hover:scale-[1.02] transition duration-1000">
+                <Transition name="fade" mode="out-in">
+                  <img
+                    :key="currentImageIndex"
+                    :src="imageList[currentImageIndex]"
+                    :alt="`Hero image ${currentImageIndex + 1}`"
+                    class="w-full h-full object-cover"
+                  />
+                </Transition>
+                <!-- Floating badge -->
+                <div class="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-xs font-medium text-emerald-700 border border-emerald-100">
+                  AI-Powered
+                </div>
+              </div>
+            </div>
+            </div>
           </div>
-          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-emerald-700 to-teal-500 bg-clip-text text-transparent leading-tight">
-            Revolutionize Assessment <br> with AI-Powered Quiz/Test Creation
-          </h1>
-          <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-            The complete exam platform designed for Nigerian educational institutions, corporations, and training organizations. Create, customize, and deploy intelligent assessments that drive real learning outcomes.
-          </p>
-          <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-            <Link :href="route('register')" class="px-6 sm:px-8 py-3.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg hover:shadow-xl text-base sm:text-lg font-medium transform hover:scale-[1.02] duration-300">
-              Get stated for FREE
-            </Link>
-            <Link :href="route('login')" class="px-6 sm:px-8 py-3.5 border-2 border-gray-200 rounded-xl hover:border-emerald-300 transition text-base sm:text-lg font-medium hover:bg-emerald-50">
-              Sign in
-            </Link>
-          </div>
-          <div class="text-sm text-gray-500">
-            No payment required to start
-          </div>
-        </div>
       </section>
+
   
       <!-- Stats Section -->
       <section class="bg-emerald-50 py-12 sm:py-16">
@@ -124,7 +161,7 @@
         <div class="container mx-auto px-4 sm:px-6">
           <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by Nigerian organizations</h2>
-            <p class="text-lg sm:text-xl text-gray-600">See what businesses and institutions are saying about ExamPortal Online Nigeria.</p>
+            <p class="text-lg sm:text-xl text-gray-600">See what businesses and institutions are saying about Testoria Nigeria.</p>
           </div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
             <!-- Testimonial Cards - Copied directly -->
@@ -138,7 +175,7 @@
                   <div class="text-xs sm:text-sm text-gray-500">Teacher</div>
                 </div>
               </div>
-              <p class="text-gray-600 mb-4 text-sm sm:text-base">"ExamPortal has revolutionized how we conduct assessments. The AI question generation saves me hours of work every week."</p>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"TestoriaNG has revolutionized how we conduct assessments. The AI question generation saves me hours of work every week."</p>
               <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
             </div>
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
@@ -151,7 +188,7 @@
                   <div class="text-xs sm:text-sm text-gray-500">HR</div>
                 </div>
               </div>
-              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The features in ExamPortal is a game-changer. Our staffs can now take text even at home even on weekend."</p>
+              <p class="text-gray-600 mb-4 text-sm sm:text-base">"The features in Testoria is a game-changer. Our staffs can now take text even at home even on weekend."</p>
               <div class="flex text-amber-400">⭐⭐⭐⭐⭐</div>
             </div>
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
@@ -269,7 +306,7 @@
                               }">
                             Start Free Trial
                         </Link>
-                        <a v-else href="mailto:sales@examportal.online" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
+                        <a v-else href="mailto:sales@testoria.ng" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
                             Contact Sales
                         </a>
                     </div>
@@ -374,11 +411,58 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted, onUnmounted } from 'vue';
   import { Head,Link } from '@inertiajs/vue3'
   import AppLayout2 from '@/Layouts/AppLayout2.vue'; 
   import { defineProps } from 'vue'; 
   import Cta from '@/Components/Cta.vue';
+  
+  const headlines = ref([
+  'Revolutionize Assessment',
+  'AI-Powered Quiz Creation',
+  'Drive Learning Outcomes',
+  'Built for Nigerian Schools',
+  'Built for HR hiring',
+  'For Learning and Development',
+]);
+const currentHeadlineIndex = ref(0);
+
+// Image rotation
+const imageList = ref([
+  '/assets/img/frontimg/f1.png',
+  '/assets/img/elements/1.jpg',
+]);
+const currentImageIndex = ref(0);
+
+// Rotation interval
+let rotationInterval = null;
+
+// Optional: Pause on hover
+const isPaused = ref(false);
+
+const startRotation = () => {
+  rotationInterval = setInterval(() => {
+    if (isPaused.value) return;
+    currentHeadlineIndex.value = (currentHeadlineIndex.value + 1) % headlines.value.length;
+    currentImageIndex.value = (currentImageIndex.value + 1) % imageList.value.length;
+  }, 4000);
+};
+
+const pauseRotation = () => {
+  isPaused.value = true;
+};
+
+const resumeRotation = () => {
+  isPaused.value = false;
+};
+
+onMounted(() => {
+  startRotation();
+});
+
+onUnmounted(() => {
+  if (rotationInterval) clearInterval(rotationInterval);
+});
   
 
   const props = defineProps({
@@ -470,5 +554,14 @@ const getPriceSuffix = () => {
   }
   .animation-delay-4000 {
     animation-delay: 4s;
+  }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
   }
   </style>

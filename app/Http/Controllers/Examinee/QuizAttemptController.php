@@ -18,66 +18,124 @@ use Illuminate\Validation\Rule;
 class QuizAttemptController extends Controller
 {
     public function start(Quiz $quiz, Request $request)
-    {
-        $existingAttempt = QuizAttempt::where('quiz_id', $quiz->id)
-        ->where('user_id', $request->user()->id)
-        ->whereNull('completed_at')
-        ->latest()
-        ->first();
-
-        if ($existingAttempt) {
-            // Calculate remaining time for existing attempt
-            $elapsedTime = $existingAttempt->time_spent ?? 0;
-            $totalTimeLimit = $quiz->time_limit * 60;
-            // Resume existing attempt
-            return redirect()->route('examinee.attempt', [
-                'quiz' => $quiz->id,
-                'attempt' => $existingAttempt->id
-            ]);
-        }
-        // Validate attempt limit
-        if ($quiz->max_attempts) {
-            $attempts = QuizAttempt::where('quiz_id', $quiz->id)
+    { 
+        // Check if user is authenticated
+        $isAuthenticated = auth()->check();
+        
+        // Handle existing attempts for authenticated users
+        if ($isAuthenticated) {
+            $existingAttempt = QuizAttempt::where('quiz_id', $quiz->id)
                 ->where('user_id', $request->user()->id)
-                ->count();
-                
-            if ($attempts >= $quiz->max_attempts) {
-                return redirect()->back()->with('error', 'You have reached the maximum number of attempts');
+                ->whereNull('completed_at')
+                ->latest()
+                ->first();
+
+            if ($existingAttempt) {
+                return redirect()->route('examinee.attempt', [
+                    'quiz' => $quiz->id,
+                    'attempt' => $existingAttempt->id
+                ]);
+            }
+
+            // Validate attempt limit for authenticated users
+            if ($quiz->max_attempts) {
+                $attempts = QuizAttempt::where('quiz_id', $quiz->id)
+                    ->where('user_id', $request->user()->id)
+                    ->count();
+                    
+                if ($attempts >= $quiz->max_attempts) {
+                    return redirect()->back()->with('error', 'You have reached the maximum number of attempts');
+                }
+            }
+        } else {
+            // Check if quiz is public for guests
+            if (!$quiz->is_public) {
+                return redirect()->route('login')->with('error', 'Please login to access this quiz');
             }
         }
 
-        // Prepare questions FIRST
+        // Validate guest information if needed
+        if (!$isAuthenticated && $quiz->is_public && $quiz->require_guest_info) {
+            $validationRules = [];
+            
+            if ($quiz->guest_info_required === 'name' || $quiz->guest_info_required === 'both') {
+                $validationRules['guest_name'] = 'required|string|max:255';
+            }
+            
+            if ($quiz->guest_info_required === 'email' || $quiz->guest_info_required === 'both') {
+                $validationRules['guest_email'] = 'required|email|max:255';
+            }
+
+            $validated = $request->validate($validationRules);
+        }
+
+        // Prepare questions
         $questions = $this->prepareQuestions($quiz);
 
         // Create new attempt
-        $attempt = QuizAttempt::create([
+        $attemptData = [
             'quiz_id' => $quiz->id,
-            'user_id' => $request->user()->id,
-            'attempt_number' => $this->getNextAttemptNumber($quiz, $request->user()->id),
+            'user_id' => $isAuthenticated ? $request->user()->id : null,
+            'attempt_number' => $isAuthenticated ? $this->getNextAttemptNumber($quiz, $request->user()->id) : 1,
             'started_at' => now(),
             'status' => 'in_progress',
-            'questions_data' => $questions 
-        ]);
+            'questions_data' => $questions,
+        ];
 
-        // Prepare questions
-        //$questions = $this->prepareQuestions($quiz);
-        
-        // Return Inertia response
-        // Redirect to the attempt page
-        return redirect()->route('examinee.attempt', [
-            'quiz' => $quiz->id,
-            'attempt' => $attempt->id
-        ]);
+        // Add guest info if applicable
+        if (!$isAuthenticated && $quiz->is_public) {
+            $attemptData['guest_id'] = uniqid('guest_', true);
+            $attemptData['guest_name'] = $validated['guest_name'] ?? null;
+            $attemptData['guest_email'] = $validated['guest_email'] ?? null;
+            
+            // Store in session for guest
+            session()->put('guest_attempt_'.$quiz->id, $attemptData['guest_id']);
+        }
+
+        $attempt = QuizAttempt::create($attemptData);
+
+        // Redirect based on user type
+        if ($isAuthenticated) {
+            return redirect()->route('examinee.attempt', [
+                'quiz' => $quiz->id,
+                'attempt' => $attempt->id
+            ]);
+        } else {
+            return redirect()->route('quiz.show.guest', [
+                'quiz' => $quiz->id,
+                'attempt' => $attempt->id
+            ]);
+        }
     }
 
     public function showAttempt(Quiz $quiz, Request $request)
     {
+        $referrer = $request->headers->get('referer');
         // Get the latest in-progress attempt or 404
-        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+        if($quiz->is_public){
+            $guestId = $request->session()->get('guest_attempt_'.$quiz->id);
+            $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('guest_id', $guestId)
+            ->whereNull('completed_at')
+            ->latest()
+            ->firstOrFail();
+            //start
+            $expectedReferrer = route('quiz.start.guest', $quiz->id);
+        }else{
+            $attempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $request->user()->id)
             ->whereNull('completed_at')
             ->latest()
             ->firstOrFail();
+            //start
+            $expectedReferrer = route('examinee.start', $quiz->id);
+        }
+        
+        
+    
+        // Mark as started for refresh allowance
+        $request->session()->put('quiz_attempt_started_'.$attempt->id, true);
+        
         
         // Questions are already stored from start()
         $questions = $attempt->questions_data;
@@ -108,7 +166,7 @@ class QuizAttemptController extends Controller
         $remainingTime = max(0, $totalTimeLimit - $elapsedTime);
 
         return Inertia::render('Examinee/QuizPlayer', [
-            'quiz' => $quiz->only('id', 'title', 'time_limit'),
+            'quiz' => $quiz->only('id', 'title', 'time_limit','quiz_type','is_public'),
             'attempt' => $attempt,
             'attemptID' => $attempt->id,
             'questions' => $questions,
@@ -557,7 +615,7 @@ class QuizAttemptController extends Controller
     
 
         return Inertia::render('Examinee/Result', [
-            'quiz' => $quiz->only('id', 'title', 'passing_score','survey_thank_you_message','show_correct_answers'),
+            'quiz' => $quiz->only('id', 'title', 'passing_score','survey_thank_you_message','show_correct_answers','quiz_type'),
             'attempt' => $attempt->only([
                 'id', 'score', 'max_score', 'percentage',
                 'is_passed', 'completed_at', 'time_spent'
@@ -641,15 +699,19 @@ class QuizAttemptController extends Controller
             ->whereIn('violation_type', ['tab_switch', 'fullscreen_exit', 'multiple_displays'])
             ->count();
 
-        if ($seriousViolations > 5) { 
-            return back()->with('error', 'Quiz submission rejected due to multiple proctoring violations.');
+        if(!$quiz->is_public){
+            if ($seriousViolations > 10) { 
+                return back()->with('error', 'Quiz submission rejected due to multiple proctoring violations.');
+            }
         }
+        
 
+        /**
         if ($attempt->user_id !== auth()->id() || 
             $attempt->quiz_id !== $quiz->id ) {
             abort(403);
         }
-
+         */
         $questions = $this->getAttemptQuestions($attempt);
 
         
@@ -683,6 +745,7 @@ class QuizAttemptController extends Controller
                     'points_earned' => $result['points'],
                     'grading_data' => json_encode($result['feedback']),
                     'updated_at' => now(),
+                    'time_spent' => $timeSpent,
                 ]);
             } else {
                 $responses[] = [
@@ -746,11 +809,21 @@ class QuizAttemptController extends Controller
         ]);
 
         // Generate certificate if enabled and passed
-        if ($attempt->is_passed && $quiz->enable_certificates) {
-            $certificateService = app(CertificateService::class);
-            $certificate = $certificateService->generateCertificate($attempt);
+        if(!$quiz->is_public){
+            if ($attempt->is_passed && $quiz->enable_certificates) {
+                $certificateService = app(CertificateService::class);
+                $certificate = $certificateService->generateCertificate($attempt);
+            }
         }
         
+        if($quiz->is_public){
+            return redirect()->route('quiz.show.feedback', [
+            'quiz' => $quiz->id,
+            'quiztype' => $quiz->quiz_type,
+            'attemptId' => $attempt->id,
+            'attempt' => $attempt,
+        ]);
+        }
         return redirect()->route('examinee.quiz.results', [
             'quiz' => $quiz->id,
             'quiztype' => $quiz->quiz_type,
@@ -1195,5 +1268,47 @@ class QuizAttemptController extends Controller
             \Log::error('Save progress failed: ' . $e->getMessage());
             return response()->json(['error' => 'Save failed: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function startPublicQuiz(Quiz $quiz, Request $request)
+    {
+        if (!$quiz->is_public) {
+            abort(404);
+        }
+
+        // Validate guest information based on quiz requirements
+        $validationRules = [];
+        
+        if ($quiz->require_guest_info) {
+            if ($quiz->guest_info_required === 'name' || $quiz->guest_info_required === 'both') {
+                $validationRules['guest_name'] = 'required|string|max:255';
+            }
+            
+            if ($quiz->guest_info_required === 'email' || $quiz->guest_info_required === 'both') {
+                $validationRules['guest_email'] = 'required|email|max:255';
+            }
+        }
+
+        $validated = $request->validate($validationRules);
+
+        // Create attempt
+        $attempt = QuizAttempt::create([
+            'quiz_id' => $quiz->id,
+            'user_id' => null,
+            'guest_id' => uniqid('guest_', true),
+            'guest_name' => $validated['guest_name'] ?? null,
+            'guest_email' => $validated['guest_email'] ?? null,
+            'attempt_number' => 1,
+            'started_at' => now(),
+            'status' => 'in_progress',
+            'questions_data' => $this->prepareQuestions($quiz)
+        ]);
+
+        session()->put('guest_attempt_'.$quiz->id, $attempt->guest_id);
+
+        return redirect()->route('public.quiz.attempt', [
+            'quiz' => $quiz->id,
+            'attempt' => $attempt->id
+        ]);
     }
 }

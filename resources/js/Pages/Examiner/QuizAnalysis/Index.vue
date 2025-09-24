@@ -1,9 +1,9 @@
 <template>
-  <AppLayout :title="`Quiz Results: ${quiz.title}`">
+  <AppLayout :title="`Results: ${quiz.title}`">
     <template #header>
       <div class="flex justify-between items-center">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-          Results Analysis: {{ quiz.title }}
+          {{ quiz.quiz_type === 'survey' ? 'Survey Results' : 'Results Analysis' }}: {{ quiz.title }}
         </h2>
         <div class="flex space-x-2">
           <Link 
@@ -13,7 +13,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Quiz
+            Back to {{ quiz.quiz_type === 'survey' ? 'Survey' : 'Quiz' }}
           </Link>
         </div>
       </div>
@@ -22,73 +22,110 @@
 
     <div class="py-6">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <SummaryCard 
-            title="Total Attempts" 
-            :value="analysis.total_attempts" 
-            icon="users"
-            color="green"
+        <!-- Survey Components -->
+        <template v-if="quiz.quiz_type === 'survey'">
+          <!-- Survey Summary Cards -->
+          <SurveySummary 
+            :quiz="quiz" 
+            :analysis="analysis"
+            class="mb-6"
           />
-          <SummaryCard 
-            title="Average Score" 
-            :value="`${Math.round(analysis.average_score)}%`"
-            icon="chart-bar"
-            color="green"
+
+          <!-- Survey Response Breakdown -->
+          <SurveyBreakdown 
+            :quiz="quiz"
+            :attempts="attempts"
+            :questionStats="questionStats"
+            class="mb-6"
           />
-          <SummaryCard 
-            title="Pass Rate" 
-            :value="`${Math.round(analysis.pass_rate)}%`"
-            icon="check-circle"
-            color="green"
+
+          <!-- Survey Charts -->
+          <SurveyCharts 
+            :quiz="quiz"
+            :attempts="attempts"
+            :questionStats="questionStats"
+            class="mb-6"
           />
-        </div>
-
-        <!-- Groups Filter -->
-        <div class="mb-6">
-          <h3 class="text-lg font-medium mb-2">Filter by Group</h3>
-          <div class="flex flex-wrap gap-2">
-            <Link
-              :href="route('examiner.quizzes.analysis.index', quiz.id)"
-              class="px-4 py-2 rounded-full text-sm transition-all duration-200 hover:shadow-md"
-              :class="{
-                'bg-green-100 text-green-800 border border-green-200': !$page.url.includes('group'),
-                'bg-gray-100 text-gray-800 border border-gray-200': $page.url.includes('group')
-              }"
-            >
-              All Participants
-            </Link>
-            <Link
-              v-for="group in groups"
-              :key="group.id"
-              :href="route('examiner.quizzes.analysis.group', { quiz: quiz.id, group: group.id })"
-              class="px-4 py-2 rounded-full text-sm transition-all duration-200 hover:shadow-md"
-              :class="{
-                'bg-green-100 text-green-800 border border-green-200': $page.url.includes(`group=${group.id}`),
-                'bg-gray-100 text-gray-800 border border-gray-200': !$page.url.includes(`group=${group.id}`)
-              }"
-            >
-              {{ group.name }} ({{ group.members_count }})
-            </Link>
+          
+          
+          <!-- Survey Responses Table -->
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6 border border-gray-100">
+            <div class="p-6 bg-white border-b border-gray-200">
+              <h3 class="text-lg font-medium mb-4">Individual Responses</h3>
+              <SurveyResponsesTable :quiz="quiz" :attempts="attempts" />
+            </div>
           </div>
-        </div>
+        </template>
 
-        <!-- Attempts Table -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6 border border-gray-100">
-          <div class="p-6 bg-white border-b border-gray-200">
-            <h3 class="text-lg font-medium mb-4">Attempts</h3>
-            <AttemptsTable :quiz="quiz" :attempts="attempts" :grouped="true" :quiz-id="quiz.id"/>
+        <!-- Quiz Components (Original Content) -->
+        <template v-else>
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <SummaryCard 
+              title="Total Attempts" 
+              :value="analysis.total_attempts" 
+              icon="users"
+              color="green"
+            />
+            <SummaryCard 
+              title="Average Score" 
+              :value="`${Math.round(analysis.average_score)}%`"
+              icon="chart-bar"
+              color="green"
+            />
+            <SummaryCard 
+              title="Pass Rate" 
+              :value="`${Math.round(analysis.pass_rate)}%`"
+              icon="check-circle"
+              color="green"
+            />
           </div>
-        </div>
 
-        <!-- Question Statistics -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
-          <div class="p-6 bg-white border-b border-gray-200">
-            <h3 class="text-lg font-medium mb-4">Question Performance</h3>
-            <QuestionStatsTable :attempts="attempt" :quiz="quiz" />
+          <!-- Groups Filter -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium mb-2">Filter by Group</h3>
+            <div class="flex flex-wrap gap-2">
+              <Link
+                :href="route('examiner.quizzes.analysis.index', quiz.id)"
+                class="px-4 py-2 rounded-full text-sm transition-all duration-200 hover:shadow-md"
+                :class="{
+                  'bg-green-100 text-green-800 border border-green-200': !$page.url.includes('group'),
+                  'bg-gray-100 text-gray-800 border border-gray-200': $page.url.includes('group')
+                }"
+              >
+                All Participants
+              </Link>
+              <Link
+                v-for="group in groups"
+                :key="group.id"
+                :href="route('examiner.quizzes.analysis.group', { quiz: quiz.id, group: group.id })"
+                class="px-4 py-2 rounded-full text-sm transition-all duration-200 hover:shadow-md"
+                :class="{
+                  'bg-green-100 text-green-800 border border-green-200': $page.url.includes(`group=${group.id}`),
+                  'bg-gray-100 text-gray-800 border border-gray-200': !$page.url.includes(`group=${group.id}`)
+                }"
+              >
+                {{ group.name }} ({{ group.members_count }})
+              </Link>
+            </div>
           </div>
-        </div>
 
+          <!-- Attempts Table -->
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6 border border-gray-100">
+            <div class="p-6 bg-white border-b border-gray-200">
+              <h3 class="text-lg font-medium mb-4">Attempts</h3>
+              <AttemptsTable :quiz="quiz" :attempts="attempts" :grouped="true" :quiz-id="quiz.id"/>
+            </div>
+          </div>
+
+          <!-- Question Statistics -->
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
+            <div class="p-6 bg-white border-b border-gray-200">
+              <h3 class="text-lg font-medium mb-4">Question Performance</h3>
+              <QuestionStatsTable :attempts="attempt" :quiz="quiz" />
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </AppLayout>
@@ -100,8 +137,10 @@ import { Link } from '@inertiajs/vue3';
 import SummaryCard from '@/Components/SummaryCard.vue';
 import QuestionStatsTable from '@/Components/Tables/QuestionStatsTable.vue';
 import AttemptsTable from '@/Components/Tables/AttemptsTable.vue';
-import QuizPoolAnalysis from '@/Components/Tables/QuizPoolAnalysis.vue';
-
+import SurveySummary from '@/Components/Survey/SurveySummary.vue';
+import SurveyBreakdown from '@/Components/Survey/SurveyBreakdown.vue';
+import SurveyCharts from '@/Components/Survey/SurveyCharts.vue';
+import SurveyResponsesTable from '@/Components/Survey/SurveyResponsesTable.vue';
 
 const props = defineProps({
   quiz: Object,

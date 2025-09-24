@@ -20,14 +20,14 @@
           <div class="px-6 py-5 sm:px-8 sm:py-6">
             <!-- Instructions -->
             <div class="mb-8">
-              <h2 class="text-lg font-semibold text-gray-900 mb-3">Instructions from {{ organisation }}</h2>
+              <h2 class="text-lg font-semibold text-gray-900 mb-3">From {{ organisation }}</h2>
               <div class="prose max-w-none text-gray-600 bg-gray-50 p-4 rounded-md border border-gray-200">
                 <div v-html="quiz.instructions || '<p class=\'text-gray-500 italic\'>No specific instructions provided.</p>'"></div>
               </div>
             </div>
 
             <!-- Quiz Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div v-if="quiz.quiz_type !== 'survey'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <!-- Timing -->
               <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
                 <h3 class="text-md font-medium text-gray-900 flex items-center mb-3">
@@ -73,6 +73,49 @@
             <div class="flex flex-col items-center">
               <!-- Auth State -->
               <div v-if="!isAuthenticated" class="text-center mb-6">
+                <div v-if="quiz.is_public">
+                  <!-- Guest Info Collection Form -->
+                  <form v-if="quiz.require_guest_info" @submit.prevent="startGuestQuiz" class="w-full max-w-md space-y-4">
+                    <!-- Name Field (if required) -->
+                    <div v-if="quiz.guest_info_required === 'name' || quiz.guest_info_required === 'both'">
+                      <InputLabel for="guest_name" value="Your Name" class="block text-sm font-medium text-gray-700 mb-1" />
+                      <input
+                        id="guest_name"
+                        v-model="guestForm.name"
+                        type="text"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter your name"
+                      />
+                      <InputError v-if="guestForm.errors.name" :message="guestForm.errors.name" class="mt-1" />
+                    </div>
+
+                    <!-- Email Field (if required) -->
+                    <div v-if="quiz.guest_info_required === 'email' || quiz.guest_info_required === 'both'">
+                      <InputLabel for="guest_email" value="Your Email" class="block text-sm font-medium text-gray-700 mb-1" />
+                      <input
+                        id="guest_email"
+                        v-model="guestForm.email"
+                        type="email"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter your email"
+                      />
+                      <InputError v-if="guestForm.errors.email" :message="guestForm.errors.email" class="mt-1" />
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button
+                      type="submit"
+                      :disabled="guestForm.processing"
+                      class="inline-flex items-center px-5 py-2.5 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition ease-in-out duration-150"
+                    >
+                      <span v-if="guestForm.processing">Starting...</span>
+                      <span v-else>Start</span>
+                    </button>
+                  </form>
+                  </div>
+                <div v-else>
                 <p class="text-gray-700 mb-4">You need to sign in to access this quiz.</p>
                 <Link
                   :href="route('login')"
@@ -80,6 +123,7 @@
                 >
                   Sign In
                 </Link>
+                </div>
               </div>
 
               <!-- Assignment Warning -->
@@ -160,7 +204,10 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
-import { computed } from 'vue';
+import { computed,ref, reactive } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import InputLabel from '@/Components/InputLabel.vue';
+import InputError from '@/Components/InputError.vue';
 import {
   ClockIcon,
   CheckCircleIcon,
@@ -191,6 +238,60 @@ const startQuiz = () => {
     }
   });
 };
+
+const guestForm = useForm({
+  name: '',
+  email: ''
+});
+
+const startGuestQuiz = () => {
+  // If guest info is required, validate and submit the form
+  if (props.quiz.require_guest_info) {
+    // Validate based on requirements
+    const validationRules = {};
+    
+    if (props.quiz.guest_info_required === 'name' || props.quiz.guest_info_required === 'both') {
+      validationRules.name = 'required|string|max:255';
+    }
+    
+    if (props.quiz.guest_info_required === 'email' || props.quiz.guest_info_required === 'both') {
+      validationRules.email = 'required|email|max:255';
+    }
+
+    guestForm.clearErrors();
+    
+    // Simple frontend validation
+    if (props.quiz.guest_info_required === 'name' || props.quiz.guest_info_required === 'both') {
+      if (!guestForm.name.trim()) {
+        guestForm.setError('name', 'Name is required');
+        return;
+      }
+    }
+    
+    if (props.quiz.guest_info_required === 'email' || props.quiz.guest_info_required === 'both') {
+      if (!guestForm.email.trim()) {
+        guestForm.setError('email', 'Email is required');
+        return;
+      }
+      // Simple email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(guestForm.email)) {
+        guestForm.setError('email', 'Please enter a valid email address');
+        return;
+      }
+    }
+
+    // Submit with guest info
+    router.post(route('quiz.start.guest', { quiz: props.quiz.id }), {
+      guest_name: guestForm.name,
+      guest_email: guestForm.email
+    });
+  } else {
+    // Start without guest info
+    router.post(route('quiz.start.guest', { quiz: props.quiz.id }));
+  }
+};
+
 
 const hasQuestionPools = computed(() => {
   return props.quiz.question_pools && props.quiz.question_pools.length > 0;

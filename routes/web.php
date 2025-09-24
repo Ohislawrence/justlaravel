@@ -59,9 +59,19 @@ Route::prefix('help')->group(function () {
     Route::get('/{categorySlug}/{articleSlug}', [HelpCenterController::class, 'showArticle'])->name('help.article');
 });
 
-//sample quiz link
+//quiz link
 Route::get('/quizzes/{quiz}/{token?}', [ExamineeQuizController::class, 'show'])
     ->name('quiz.show');
+
+//guest
+Route::post('/public/quiz/{quiz}/start/guest', [QuizAttemptController::class, 'start'])->name('quiz.start.guest');
+Route::get('/public/quiz/{quiz}/show/guest', [QuizAttemptController::class, 'showAttempt'])->name('quiz.show.guest');
+Route::post('/public/quiz/{quiz}/start', [QuizAttemptController::class, 'submit'])->name('quiz.submit.guest');
+Route::get('/public/{quiz}/{attemptId}/result/feedback', [QuizAttemptController::class, 'result'])->name('quiz.show.feedback');
+
+Route::get('/public/quiz/{quiz}/attempt/{attempt}', [QuizAttemptController::class, 'showPublicAttempt'])
+    ->name('quiz.attempt'); 
+
 
 //members Login
 Route::get('{organizationSlug?}/member/{groupSlug?}/register', [ExamineeAuthController::class, 'register'])

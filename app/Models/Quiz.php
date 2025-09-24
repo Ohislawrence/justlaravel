@@ -37,7 +37,9 @@ class Quiz extends Model
         'certificate_expiry_days',
         'created_by',
         'last_updated_by',
-        'grading_system_id'
+        'grading_system_id',
+        'require_guest_info',
+        'guest_info_required'
         
     ];
     protected $casts = [

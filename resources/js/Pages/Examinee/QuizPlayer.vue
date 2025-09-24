@@ -22,7 +22,7 @@
           :disabled="submitting"
         >
           <span v-if="submitting">Submitting...</span>
-          <span v-else>Submit Quiz</span>
+          <span v-else>Submit</span>
         </button>
       </div>
     </div>
@@ -180,7 +180,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <span v-if="submitting">Submitting...</span>
-          <span v-else>Submit Quiz</span>
+          <span v-else>Submit</span>
         </button>
       </div>
     </div>
@@ -219,7 +219,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-center text-gray-900">Submit Quiz</h3>
+        <h3 class="text-lg font-bold text-center text-gray-900">Submit</h3>
         <div class="mt-4 text-center">
           <p class="text-sm text-gray-600 mb-5">
             Are you sure you want to submit your quiz? This action cannot be undone.
@@ -258,7 +258,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {{ submitting ? 'Submitting...' : 'Yes, Submit Quiz' }}
+          {{ submitting ? 'Submitting...' : 'Yes, Submit' }}
         </button>
       </div>
     </div>
@@ -548,12 +548,17 @@ async function saveProgress() {
   const timeSpent = Math.floor((now - questionStartTime.value) / 1000);
   const timeSinceLastSave = Math.floor((now - lastSaveTime.value) / 1000);
   
-  // Only save if at least 2 seconds have passed since last save
   if (timeSinceLastSave < 2) return;
   
   isSaving.value = true;
   
   try {
+    // Get CSRF token properly
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!csrfToken) {
+      throw new Error('CSRF token not found');
+    }
+
     const response = await fetch(route('api.quiz.save-progress', { 
       quiz: props.quiz.id,
       attempt: props.attempt.id 
@@ -561,8 +566,9 @@ async function saveProgress() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        'X-Requested-With': 'XMLHttpRequest'
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         question_id: currentQuestionId.value,
@@ -570,11 +576,15 @@ async function saveProgress() {
         time_spent: timeSpent,
         total_time_spent: totalTimeSpent.value + timeSpent
       }),
-      credentials: 'include'
+      credentials: 'include' // Important for sending cookies
     });
     
     if (!response.ok) {
-      throw new Error('Save failed');
+      // Check if it's specifically a 401 error
+      if (response.status === 401) {
+        throw new Error('Authentication failed. Please refresh the page.');
+      }
+      throw new Error(`Save failed: ${response.status}`);
     }
     
     const data = await response.json();
@@ -582,12 +592,12 @@ async function saveProgress() {
       throw new Error('Save failed');
     }
     
-    // Update timers after successful save
     questionStartTime.value = now;
     lastSaveTime.value = now;
     totalTimeSpent.value += timeSpent;
   } catch (error) {
     console.error('Failed to save progress:', error);
+    // Don't show error to user for auto-save functionality
   } finally {
     isSaving.value = false;
   }
@@ -881,7 +891,21 @@ const submitQuiz = async () => {
     //console.debug('Submission payload:', submissionData);
     
     // Submit with proper error handling
-    const response = await router.post(
+    if(props.quiz.is_public){
+      const response = await router.post(
+      route('quiz.submit.guest', { quiz: props.quiz.id }), 
+      submissionData, 
+      {
+        onError: (errors) => {
+          if (errors.message) {
+            throw new Error(errors.message);
+          }
+          throw new Error('Submission failed. Please try again.');
+        }
+      }
+    );
+    }else{
+      const response = await router.post(
       route('examinee.submit', { quiz: props.quiz.id }), 
       submissionData, 
       {
@@ -893,13 +917,15 @@ const submitQuiz = async () => {
         }
       }
     );
+    }
+    
 
     return response;
 
   } catch (error) {
     console.error('Submission error:', error);
     showSubmissionError.value = true;
-    submissionError.value = error.message || 'Failed to submit quiz. Please try again.';
+    submissionError.value = error.message || 'Failed to submit. Please try again.';
     submitting.value = false;
     throw error;
   }

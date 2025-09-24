@@ -28,7 +28,7 @@
             :trend-value="stats.quizzes_growth"
           />
           <SummaryCard
-            title="Active(live) Attempts"
+            title="Active Attempts"
             :value="stats.active_attempts"
             icon="users"
             trend="down"
