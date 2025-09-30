@@ -263,6 +263,7 @@
       </div>
     </div>
   </div>
+<div v-if="!props.quiz.is_public">
   <Proctoring
       ref="proctoringRef"
       :quiz-attempt-id="attempt.id"
@@ -273,7 +274,7 @@
       @proctoring-data-update="handleProctoringDataUpdate"
       @cheating-prevented="handleCheatingPrevented"
     />
-  
+</div>  
 </template>
 
 <script setup>

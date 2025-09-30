@@ -19,6 +19,8 @@ class QuizAnalysisController extends Controller
     {
         $service = new QuizAnalysisService($quiz);
         $analysis = $service->getGeneralAnalysis();
+
+        //dd($analysis['question_stats']);
         return Inertia::render('Examiner/QuizAnalysis/Index', [
             'quiz' => $quiz->load('groups', 'questionPools'),
             'questionpools' => (object)$quiz->questionPools,

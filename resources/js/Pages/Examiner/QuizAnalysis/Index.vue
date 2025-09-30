@@ -28,6 +28,8 @@
           <SurveySummary 
             :quiz="quiz" 
             :analysis="analysis"
+            :questionStats="questionStats"
+            :attempts="attempts"
             class="mb-6"
           />
 

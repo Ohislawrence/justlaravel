@@ -196,7 +196,8 @@ class QuizAnalysisService
                 'difficulty' => $this->calculateDifficulty(
                     $responses->where('is_correct', true)->count(),
                     $responses->count()
-                )
+                ),
+                'options_stats' => $this->getOptionsStats($question, $responses)
             ];
         });
     }
@@ -234,26 +235,85 @@ class QuizAnalysisService
     protected function getQuestionResponses(int $questionId, Collection $attempts): Collection
     {
         return $attempts->flatMap(function ($attempt) use ($questionId) {
-            // Get responses from the attempt's grading data
-            $gradingData = collect($attempt->grading_data['questions'] ?? []);
+            // Try multiple data sources in order of reliability
+            $responses = collect();
             
-            // Find responses for this specific question
-            return $gradingData->filter(function ($questionData) use ($questionId) {
-                return ($questionData['id'] ?? null) == $questionId;
-            })->map(function ($questionData) use ($attempt) {
-                return [
-                    'attempt_id' => $attempt->id,
-                    'user_id' => $attempt->user_id,
-                    'user' => $attempt->user,
-                    'answer' => $questionData['user_answer'] ?? null,
-                    'is_correct' => $questionData['is_correct'] ?? false,
-                    'points_earned' => $questionData['points_earned'] ?? 0,
-                    'time_spent' => $questionData['time_spent'] ?? 0,
-                    'feedback' => $questionData['feedback'] ?? null,
-                    'completed_at' => $attempt->completed_at
-                ];
-            });
-        });
+            // 1. First try: Check if we have individual QuestionResponse records
+            if (method_exists($attempt, 'responses') && $attempt->responses) {
+                $questionResponses = $attempt->responses->where('question_id', $questionId);
+                if ($questionResponses->isNotEmpty()) {
+                    return $questionResponses->map(function ($response) use ($attempt) {
+                        return [
+                            'attempt_id' => $attempt->id,
+                            'user_id' => $attempt->user_id,
+                            'user' => $attempt->user,
+                            'answer' => $response->answer,
+                            'is_correct' => $response->is_correct,
+                            'points_earned' => $response->points_earned,
+                            'time_spent' => $response->time_spent,
+                            'feedback' => $response->feedback,
+                            'grading_data' => $response->grading_data,
+                            'completed_at' => $attempt->completed_at,
+                            'source' => 'question_responses_table'
+                        ];
+                    });
+                }
+            }
+            
+            // 2. Second try: Check grading_data
+            $gradingData = collect($attempt->grading_data['questions'] ?? []);
+            if ($gradingData->isNotEmpty()) {
+                $gradingResponses = $gradingData->filter(function ($questionData) use ($questionId) {
+                    return isset($questionData['id']) && $questionData['id'] == $questionId;
+                })->map(function ($questionData) use ($attempt) {
+                    return [
+                        'attempt_id' => $attempt->id,
+                        'user_id' => $attempt->user_id,
+                        'user' => $attempt->user,
+                        'answer' => $questionData['user_answer'] ?? null,
+                        'is_correct' => $questionData['is_correct'] ?? false,
+                        'points_earned' => $questionData['points_earned'] ?? 0,
+                        'time_spent' => $questionData['time_spent'] ?? 0,
+                        'feedback' => $questionData['feedback'] ?? null,
+                        'grading_data' => $questionData,
+                        'completed_at' => $attempt->completed_at,
+                        'source' => 'grading_data'
+                    ];
+                });
+                
+                if ($gradingResponses->isNotEmpty()) {
+                    return $gradingResponses;
+                }
+            }
+            
+            // 3. Third try: Check answers JSON (if questions are stored in attempt)
+            $answersData = collect($attempt->answers ?? []);
+            if ($answersData->isNotEmpty()) {
+                $answerResponse = $answersData->filter(function ($answer, $key) use ($questionId) {
+                    return $key == $questionId || (isset($answer['question_id']) && $answer['question_id'] == $questionId);
+                })->map(function ($answerData, $key) use ($attempt) {
+                    return [
+                        'attempt_id' => $attempt->id,
+                        'user_id' => $attempt->user_id,
+                        'user' => $attempt->user,
+                        'answer' => is_array($answerData) ? ($answerData['answer'] ?? $answerData) : $answerData,
+                        'is_correct' => $answerData['is_correct'] ?? false,
+                        'points_earned' => $answerData['points_earned'] ?? 0,
+                        'time_spent' => $answerData['time_spent'] ?? 0,
+                        'feedback' => $answerData['feedback'] ?? null,
+                        'completed_at' => $attempt->completed_at,
+                        'source' => 'answers_json'
+                    ];
+                });
+                
+                if ($answerResponse->isNotEmpty()) {
+                    return $answerResponse;
+                }
+            }
+            
+            // Return empty collection if no responses found
+            return collect();
+        })->filter(); // Remove any null/empty values
     }
 
     protected function getTimeStatistics($attempts)
@@ -289,26 +349,78 @@ class QuizAnalysisService
         
         $stats = [];
         $options = $question['options'] ?? [];
+        $totalResponses = $responses->count();
+        
+        // Handle True/False questions specifically
+        if ($question['type'] === 'true_false' && empty($options)) {
+            $options = [
+                ['text' => 'True', 'value' => 'true'],
+                ['text' => 'False', 'value' => 'false']
+            ];
+        }
         
         foreach ($options as $index => $option) {
             $text = is_array($option) ? ($option['text'] ?? $option['value'] ?? $index) : $option;
-            $isCorrect = in_array($index, (array)($question['correct_answers'] ?? []));
+            $value = is_array($option) ? ($option['value'] ?? $index) : $index;
             
-            $count = $responses->filter(function ($response) use ($index, $question) {
-                if ($question['type'] === 'matching') {
-                    return in_array($index, (array)$response['answer']);
+            // Determine if this option is correct
+            $isCorrect = $this->isCorrectOption($question, $value, $index);
+            
+            // Count responses for this option
+            $count = $responses->filter(function ($response) use ($value, $question, $index) {
+                $answer = $response['answer'];
+                
+                // Handle different answer formats
+                if ($question['type'] === 'true_false') {
+                    // Convert both to boolean for comparison
+                    $answerBool = filter_var($answer, FILTER_VALIDATE_BOOLEAN);
+                    $valueBool = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                    return $answerBool === $valueBool;
                 }
-                return $response['answer'] == $index;
+                
+                if ($question['type'] === 'matching') {
+                    return in_array($value, (array)$answer);
+                }
+                
+                return $answer == $value || $answer == $index;
             })->count();
+            
+            $percentage = $totalResponses > 0 ? round(($count / $totalResponses) * 100, 1) : 0;
             
             $stats[] = [
                 'option' => $text,
+                'value' => $value,
                 'count' => $count,
+                'percentage' => $percentage,
                 'is_correct' => $isCorrect
             ];
         }
         
         return $stats;
+    }
+
+    protected function isCorrectOption($question, $optionValue, $optionIndex)
+    {
+        $correctAnswers = (array)($question['correct_answers'] ?? []);
+        
+        if (empty($correctAnswers)) {
+            return false;
+        }
+        
+        // Handle True/False specifically
+        if ($question['type'] === 'true_false') {
+            $optionBool = filter_var($optionValue, FILTER_VALIDATE_BOOLEAN);
+            foreach ($correctAnswers as $correctAnswer) {
+                $correctBool = filter_var($correctAnswer, FILTER_VALIDATE_BOOLEAN);
+                if ($correctBool === $optionBool) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // For other question types
+        return in_array($optionValue, $correctAnswers) || in_array($optionIndex, $correctAnswers);
     }
 
     protected function calculateDifficulty($correct, $total)
