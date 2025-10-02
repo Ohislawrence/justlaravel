@@ -39,7 +39,9 @@ class Quiz extends Model
         'last_updated_by',
         'grading_system_id',
         'require_guest_info',
-        'guest_info_required'
+        'guest_info_required',
+        'is_proctored',
+        'redirect_on_complete_url'
         
     ];
     protected $casts = [

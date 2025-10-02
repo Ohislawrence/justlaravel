@@ -166,7 +166,7 @@ class QuizAttemptController extends Controller
         $remainingTime = max(0, $totalTimeLimit - $elapsedTime);
 
         return Inertia::render('Examinee/QuizPlayer', [
-            'quiz' => $quiz->only('id', 'title', 'time_limit','quiz_type','is_public'),
+            'quiz' => $quiz->only('id', 'title', 'time_limit','quiz_type','is_public','is_proctored'),
             'attempt' => $attempt,
             'attemptID' => $attempt->id,
             'questions' => $questions,

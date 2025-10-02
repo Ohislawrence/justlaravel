@@ -3,11 +3,13 @@
       <title>{{ quiz.title }}</title>
   </Head>
   <!-- Timer and Header -->
+  <!-- Timer and Header -->
   <div class="bg-white text-gray-800 py-3 px-4 shadow-sm rounded-b-lg border-b border-gray-200 sticky top-0 z-10">
     <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
       <h1 class="text-xl font-bold text-gray-900 truncate w-full sm:w-auto">{{ quiz.title }}</h1>
       <div class="flex items-center justify-between w-full sm:w-auto gap-3">
-        <div v-if="timeLimit" class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+        <!-- Quiz Timer -->
+        <div v-if="timeLimit && !currentQuestionTimeLimit" class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
           <ClockIcon class="h-4 w-4 mr-1 text-gray-600" />
           <span :class="{ 'text-red-600 font-medium': timeRemaining <= 300, 'animate-pulse': timeRemaining <= 60 }">
             {{ formattedTimeRemaining }}
@@ -16,6 +18,19 @@
             </span>
           </span>
         </div>
+        
+        <!-- Question Timer (overrides quiz timer) -->
+        <div v-if="currentQuestionTimeLimit" class="flex items-center bg-amber-100 px-3 py-1.5 rounded-full text-sm">
+          <ClockIcon class="h-4 w-4 mr-1 text-amber-600" />
+          <span :class="{ 
+            'text-red-600 font-medium': questionTimeRemaining <= 30, 
+            'text-amber-600': questionTimeRemaining > 30,
+            'animate-pulse': questionTimeRemaining <= 10 
+          }">
+            Q: {{ formattedQuestionTimeRemaining }}
+          </span>
+        </div>
+        
         <button
           @click="confirmSubmit"
           class="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 focus:ring-offset-2 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors shadow-sm focus:outline-none focus:ring-2"
@@ -63,7 +78,7 @@
               {{ currentQuestion?.points || 0 }} pt{{ (currentQuestion?.points || 0) !== 1 ? 's' : '' }}
             </span>
             <span v-if="currentQuestion?.time_limit" class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-medium">
-              {{ currentQuestion.time_limit }} min limit
+              {{ currentQuestion.time_limit }} sec limit
             </span>
             <span v-if="currentQuestion?.is_required" class="bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full font-medium text-xs">
               Required
@@ -263,22 +278,22 @@
       </div>
     </div>
   </div>
-<div v-if="!props.quiz.is_public">
-  <Proctoring
-      ref="proctoringRef"
-      :quiz-attempt-id="attempt.id"
-      :is-active="true"
-      :prevent-cheating="true"
-      @violation-detected="handleViolationDetected"
-      @fingerprint-generated="handleFingerprintGenerated"
-      @proctoring-data-update="handleProctoringDataUpdate"
-      @cheating-prevented="handleCheatingPrevented"
-    />
-</div>  
+  <div v-if="props.quiz.is_proctored">
+    <Proctoring
+        ref="proctoringRef"
+        :quiz-attempt-id="attempt.id"
+        :is-active="true"
+        :prevent-cheating="true"
+        @violation-detected="handleViolationDetected"
+        @fingerprint-generated="handleFingerprintGenerated"
+        @proctoring-data-update="handleProctoringDataUpdate"
+        @cheating-prevented="handleCheatingPrevented"
+      />
+  </div>  
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { router, Head } from '@inertiajs/vue3';
 import { ClockIcon } from '@heroicons/vue/24/outline';
 import MCQQuestion from '@/Components/Questions/MCQ.vue';
@@ -319,8 +334,79 @@ const props = defineProps({
   }
 });
 
+// Reactive state - define these FIRST
+const currentQuestionIndex = ref(0);
+const answers = ref([]);
+const showSubmitModal = ref(false);
+const showImageModal = ref(false);
+const submitting = ref(false);
+const timeRemaining = ref(props.remainingTime ? props.remainingTime : (props.timeLimit ? props.timeLimit * 60 : 0));
+const timer = ref(null);
 
+// Computed properties - define these AFTER reactive state
+const currentQuestion = computed(() => {
+  if (!props.questions || !props.questions.length || currentQuestionIndex.value >= props.questions.length) {
+    return null;
+  }
+  return props.questions[currentQuestionIndex.value];
+});
 
+const progressPercentage = computed(() => {
+  if (!props.questions || props.questions.length === 0) return 0;
+  return Math.round(((currentQuestionIndex.value + 1) / props.questions.length) * 100);
+});
+
+const formattedTimeRemaining = computed(() => {
+  const minutes = Math.floor(timeRemaining.value / 60);
+  const seconds = timeRemaining.value % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+const unansweredQuestions = computed(() =>
+  answers.value.filter(answer => answer === null || answer === undefined || answer === '').length
+);
+
+// Add question timer specific refs
+const questionTimeRemaining = ref(null);
+const questionTimer = ref(null);
+const questionTimeLimit = ref(null);
+
+// Computed property to get current question's time limit
+const currentQuestionTimeLimit = computed(() => {
+  if (!currentQuestion.value) return null;
+  
+  // If question has time_limit, use it (override quiz time limit)
+  if (currentQuestion.value.time_limit && currentQuestion.value.time_limit > 0) {
+    return currentQuestion.value.time_limit ; // in seconds
+  }
+  
+  // Otherwise use quiz time limit if available
+  if (props.timeLimit && props.timeLimit > 0) {
+    return props.timeLimit * 60; // Convert to seconds
+  }
+  
+  return null; // No time limit
+});
+
+// Computed property for formatted question time remaining
+const formattedQuestionTimeRemaining = computed(() => {
+  if (questionTimeRemaining.value === null) return '';
+  
+  const minutes = Math.floor(questionTimeRemaining.value / 60);
+  const seconds = questionTimeRemaining.value % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+// Watch for question changes to start/stop question timers - MOVE THIS AFTER computed properties
+watch(currentQuestion, (newQuestion, oldQuestion) => {
+  // Stop previous question timer
+  stopQuestionTimer();
+  
+  // Start new question timer if time limit exists
+  if (currentQuestionTimeLimit.value) {
+    startQuestionTimer();
+  }
+});
 
 const proctoringRef = ref(null)
 const proctoringData = ref({
@@ -336,7 +422,6 @@ const questionTimers = ref({});
 const totalTimeSpent = ref(0);
 const questionTimeSpent = ref({});
 
-
 // Add these for error handling
 const showSubmissionError = ref(false);
 const submissionError = ref('');
@@ -344,7 +429,6 @@ const submissionError = ref('');
 const currentQuestionId = computed(() => {
   return currentQuestion.value?.id;
 });
-
 
 // Question type mapping
 const questionTypeLabel = (type) => {
@@ -372,40 +456,8 @@ const questionComponents = {
   essay: Essay
 };
 
-// Reactive state
-const currentQuestionIndex = ref(0);
-const answers = ref([]);
-const showSubmitModal = ref(false);
-const showImageModal = ref(false);
-const submitting = ref(false);
-const timeRemaining = ref(props.remainingTime ? props.remainingTime : (props.timeLimit ? props.timeLimit * 60 : 0));
-const timer = ref(null);
-
 const lastSaveTime = ref(Date.now());
 const isSaving = ref(false);
-
-// Computed properties
-const currentQuestion = computed(() => {
-  if (!props.questions || !props.questions.length || currentQuestionIndex.value >= props.questions.length) {
-    return null;
-  }
-  return props.questions[currentQuestionIndex.value];
-});
-
-const progressPercentage = computed(() => {
-  if (!props.questions || props.questions.length === 0) return 0;
-  return Math.round(((currentQuestionIndex.value + 1) / props.questions.length) * 100);
-});
-
-const formattedTimeRemaining = computed(() => {
-  const minutes = Math.floor(timeRemaining.value / 60);
-  const seconds = timeRemaining.value % 60;
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-});
-
-const unansweredQuestions = computed(() =>
-  answers.value.filter(answer => answer === null || answer === undefined || answer === '').length
-);
 
 const getQuestionComponent = (type) => {
   if (!type) {
@@ -502,12 +554,72 @@ onMounted(() => {
   // Start tracking time for the first question
   startQuestionTimer();
   
+  // Start question time limit timer if applicable
+  if (currentQuestionTimeLimit.value) {
+    startQuestionTimeLimitTimer();
+  }
+  
   // If we have remaining time, update totalTimeSpent
   if (props.remainingTime !== null && props.timeLimit) {
     const elapsedTime = (props.timeLimit * 60) - props.remainingTime;
     totalTimeSpent.value = Math.max(0, elapsedTime);
   }
 });
+
+function startQuestionTimeLimitTimer() {
+  if (!currentQuestionTimeLimit.value) return;
+  
+  // Initialize question time remaining
+  questionTimeRemaining.value = currentQuestionTimeLimit.value;
+  questionTimeLimit.value = currentQuestionTimeLimit.value;
+  
+  // Start the countdown timer
+  questionTimer.value = setInterval(() => {
+    if (questionTimeRemaining.value > 0) {
+      questionTimeRemaining.value--;
+      
+      // Auto-advance when time runs out
+      if (questionTimeRemaining.value <= 0) {
+        handleQuestionTimeUp();
+      }
+    }
+  }, 1000);
+}
+
+// Function to handle when question time runs out
+function handleQuestionTimeUp() {
+  stopQuestionTimeLimitTimer();
+  
+  // Auto-save current answer if any
+  if (answers.value[currentQuestionIndex.value] !== null && 
+      answers.value[currentQuestionIndex.value] !== undefined && 
+      answers.value[currentQuestionIndex.value] !== '') {
+    saveProgressImmediate();
+  }
+  
+  // Show notification
+  if (currentQuestionIndex.value < props.questions.length - 1) {
+    // Move to next question if available
+    setTimeout(() => {
+      nextQuestion();
+    }, 1000);
+  } else {
+    // If last question, submit quiz
+    setTimeout(() => {
+      confirmSubmit();
+    }, 1000);
+  }
+}
+
+// Modified stopQuestionTimer function
+function stopQuestionTimeLimitTimer() {
+  if (questionTimer.value) {
+    clearInterval(questionTimer.value);
+    questionTimer.value = null;
+  }
+  questionTimeRemaining.value = null;
+  questionTimeLimit.value = null;
+}
 
 function startQuestionTimer() {
   if (currentQuestionId.value) {
@@ -606,7 +718,6 @@ async function saveProgress() {
 
 const periodicSaver = ref(null);
 
-
 // Cleanup
 onUnmounted(() => {
   // Stop all question timers
@@ -653,9 +764,14 @@ function nextQuestion() {
     totalTimeSpent.value += timeSpent;
   }
   
+  stopQuestionTimeLimitTimer();
+  
   if (currentQuestionIndex.value < props.questions.length - 1) {
     currentQuestionIndex.value++;
     startQuestionTimer();
+    if (currentQuestionTimeLimit.value) {
+      startQuestionTimeLimitTimer();
+    }
   }
 }
 
@@ -712,9 +828,14 @@ function prevQuestion() {
     totalTimeSpent.value += timeSpent;
   }
   
+  stopQuestionTimeLimitTimer();
+  
   if (currentQuestionIndex.value > 0) {
     currentQuestionIndex.value--;
     startQuestionTimer();
+    if (currentQuestionTimeLimit.value) {
+      startQuestionTimeLimitTimer();
+    }
   }
 }
 
@@ -724,9 +845,14 @@ function goToQuestion(index) {
     totalTimeSpent.value += timeSpent;
   }
   
+  stopQuestionTimeLimitTimer();
+  
   if (index >= 0 && index < props.questions.length) {
     currentQuestionIndex.value = index;
     startQuestionTimer();
+    if (currentQuestionTimeLimit.value) {
+      startQuestionTimeLimitTimer();
+    }
   }
 }
 
@@ -782,7 +908,6 @@ const handleBeforeUnload = (event) => {
 // Add beforeunload listener
 window.addEventListener('beforeunload', handleBeforeUnload);
 
-
 // Submission functions
 function confirmSubmit() {
   showSubmitModal.value = true;
@@ -804,6 +929,8 @@ const submitQuiz = async () => {
       questionTimeSpent.value[currentQuestionId.value] += finalTimeSpent;
     }
   }
+
+  stopQuestionTimeLimitTimer();
 
   // Calculate total time spent including any previous time
   const totalElapsedTime = totalTimeSpent.value;
@@ -937,7 +1064,6 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 </script>
-
 <style scoped>
 .violation-counter {
   position: fixed;

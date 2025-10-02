@@ -35,6 +35,7 @@ const form = useForm({
     industry: props.quiz.industry || '',
     is_published: props.quiz.is_published,
     is_public: props.quiz.is_public,
+    is_proctored: props.quiz.is_proctored,
     randomize_questions: props.quiz.randomize_questions,
     randomize_answers: props.quiz.randomize_answers,
     show_correct_answers: props.quiz.show_correct_answers,
@@ -190,8 +191,8 @@ const selectedGradingSystem = computed(() => {
                                         </div>
 
                                         <div class="flex items-center">
-                                            <Checkbox id="is_public" v-model:checked="form.is_public" />
-                                            <InputLabel for="is_public" value="Make Public" class="ml-2" />
+                                            <Checkbox id="is_proctored" v-model:checked="form.is_proctored" />
+                                            <InputLabel for="is_proctored" value="Use Proctor" class="ml-2" />
                                         </div>
 
                                         <div class="flex items-center">

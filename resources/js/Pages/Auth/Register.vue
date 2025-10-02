@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Checkbox from '@/Components/Checkbox.vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     industries: {
@@ -13,6 +14,9 @@ const props = defineProps({
         required: true,
     },
 });
+
+// Generate a random field name for the honeypot to make it harder for bots to detect
+const honeypotFieldName = ref(`contact_${Math.random().toString(36).substring(2, 9)}`);
 
 const form = useForm({
     name: '',
@@ -23,13 +27,33 @@ const form = useForm({
     terms: false,
     industry: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    // Honeypot field - should remain empty
+    honeypot: '',
 });
 
 const submit = () => {
+    // Check honeypot field - if it has any value, it's likely a bot
+    if (form.honeypot && form.honeypot.trim() !== '') {
+        // You can log this attempt or handle it silently
+        console.log('Bot detected via honeypot');
+        
+        // Reset the form and prevent submission
+        form.reset();
+        return;
+    }
+
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+const handleNameInput = (event) => {
+    // Remove any digits from the input
+    const value = event.target.value.replace(/\d/g, '')
+    form.name = value
+    // Update the input field to reflect the cleaned value
+    event.target.value = value
+}
 </script>
 
 <template>
@@ -64,6 +88,20 @@ const submit = () => {
             <!-- Registration Form -->
             <form class="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100" @submit.prevent="submit">
                 <div class="space-y-5">
+                    <!-- Honeypot Field (Hidden from real users) -->
+                    <div class="hidden">
+                        <InputLabel :for="honeypotFieldName" value="Do not fill this field" />
+                        <TextInput
+                            :id="honeypotFieldName"
+                            v-model="form.honeypot"
+                            type="text"
+                            :name="honeypotFieldName"
+                            class="hidden"
+                            tabindex="-1"
+                            autocomplete="off"
+                        />
+                    </div>
+
                     <!-- Organization Name Input -->
                     <div>
                         <InputLabel for="organization" value="Organization Name" class="block text-sm font-medium text-gray-700 mb-1" />
@@ -89,6 +127,7 @@ const submit = () => {
                             class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
                             required
                             autocomplete="name"
+                            @input="handleNameInput"
                         />
                         <InputError class="mt-2 text-sm text-red-600" :message="form.errors.name" />
                     </div>
@@ -106,6 +145,36 @@ const submit = () => {
                         />
                         <InputError class="mt-2 text-sm text-red-600" :message="form.errors.email" />
                     </div>
+
+                    <!-- Password Input -->
+                    <div>
+                        <InputLabel for="password" value="Password" class="block text-sm font-medium text-gray-700 mb-1" />
+                        <TextInput
+                            id="password"
+                            v-model="form.password"
+                            type="password"
+                            class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                            required
+                            autocomplete="new-password"
+                        />
+                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.password" />
+                    </div>
+
+                    <!-- Password Confirmation Input -->
+                    <div>
+                        <InputLabel for="password_confirmation" value="Confirm Password" class="block text-sm font-medium text-gray-700 mb-1" />
+                        <TextInput
+                            id="password_confirmation"
+                            v-model="form.password_confirmation"
+                            type="password"
+                            class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                            required
+                            autocomplete="new-password"
+                        />
+                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.password_confirmation" />
+                    </div>
+
+                    <!-- Industry Selection -->
                     <div>
                         <InputLabel for="industry" value="Industry" class="block text-sm font-medium text-gray-700 mb-1" />
                         <select
@@ -165,5 +234,8 @@ const submit = () => {
 </template>
 
 <style scoped>
-/* Add any specific styles for the register page content if needed */
+/* Ensure the honeypot field is properly hidden */
+.hidden {
+    display: none !important;
+}
 </style>

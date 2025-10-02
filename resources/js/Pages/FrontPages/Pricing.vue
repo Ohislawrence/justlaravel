@@ -187,7 +187,7 @@ const getPriceSuffix = () => {
                                 'bg-emerald-600 text-white hover:bg-emerald-700': plan.is_default,
                                 'border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50': !plan.is_default
                               }">
-                            Start Free Trial
+                            Start For Free
                         </Link>
                         <a v-else href="mailto:sales@quizportal.online" class="w-full py-3 text-center border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition font-medium text-sm block">
                             Contact Sales

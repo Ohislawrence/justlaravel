@@ -6,13 +6,16 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Checkbox from '@/Components/Checkbox.vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     organization: Object,
     group: Object,
     email: String,
 });
+
+// Generate a random field name for the honeypot to make it harder for bots to detect
+const honeypotFieldName = ref(`contact_${Math.random().toString(36).substring(2, 9)}`);
 
 // Set initial email value based on props
 const initialEmail = props.email || '';
@@ -24,6 +27,8 @@ const form = useForm({
     organization: props.organization.id,
     terms: false,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    // Honeypot field - should remain empty
+    honeypot: '',
 });
 
 // Computed property to determine if email should be readonly
@@ -32,6 +37,16 @@ const isEmailReadonly = computed(() => {
 });
 
 const submit = () => {
+    // Check honeypot field - if it has any value, it's likely a bot
+    if (form.honeypot && form.honeypot.trim() !== '') {
+        // You can log this attempt or handle it silently
+        console.log('Bot detected via honeypot');
+        
+        // Reset the form and prevent submission
+        form.reset();
+        return;
+    }
+
     form.post(route('organization.examinee.create'));
 };
 </script>
@@ -79,6 +94,19 @@ const submit = () => {
             <!-- Registration Form -->
             <form class="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100" @submit.prevent="submit">
                 <div class="space-y-5">
+                    <!-- Honeypot Field (Hidden from real users) -->
+                    <div class="hidden">
+                        <InputLabel :for="honeypotFieldName" value="Do not fill this field" />
+                        <TextInput
+                            :id="honeypotFieldName"
+                            v-model="form.honeypot"
+                            type="text"
+                            :name="honeypotFieldName"
+                            class="hidden"
+                            tabindex="-1"
+                            autocomplete="off"
+                        />
+                    </div>
 
                     <!-- Name Input -->
                     <div>
@@ -154,5 +182,8 @@ const submit = () => {
 </template>
 
 <style scoped>
-/* Add any specific styles for the register page content if needed */
+/* Ensure the honeypot field is properly hidden */
+.hidden {
+    display: none !important;
+}
 </style>

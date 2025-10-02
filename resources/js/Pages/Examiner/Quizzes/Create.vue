@@ -51,6 +51,7 @@ const form = useForm({
     industry: null,
     is_published: false,
     is_public: false,
+    is_proctored: false,
     randomize_questions: false,
     randomize_answers: false,
     show_correct_answers: false,
@@ -308,8 +309,8 @@ watch(() => form.require_guest_info, (requireInfo) => {
                                         </div>
 
                                         <div class="flex items-center">
-                                            <Checkbox id="is_public" v-model:checked="form.is_public" />
-                                            <InputLabel for="is_public" value="Make Public" class="ml-2" />
+                                            <Checkbox id="is_proctored" v-model:checked="form.is_proctored" />
+                                            <InputLabel for="is_proctored" value="Use Proctor" class="ml-2" />
                                         </div>
 
                                         <div class="flex items-center">

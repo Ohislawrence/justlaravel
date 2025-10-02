@@ -1,4 +1,3 @@
-<!-- resources/js/Pages/Auth/Login.vue -->
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
@@ -6,6 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Checkbox from '@/Components/Checkbox.vue';
+import { ref } from 'vue';
 
 defineProps({
     canResetPassword: Boolean,
@@ -16,9 +16,24 @@ const form = useForm({
     email: '',
     password: '',
     remember: false,
+    // Honeypot field - should remain empty
+    honeypot: '',
 });
 
+// Generate a random field name for the honeypot to make it harder for bots to detect
+const honeypotFieldName = ref(`contact_${Math.random().toString(36).substring(2, 9)}`);
+
 const submit = () => {
+    // Check honeypot field - if it has any value, it's likely a bot
+    if (form.honeypot && form.honeypot.trim() !== '') {
+        // You can log this attempt or handle it silently
+        console.log('Bot detected via honeypot');
+        
+        // Reset the form and prevent submission
+        form.reset();
+        return;
+    }
+
     form.transform(data => ({
         ...data,
         remember: form.remember ? 'on' : '',
@@ -73,6 +88,20 @@ const submit = () => {
             <!-- Login Form -->
             <form class="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100" @submit.prevent="submit">
                 <div class="space-y-5">
+                    <!-- Honeypot Field (Hidden from real users) -->
+                    <div class="hidden">
+                        <InputLabel :for="honeypotFieldName" value="Do not fill this field" />
+                        <TextInput
+                            :id="honeypotFieldName"
+                            v-model="form.honeypot"
+                            type="text"
+                            :name="honeypotFieldName"
+                            class="hidden"
+                            tabindex="-1"
+                            autocomplete="off"
+                        />
+                    </div>
+
                     <!-- Email Input -->
                     <div>
                         <InputLabel for="email" value="Email address" class="block text-sm font-medium text-gray-700 mb-1" />
@@ -151,5 +180,8 @@ const submit = () => {
 </template>
 
 <style scoped>
-/* Add any specific styles for the login page content if needed */
+/* Ensure the honeypot field is properly hidden */
+.hidden {
+    display: none !important;
+}
 </style>

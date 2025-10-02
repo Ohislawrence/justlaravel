@@ -17,6 +17,7 @@
         "league/csv": "^9.24",
         "mews/purifier": "^3.4",
         "phpoffice/phpspreadsheet": "^5.0",
+        "spatie/laravel-honeypot": "^4.6",
         "spatie/laravel-permission": "^6.19",
         "stevebauman/location": "^7.6",
         "tightenco/ziggy": "^2.0"

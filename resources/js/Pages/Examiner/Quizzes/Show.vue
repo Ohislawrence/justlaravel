@@ -165,74 +165,7 @@ const availablePoolsList = computed(() => {
                 </div>
             </div>
         </template>
-        <!-- Flash Messages -->
-        <div v-if="flash.success" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                <span class="block sm:inline">{{ flash.success }}</span>
-                <button
-                    type="button" 
-                    @click="flash.success = null"
-                    class="absolute top-0 bottom-0 right-0 px-4 py-3"
-                    aria-label="Close success message"
-                >
-                    <span class="sr-only">Close</span>
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div v-if="flash.error" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                {{ flash.error }}
-                <button
-                    type="button" 
-                    @click="flash.error = null"
-                    class="absolute top-0 bottom-0 right-0 px-4 py-3"
-                    aria-label="Close error message"
-                >
-                    <span class="sr-only">Close</span>
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div v-if="flash.info" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative">
-                {{ flash.info }}
-                <button
-                    type="button" 
-                    @click="flash.info = null"
-                    class="absolute top-0 bottom-0 right-0 px-4 py-3"
-                    aria-label="Close info message"
-                >
-                    <span class="sr-only">Close</span>
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div v-if="flash.warning" class="mb-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
-                {{ flash.warning }}
-                <button
-                    type="button" 
-                    @click="flash.warning = null"
-                    class="absolute top-0 bottom-0 right-0 px-4 py-3"
-                    aria-label="Close warning message"
-                >
-                    <span class="sr-only">Close</span>
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
+        
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -574,6 +507,10 @@ const availablePoolsList = computed(() => {
                                     <div>
                                         <p class="text-sm text-gray-500">Visibility</p>
                                         <p class="font-medium">{{ quiz.is_public ? 'Public' : 'Private' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Proctor</p>
+                                        <p class="font-medium">{{ quiz.is_proctored ? 'Yes' : 'No' }}</p>
                                     </div>
                                 </div>
                             </div>
