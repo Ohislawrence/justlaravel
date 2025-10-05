@@ -17,11 +17,11 @@
     @if(isset($page['props']['meta']))
         <meta name="twitter:card"
               content="{{ 'summary_large_image' }}"/>
-        <meta name="twitter:site" content="@examportalonline"/>
+        <meta name="twitter:site" content="@testoria"/>
         <meta property="og:type" content="website" />
         <meta property="og:logo" content="{{ asset('assets/favicon-examportal.png') }}" />
         <meta property="og:title"
-              content="{{ (isset($page['props']['meta']['title'])) ? $page['props']['meta']['title'] : 'Exam Portal Online' }}"/>
+              content="{{ (isset($page['props']['meta']['title'])) ? $page['props']['meta']['title'] : 'Testoria.NG' }}"/>
         <meta property="og:description"
               content="{{ (isset($page['props']['meta']['description'])) ? $page['props']['meta']['description'] : '' }}"/>
         <meta property="og:image"

@@ -21,9 +21,7 @@ const honeypotFieldName = ref(`contact_${Math.random().toString(36).substring(2,
 const form = useForm({
     name: '',
     email: '',
-    password: '',
     organization: '',
-    password_confirmation: '',
     terms: false,
     industry: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -146,33 +144,7 @@ const handleNameInput = (event) => {
                         <InputError class="mt-2 text-sm text-red-600" :message="form.errors.email" />
                     </div>
 
-                    <!-- Password Input -->
-                    <div>
-                        <InputLabel for="password" value="Password" class="block text-sm font-medium text-gray-700 mb-1" />
-                        <TextInput
-                            id="password"
-                            v-model="form.password"
-                            type="password"
-                            class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                            required
-                            autocomplete="new-password"
-                        />
-                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.password" />
-                    </div>
-
-                    <!-- Password Confirmation Input -->
-                    <div>
-                        <InputLabel for="password_confirmation" value="Confirm Password" class="block text-sm font-medium text-gray-700 mb-1" />
-                        <TextInput
-                            id="password_confirmation"
-                            v-model="form.password_confirmation"
-                            type="password"
-                            class="block w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
-                            required
-                            autocomplete="new-password"
-                        />
-                        <InputError class="mt-2 text-sm text-red-600" :message="form.errors.password_confirmation" />
-                    </div>
+                   
 
                     <!-- Industry Selection -->
                     <div>
