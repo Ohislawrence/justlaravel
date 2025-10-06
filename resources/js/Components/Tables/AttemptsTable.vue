@@ -241,15 +241,15 @@ const props = defineProps({
   attempts: {
     type: Object,
     required: true,
-    validator: (value) => {
-      return Array.isArray(value?.data) && 
-             value.data.every(attempt => {
+   // validator: (value) => {
+     // return Array.isArray(value?.data) && 
+       //      value.data.every(attempt => {
                // Ensure each attempt has at least an ID and a user object
-               return 'id' in attempt && 
-                      'user' in attempt && 
-                      attempt.user !== null;
-             });
-    }
+       //        return 'id' in attempt && 
+        //              'user' in attempt && 
+         //             attempt.user !== null;
+          //   });
+    //}
   },
   quizId: {
     type: [Number, String],
