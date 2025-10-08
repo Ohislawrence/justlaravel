@@ -25,9 +25,9 @@ class Quiz extends Model
         'max_attempts',
         'max_participants',
         'time_limit',
-       'passing_score',
+        'passing_score',
         'starts_at',
-       'ends_at',
+        'ends_at',
         'settings',
         'share_token',
         'survey_thank_you_message',
@@ -42,7 +42,7 @@ class Quiz extends Model
         'guest_info_required',
         'is_proctored',
         'redirect_on_complete_url'
-        
+
     ];
     protected $casts = [
         'settings' => 'array',
@@ -58,6 +58,45 @@ class Quiz extends Model
         'enable_certificates' => 'boolean'
     ];
 
+    protected $attributes = [
+        'settings' => '{
+            "show_scores": false,
+            "review_questions": false,
+            "per_question_timing: false",
+            "default_time_per_question": 60,
+        }'
+    ];
+
+    //setting attr
+    public function showscores()
+    {
+        return $this->settings['show_scores'] ?? false;
+    }
+
+    public function reviewquestions()
+    {
+        return $this->settings['review_questions'] ?? false;
+    }
+
+    public function quiztiming()
+    {
+        return $this->settings['per_question_timing'] ?? false;
+    }
+
+    public function defaultTimePerQuestion()
+    {
+        return $this->settings['default_time_per_question'] ?? 60;
+    }
+
+    // Method to update specific setting
+    public function updateSetting($key, $value)
+    {
+        $settings = $this->settings ?? [];
+        $settings[$key] = $value;
+        $this->settings = $settings;
+        return $this;
+    }
+
     public function certificateTemplate()
     {
         return $this->belongsTo(CertificateTemplate::class);
@@ -67,49 +106,49 @@ class Quiz extends Model
     {
         return $this->belongsTo(Organization::class);
     }
-    
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function questions()
     {
         return $this->hasMany(Question::class);
     }
-    
+
     public function questionPools()
     {
         return $this->belongsToMany(QuestionPool::class, 'quiz_question_pool')
             ->withPivot('questions_to_show')
             ->withTimestamps()->with('questions')
-            ->withCount('questions'); 
+            ->withCount('questions');
     }
 
     public function pools()
     {
         return $this->belongsToMany(QuestionPool::class, 'quiz_question_pool')
-            ->withPivot('questions_to_show'); 
+            ->withPivot('questions_to_show');
     }
 
-    
-    
+
+
     public function attempts()
     {
         return $this->hasMany(QuizAttempt::class);
     }
-    
+
     public function certificates()
     {
         return $this->hasMany(Certificate::class);
     }
-    
+
     public function accessRules()
     {
         return $this->hasMany(QuizAccessRule::class);
     }
-    
-    
+
+
     public function learningPathItems()
     {
         return $this->morphMany(LearningPathItem::class, 'item');
@@ -125,24 +164,24 @@ class Quiz extends Model
         return $this->belongsToMany(User::class, 'quiz_user_assignments');
     }
 
-    
+
 
     public function groups()
     {
         return $this->belongsToMany(Group::class, 'group_quizzes')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     public function getTotalQuestionsAttribute()
     {
         // Count direct questions
         $directQuestions = $this->questions()->count();
-        
+
         // Count questions from pools
-        $poolQuestions = $this->questionPools->sum(function($pool) {
+        $poolQuestions = $this->questionPools->sum(function ($pool) {
             return min($pool->questions_count, $pool->pivot->questions_to_show);
         });
-        
+
         return $directQuestions + $poolQuestions;
     }
 
@@ -155,7 +194,7 @@ class Quiz extends Model
 
     public function scopeInGroup($query, $groupId)
     {
-        return $query->whereHas('quizGroups', function($q) use ($groupId) {
+        return $query->whereHas('quizGroups', function ($q) use ($groupId) {
             $q->where('quiz_group_id', $groupId);
         });
     }
@@ -165,11 +204,11 @@ class Quiz extends Model
         return $this->belongsTo(GradingSystem::class);
     }
 
-    
+
     /**
     public function products()
     {
         return $this->morphMany(ProductItem::class, 'item');
     }
-         */
+     */
 }

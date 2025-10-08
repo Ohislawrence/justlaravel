@@ -1,9 +1,9 @@
 <template>
   <PublicLayout title="Quiz Results">
-    <div class="py-12">
+    <div v-if="attempt" class="py-12">
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- Survey Thank You Page -->
-        <div v-if="quizType === 'survey'" class="bg-white rounded-lg shadow-md p-12 text-center">
+        <div v-if="quizType === 'survey'" class="bg-white rounded-lg shadow-md p-12 text-center mb-4">
           <svg class="mx-auto h-12 w-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
@@ -23,7 +23,7 @@
         
 
         <!-- Exam Completion Message -->
-        <div v-else-if="quizType === 'exam'" class="bg-white rounded-lg shadow-md p-12 text-center">
+        <div v-else-if="quizType === 'exam' && !showScores && !reviewQuestions" class="bg-white rounded-lg shadow-md p-12 text-center mb-4">
           <svg class="mx-auto h-12 w-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
@@ -41,14 +41,13 @@
         </div>
 
         <!-- Exam Completion Message -->
-        <div v-else-if="quizType === 'test'" class="bg-white rounded-lg shadow-md p-12 text-center">
+        <div v-else-if="quizType === 'test'" class="bg-white rounded-lg shadow-md p-12 text-center mb-4">
           <svg class="mx-auto h-12 w-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <h3 class="mt-2 text-lg font-medium text-gray-900">Test Submitted</h3>
           <p class="mt-1 text-sm text-gray-500">Your test has been successfully submitted.</p>
           <p class="mt-4 text-sm text-gray-600">
-            Results will be available after grading is complete.
           </p>
           <button
             @click="closeTab"
@@ -58,59 +57,62 @@
           </button>
         </div>
 
-        <!-- Test Results (default) -->
-        <div v-else-if="showResults || quizType === 'practice'">
-        <div v-if="attempt" class="space-y-10">
-          <!-- Summary Card -->
-          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 bg-white border-b border-gray-200">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                  <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Test Completed</h1>
-                  <p class="text-gray-600 mt-1">{{ quiz?.title }}</p>
+        <!--Scores Summary Card -->
+          <div v-if="showScores && quizType !== 'survey'" class="space-y-10 mb-4">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+              <div class="p-6 bg-white border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Test Completed</h1>
+                    <p class="text-gray-600 mt-1">{{ showScores }} Result summary for {{ quiz?.title }}</p>
+                  </div>
+                  <span
+                    :class="[
+                      'px-3 py-1.5 rounded-full text-sm font-semibold',
+                      percentage >= 50 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                    ]"
+                  >
+                    {{ percentage >= 50 ? 'Passed' : 'Failed' }}
+                  </span>
                 </div>
-                <span
-                  :class="[
-                    'px-3 py-1.5 rounded-full text-sm font-semibold',
-                    percentage >= 50 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                  ]"
-                >
-                  {{ percentage >= 50 ? 'Passed' : 'Failed' }}
-                </span>
-              </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-center">
-                <div class="bg-gray-50 p-3 rounded-lg">
-                  <p class="text-sm text-gray-600">Your Score</p>
-                  <p class="text-xl font-bold text-gray-900">{{ score }}<span class="text-base font-normal text-gray-600">/{{ totalPoints }}</span></p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-center">
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Points</p>
+                    <p class="text-xl font-bold text-gray-900">{{ score }}<span class="text-base font-normal text-gray-600">/{{ totalPoints }}</span></p>
+                  </div>
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Percentage</p>
+                    <p class="text-xl font-bold text-gray-900">{{ percentage }}%</p>
+                  </div>
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Correct</p>
+                    <p class="text-xl font-bold text-gray-900">{{ correctCount }}<span class="text-base font-normal text-gray-600">/{{ questions.length }}</span></p>
+                  </div>
+                  <div v-if="completionTime" class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Time Taken</p>
+                    <p class="text-xl font-bold text-gray-900">{{ formatTime(completionTime) }}</p>
+                  </div>
                 </div>
-                <div class="bg-gray-50 p-3 rounded-lg">
-                  <p class="text-sm text-gray-600">Percentage</p>
-                  <p class="text-xl font-bold text-gray-900">{{ percentage }}%</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-lg">
-                  <p class="text-sm text-gray-600">Correct</p>
-                  <p class="text-xl font-bold text-gray-900">{{ correctCount }}<span class="text-base font-normal text-gray-600">/{{ questions.length }}</span></p>
-                </div>
-                <div v-if="completionTime" class="bg-gray-50 p-3 rounded-lg">
-                  <p class="text-sm text-gray-600">Time Taken</p>
-                  <p class="text-xl font-bold text-gray-900">{{ formatTime(completionTime) }}</p>
-                </div>
-              </div>
 
-              <div class="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  class="bg-emerald-600 h-3 rounded-full transition-all duration-700 ease-out"
-                  :style="{ width: `${percentage}%` }"
-                ></div>
-              </div>
-              <div class="flex justify-between text-xs text-gray-500 mt-2">
-                <span>0%</span>
-                <span>100%</span>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div
+                    class="bg-emerald-600 h-3 rounded-full transition-all duration-700 ease-out"
+                    :style="{ width: `${percentage}%` }"
+                  ></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
               </div>
             </div>
           </div>
+          </div>
 
+        <!-- Test Results (default) -->
+        
+        <div v-if="reviewQuestions && quizType !== 'survey'" class="max-w-4xl mx-auto sm:px-6 lg:px-8">
           <!-- Individual Question Results -->
           <div if="quizType === 'practice'" class="space-y-10">
             <div
@@ -260,26 +262,15 @@
           </div>
 
         <!-- Results Not Found Fallback -->
-        <div v-else class="bg-white rounded-lg shadow-md p-12 text-center">
+        <div v-if="!attempt" class="bg-white rounded-lg shadow-md p-12 text-center">
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <h3 class="mt-2 text-lg font-medium text-gray-900">Results Not Found</h3>
-          <p class="mt-1 text-sm text-gray-500">Unable to load quiz results.</p>
+          <p class="mt-1 text-sm text-gray-500">Unable to load test results.</p>
         </div>
       </div>
     
-          
-
-        <div v-else class="bg-white rounded-lg shadow-md p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h3 class="mt-2 text-lg font-medium text-gray-900">Results Not Found</h3>
-          <p class="mt-1 text-sm text-gray-500">Unable to load quiz results.</p>
-        </div>
-      </div>
-    </div>
   </PublicLayout>
 </template>
 
@@ -321,6 +312,10 @@ const showResults = ref(false);
 
 // Determine quiz type
 const quizType = computed(() => props.quiz.quiz_type || 'exam');
+
+const settings = computed(() => props.quiz.settings || {});
+const showScores = computed(() => settings.value.show_scores);
+const reviewQuestions = computed(() => settings.value.review_questions);
 
 // --- Computed Properties ---
 const score = computed(() => props.attempt?.score || 0);

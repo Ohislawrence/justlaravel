@@ -67,7 +67,7 @@ Route::get('/quizzes/{quiz}/{token?}', [ExamineeQuizController::class, 'show'])
 Route::post('/public/quiz/{quiz}/start/guest', [QuizAttemptController::class, 'start'])->name('quiz.start.guest');
 Route::get('/public/quiz/{quiz}/show/guest', [QuizAttemptController::class, 'showAttempt'])->name('quiz.show.guest');
 Route::post('/public/quiz/{quiz}/start', [QuizAttemptController::class, 'submit'])->name('quiz.submit.guest');
-Route::get('/public/{quiz}/{attemptId}/result/feedback', [QuizAttemptController::class, 'result'])->name('quiz.show.feedback');
+Route::get('/public/{quiz}/{attemptId}/result/feedback', [QuizAttemptController::class, 'resultPublic'])->name('quiz.show.feedback');
 
 Route::get('/public/quiz/{quiz}/attempt/{attempt}', [QuizAttemptController::class, 'showPublicAttempt'])
     ->name('quiz.attempt'); 

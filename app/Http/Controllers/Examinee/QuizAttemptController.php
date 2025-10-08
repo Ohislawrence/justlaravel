@@ -166,7 +166,7 @@ class QuizAttemptController extends Controller
         $remainingTime = max(0, $totalTimeLimit - $elapsedTime);
 
         return Inertia::render('Examinee/QuizPlayer', [
-            'quiz' => $quiz->only('id', 'title', 'time_limit','quiz_type','is_public','is_proctored'),
+            'quiz' => $quiz->only('id', 'title', 'time_limit','quiz_type','is_public','is_proctored','settings'),
             'attempt' => $attempt,
             'attemptID' => $attempt->id,
             'questions' => $questions,
@@ -615,7 +615,44 @@ class QuizAttemptController extends Controller
     
 
         return Inertia::render('Examinee/Result', [
-            'quiz' => $quiz->only('id', 'title', 'passing_score','survey_thank_you_message','show_correct_answers','quiz_type'),
+            'quiz' => $quiz->only('id', 'title', 'passing_score','survey_thank_you_message','show_correct_answers','quiz_type','settings'),
+            'attempt' => $attempt->only([
+                'id', 'score', 'max_score', 'percentage',
+                'is_passed', 'completed_at', 'time_spent'
+            ]),
+            'questions' => $questions,
+            'responses' => $responses,
+        ]);
+    }
+
+    public function resultPublic(Request $request, Quiz $quiz, QuizAttempt $attemptId)
+    {
+        
+        $attempt = $attemptId ;
+
+        // Eager load responses with their questions
+        $attempt->load(['responses.question']);
+        // Load the exact questions that were in this attempt
+        //$questions = collect(json_decode($attempt->questions_data, true));
+
+        // Load all questions that were in this attempt
+        $questions = collect($attempt->questions_data, true);
+
+        // Transform responses with question data
+        $responses = $attempt->responses->map(function($response) {
+            return [
+                'question_id' => $response->question_id,
+                'answer' => $this->formatAnswerForFrontend($response->answer, $response->question->type),
+                'is_correct' => (bool)$response->is_correct,
+                'points_earned' => $response->points_earned,
+                'grading_data' => $response->grading_data ? $response->grading_data : null,
+            ];
+        });
+
+    
+
+        return Inertia::render('Examinee/Result', [
+            'quiz' => $quiz->only('id', 'title', 'passing_score','survey_thank_you_message','show_correct_answers','quiz_type','redirect_on_complete_url','settings'),
             'attempt' => $attempt->only([
                 'id', 'score', 'max_score', 'percentage',
                 'is_passed', 'completed_at', 'time_spent'

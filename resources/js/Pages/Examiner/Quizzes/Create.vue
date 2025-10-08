@@ -72,6 +72,12 @@ const form = useForm({
     certificate_template_id: props.initialData.certificate_template_id,
     certificate_pass_percentage: props.initialData.certificate_pass_percentage,
     certificate_expiry_days: props.initialData.certificate_expiry_days,
+    settings: {
+        show_scores: props.quiz.settings?.show_scores || false,
+        review_questions: props.quiz.settings?.review_questions || false,
+        per_question_timing: props.quiz.settings?.per_question_timing || false,
+        default_time_per_question: props.quiz.settings?.default_time_per_question,
+    }
 });
 
 const selectedGradingSystem = computed(() => {
@@ -325,14 +331,20 @@ watch(() => form.require_guest_info, (requireInfo) => {
                                         </div>
 
                                         <div class="flex items-center">
-                                            <Checkbox id="show_correct_answers" v-model:checked="form.show_correct_answers" />
-                                            <InputLabel for="show_correct_answers" value="Show Correct Answers" class="ml-2" />
+                                            <Checkbox id="show_scores" v-model:checked="form.settings.show_scores" />
+                                            <InputLabel for="show_scores" value="Show scores summary when done" class="ml-2" />
                                         </div>
 
                                         <div class="flex items-center">
-                                            <Checkbox id="show_leaderboard" v-model:checked="form.show_leaderboard" />
-                                            <InputLabel for="show_leaderboard" value="Show Leaderboard" class="ml-2" />
+                                            <Checkbox id="review_questions" v-model:checked="form.settings.review_questions" />
+                                            <InputLabel for="review_questions" value="Show questions & answers when done" class="ml-2" />
                                         </div>
+
+                                        <div class="flex items-center">
+                                            <Checkbox id="per_question_timing" v-model:checked="form.settings.per_question_timing" />
+                                            <InputLabel for="per_question_timing" value="Timed per question" class="ml-2" />
+                                        </div>
+                                        
                                     </div>
                                 </div>
 
@@ -413,7 +425,24 @@ watch(() => form.require_guest_info, (requireInfo) => {
                                             <InputError class="mt-2" :message="form.errors.max_participants" />
                                         </div>
 
-                                        <div>
+                                        <div v-if="form.settings.per_question_timing">
+                                            <InputLabel for="time_per_question" value="Default Time per question (seconds)" />
+                                            <TextInput
+                                                v-model="form.settings.default_time_per_question"
+                                                type="number"
+                                                id="default_time_per_question"
+                                                min="5"
+                                                max="300"
+                                                class="mt-1 block w-full"
+                                                placeholder="60"
+                                            />
+                                            <InputError class="mt-2" :message="form.errors['settings.default_time_per_question']" />
+                                            <p class="text-xs text-gray-500 mt-1">
+                                            Each question will have a countdown timer. If a question does not have it own time, this will be used. Previous button is disabled.
+                                            
+                                            </p>
+                                        </div>
+                                        <div v-else>
                                             <InputLabel for="time_limit" value="Time Limit (minutes)" />
                                             <TextInput
                                                 id="time_limit"
@@ -423,6 +452,9 @@ watch(() => form.require_guest_info, (requireInfo) => {
                                                 class="mt-1 block w-full"
                                             />
                                             <InputError class="mt-2" :message="form.errors.time_limit" />
+                                            <p class="text-xs text-gray-500 mt-1">
+                                            Previous button is enabled.
+                                            </p>
                                         </div>
 
                                         <div>

@@ -149,7 +149,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
       <button
         @click="prevQuestion"
-        :disabled="currentQuestionIndex === 0"
+        :disabled="currentQuestionIndex === 0 || perQuestionTiming"
         class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-800 px-5 py-2 rounded-md font-medium transition-colors flex items-center justify-center"
       >
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,17 +278,19 @@
       </div>
     </div>
   </div>
-  <div v-if="props.quiz.is_proctored">
-    <Proctoring
-        ref="proctoringRef"
-        :quiz-attempt-id="attempt.id"
-        :is-active="true"
-        :prevent-cheating="true"
-        @violation-detected="handleViolationDetected"
-        @fingerprint-generated="handleFingerprintGenerated"
-        @proctoring-data-update="handleProctoringDataUpdate"
-        @cheating-prevented="handleCheatingPrevented"
-      />
+  <div v-if="quiz.quiz_type != 'survey'">
+    <div v-if="props.quiz.is_proctored">
+      <Proctoring
+          ref="proctoringRef"
+          :quiz-attempt-id="attempt.id"
+          :is-active="true"
+          :prevent-cheating="true"
+          @violation-detected="handleViolationDetected"
+          @fingerprint-generated="handleFingerprintGenerated"
+          @proctoring-data-update="handleProctoringDataUpdate"
+          @cheating-prevented="handleCheatingPrevented"
+        />
+    </div>
   </div>  
 </template>
 
@@ -334,6 +336,11 @@ const props = defineProps({
   }
 });
 
+// Settings implementation
+const settings = computed(() => props.quiz.settings || {});
+const perQuestionTiming = computed(() => settings.value.per_question_timing);
+const defaultTimePerQuestion = computed(() => settings.value.default_time_per_question || 60);
+
 // Reactive state - define these FIRST
 const currentQuestionIndex = ref(0);
 const answers = ref([]);
@@ -375,9 +382,13 @@ const questionTimeLimit = ref(null);
 const currentQuestionTimeLimit = computed(() => {
   if (!currentQuestion.value) return null;
   
-  // If question has time_limit, use it (override quiz time limit)
-  if (currentQuestion.value.time_limit && currentQuestion.value.time_limit > 0) {
-    return currentQuestion.value.time_limit ; // in seconds
+  // If per question timing is enabled, use question's time limit or default
+  if (perQuestionTiming.value) {
+    // Use question's time_limit if it exists, otherwise use default time per question
+    if (currentQuestion.value.time_limit && currentQuestion.value.time_limit > 0) {
+      return currentQuestion.value.time_limit; // in seconds
+    }
+    return defaultTimePerQuestion.value; // in seconds
   }
   
   // Otherwise use quiz time limit if available

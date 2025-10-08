@@ -151,11 +151,20 @@ class QuizController extends Controller
             'grading_system_id' => ['nullable', 'integer', 'exists:grading_systems,id'],
             'require_guest_info' => ['nullable','boolean'],
             'guest_info_required' => ['nullable', Rule::in(['none', 'name', 'email', 'both'])],
+            'settings.show_scores' => ['nullable','boolean'],
+            'settings.review_questions' => ['nullable','boolean'],
+            'settings.per_question_timing' => ['nullable','boolean'],
+            'settings.default_time_per_question'=> ['nullable', 'integer', 'min:0'],
         ]);
     
         $organization = auth()->user()->organizations()->first();
 
-        
+        $settings = [
+            'show_scores' => $validated['settings']['show_scores'] ?? false,
+            'review_questions' => $validated['settings']['review_questions'] ?? false,
+            'per_question_timing' => $validated['settings']['per_question_timing'] ?? false,
+            'default_time_per_question' => $validated['settings']['default_time_per_question'] ?? null,
+        ];
     
         $quizData = [
             'user_id' => auth()->id(),
@@ -189,6 +198,7 @@ class QuizController extends Controller
             'created_by' => auth()->id(),
             'require_guest_info' => $validated['require_guest_info'],
             'guest_info_required' => $validated['guest_info_required'],
+            'settings' => $settings,
         ];
     
         $quiz = $organization->quizzes()->create($quizData);
@@ -315,6 +325,12 @@ class QuizController extends Controller
             'certificate_pass_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'certificate_expiry_days' => ['nullable', 'integer', 'min:0'],
             'grading_system_id' => ['nullable', 'integer', 'min:0'],
+            'require_guest_info' => ['nullable','boolean'],
+            'guest_info_required' => ['nullable', Rule::in(['none', 'name', 'email', 'both'])],
+            'settings.show_scores' => ['nullable','boolean'],
+            'settings.review_questions' => ['nullable','boolean'],
+            'settings.per_question_timing' => ['nullable','boolean'],
+            'settings.default_time_per_question'=> ['nullable', 'integer', 'min:0'],
         ]);
 
         // Only update slug if title changed
