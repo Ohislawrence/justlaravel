@@ -318,9 +318,31 @@ const showScores = computed(() => settings.value.show_scores);
 const reviewQuestions = computed(() => settings.value.review_questions);
 
 // --- Computed Properties ---
-const score = computed(() => props.attempt?.score || 0);
-const totalPoints = computed(() => props.questions.reduce((sum, q) => sum + (q.points || 0), 0));
-const percentage = computed(() => totalPoints.value > 0 ? Math.round((score.value / totalPoints.value) * 100) : 0);
+const score = computed(() => {
+  const rawScore = props.attempt?.score;
+  // Handle multiple possible types safely
+  if (rawScore === null || rawScore === undefined) return 0;
+  return Number(rawScore) || 0;
+});
+
+const totalPoints = computed(() => {
+  if (!props.questions || !Array.isArray(props.questions)) return 0;
+  
+  return props.questions.reduce((sum, q) => {
+    const points = q?.points;
+    // Convert to number safely
+    const numericPoints = Number(points) || 0;
+    return sum + numericPoints;
+  }, 0);
+});
+
+const percentage = computed(() => {
+  if (totalPoints.value <= 0) return 0;
+  
+  const calculated = (score.value / totalPoints.value) * 100;
+  // Handle edge cases and ensure integer
+  return Math.round(calculated) || 0;
+});
 const correctCount = computed(() => props.responses.filter(r => r?.is_correct).length);
 const completionTime = computed(() => props.attempt?.time_spent || 0);
 
