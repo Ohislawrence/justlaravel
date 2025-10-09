@@ -35,6 +35,8 @@ const form = useForm({
     industry: props.quiz.industry || '',
     is_published: props.quiz.is_published,
     is_public: props.quiz.is_public,
+    require_guest_info: props.quiz.require_guest_info,
+    guest_info_required: props.quiz.guest_info_required,
     is_proctored: props.quiz.is_proctored,
     randomize_questions: props.quiz.randomize_questions,
     randomize_answers: props.quiz.randomize_answers,
@@ -225,6 +227,49 @@ const selectedGradingSystem = computed(() => {
                                             <Checkbox id="per_question_timing" v-model:checked="form.settings.per_question_timing" />
                                             <InputLabel for="per_question_timing" value="Timed per question" class="ml-2" />
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- Make Quiz Public -->
+                                <div class="mb-4">
+                                    <div class="flex items-center">
+                                    <Checkbox id="is_public" v-model:checked="form.is_public" />
+                                    <InputLabel for="is_public" value="Make this quiz public (allow guests without accounts)" class="ml-2" />
+                                    </div>
+                                    <InputError :message="form.errors.is_public" class="mt-2" />
+                                
+                                <!-- Guest Info Requirements (only show if quiz is public) -->
+                                <div v-if="form.is_public" class="space-y-2 pt-4 mt-1">
+                                    <div class="flex items-center">
+                                    <Checkbox id="require_guest_info" v-model:checked="form.require_guest_info" />
+                                    <InputLabel for="require_guest_info" value="Require guest information" class="ml-2" />
+                                    </div>
+                                    <InputError :message="form.errors.require_guest_info" class="mt-2" />
+
+                                    <!-- Guest Info Options (only show if require_guest_info is true) -->
+                                    <div v-if="form.require_guest_info" class="ml-6 space-y-3">
+                                    <div>
+                                        <InputLabel for="guest_info_required" value="What information should guests provide?" />
+                                        <select 
+                                        id="guest_info_required" 
+                                        v-model="form.guest_info_required"
+                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        >
+                                        <option value="none">No information required</option>
+                                        <option value="name">Name only</option>
+                                        <option value="email">Email only</option>
+                                        <option value="both">Name and Email</option>
+                                        </select>
+                                        <InputError :message="form.errors.guest_info_required" class="mt-2" />
+                                        <!-- Help text -->
+                                        <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mt-3">
+                                        <p class="text-sm text-blue-800">
+                                            <strong>Note:</strong> Guests will be asked to provide this information before starting the quiz.
+                                        </p>
+                                        </div>
+                                    </div>
+                                    </div>
+
                                     </div>
                                 </div>
 

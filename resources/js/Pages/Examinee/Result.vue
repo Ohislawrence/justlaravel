@@ -58,21 +58,21 @@
         </div>
 
         <!--Scores Summary Card -->
-          <div v-if="showScores && quizType !== 'survey'" class="space-y-10 mb-4">
+          <div v-if="showScores" class="space-y-10 mb-4">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
               <div class="p-6 bg-white border-b border-gray-200">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div>
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Test Completed</h1>
-                    <p class="text-gray-600 mt-1">{{ showScores }} Result summary for {{ quiz?.title }}</p>
+                    <p class="text-gray-600 mt-1">Result summary for {{ quiz?.title }}</p>
                   </div>
                   <span
                     :class="[
                       'px-3 py-1.5 rounded-full text-sm font-semibold',
-                      percentage >= 50 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      percentage >= quiz.passing_score ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                     ]"
                   >
-                    {{ percentage >= 50 ? 'Passed' : 'Failed' }}
+                    {{ percentage >= quiz.passing_score ? 'Passed' : 'Failed' }}
                   </span>
                 </div>
 

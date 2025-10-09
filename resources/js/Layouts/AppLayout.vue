@@ -281,7 +281,7 @@ const toggleDropdown = (dropdown) => {
                                 <svg class="w-3.5 h-3.5 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>Exams & Questions</span>
+                                <span>Tests & Questions</span>
                             </div>
                         </div>
                         <hr class="border-t border-gray-100 mx-3 my-1">
@@ -291,13 +291,13 @@ const toggleDropdown = (dropdown) => {
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('examiner.quiz-groups.index')"
                             :active="route().current('examiner.quiz-groups.index')">
-                            <div>Exam Group</div>
+                            <div>Test Group</div>
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('examiner.quizzes.index')"
                             :active="route().current('examiner.quizzes.index')">
-                            <div>Exam</div>
+                            <div>Test</div>
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
@@ -389,7 +389,7 @@ const toggleDropdown = (dropdown) => {
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('examinee.quizzes.index')"
                             :active="route().current('examinee.quizzes.index')">
-                            <div>My Exam</div>
+                            <div>My Test</div>
                         </ResponsiveNavLink>
                     </li>
                     <li class="menu-item">
@@ -417,7 +417,7 @@ const toggleDropdown = (dropdown) => {
                     <li class="menu-item">
                         <ResponsiveNavLink :href="route('instructor.quizzes.index')"
                             :active="route().current('instructor.quizzes.index')">
-                            <div>My Exam</div>
+                            <div>My Test</div>
                         </ResponsiveNavLink>
                     </li>
                     
