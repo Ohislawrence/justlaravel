@@ -14,9 +14,18 @@ use App\Services\ActivityService;
 use App\Services\CertificateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Services\DeviceLocationService;
 
 class QuizAttemptController extends Controller
 {
+    protected $deviceLocationService;
+
+    public function __construct(DeviceLocationService $deviceLocationService)
+    {
+        $this->deviceLocationService = $deviceLocationService;
+    }
+
+
     public function start(Quiz $quiz, Request $request)
     { 
         // Check if user is authenticated
@@ -81,7 +90,7 @@ class QuizAttemptController extends Controller
             'status' => 'in_progress',
             'questions_data' => $questions,
         ];
-
+        $deviceLocationData = $this->deviceLocationService->getDeviceLocationData();
         // Add guest info if applicable
         if (!$isAuthenticated && $quiz->is_public) {
             $attemptData['guest_id'] = uniqid('guest_', true);
@@ -92,7 +101,7 @@ class QuizAttemptController extends Controller
             session()->put('guest_attempt_'.$quiz->id, $attemptData['guest_id']);
         }
 
-        $attempt = QuizAttempt::create($attemptData);
+        $attempt = QuizAttempt::create(array_merge($attemptData, $deviceLocationData));
 
         // Redirect based on user type
         if ($isAuthenticated) {
@@ -720,7 +729,9 @@ class QuizAttemptController extends Controller
             'fingerprint_recorded_at' => 'nullable',
         ]);
     
+
         $attempt = QuizAttempt::findOrFail($validated['attempt_id']);
+        $deviceLocationData = $this->deviceLocationService->getDeviceLocationData();
 
         // Check if already submitted
         if ($attempt->completed_at !== null && $attempt->status == null) {
@@ -843,6 +854,7 @@ class QuizAttemptController extends Controller
             'fingerprint_components' => $validated['fingerprint_components'],
             'violation_count' => $validated['violation_count'],
             'fingerprint_recorded_at' => $validated['fingerprint_recorded_at'],
+            
         ]);
 
         // Generate certificate if enabled and passed

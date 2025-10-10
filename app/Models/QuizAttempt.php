@@ -35,16 +35,47 @@ class QuizAttempt extends Model
         'guest_id',
         'guest_email',
         'guest_name',
+        'ip_address',
+        'user_agent',
+        'device_type',
+        'browser',
+        'platform',
+        'location_data',
+        'country',
+        'city',
+        'region',
     ];
 
     protected $casts = [
         'answers' => 'json',
         'grading_data' => 'json',
-        'questions_data' => 'array', // Add this line
+        'questions_data' => 'array', 
+        'location_data' => 'array',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'fingerprint_components' => 'array',
     ];
+
+    public function getDeviceInfoAttribute()
+    {
+        return [
+            'device_type' => $this->device_type,
+            'browser' => $this->browser,
+            'platform' => $this->platform,
+            'user_agent' => $this->user_agent,
+        ];
+    }
+
+    // Add accessor for location info
+    public function getLocationInfoAttribute()
+    {
+        return [
+            'country' => $this->country,
+            'city' => $this->city,
+            'region' => $this->region,
+            'ip_address' => $this->ip_address,
+        ];
+    }
 
     public function proctoringViolations(): HasMany
     {

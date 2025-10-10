@@ -225,6 +225,7 @@ const props = defineProps({
   isAuthenticated: Boolean,
   isAssigned: Boolean,
   remainingAttempt: Boolean,
+  meta: Object,
 });
 
 const formatDate = (dateString) => {

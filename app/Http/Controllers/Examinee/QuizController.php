@@ -48,6 +48,12 @@ class QuizController extends Controller
             'isAssigned' => $isAssigned,
             'organisation' => $organization->name,
             'remainingAttempt' => $remainingAttempt,
+            'meta' => [
+                'title' => $quiz->title,
+                'description' => $quiz->description,
+                'image' => asset('images/examportalonlineimage.png'),
+                'url' => url()->current()
+            ]
         ]);
     }
 
