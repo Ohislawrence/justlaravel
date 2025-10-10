@@ -50,8 +50,8 @@ class QuizController extends Controller
             'remainingAttempt' => $remainingAttempt,
             'meta' => [
                 'title' => $quiz->title,
-                'description' => $quiz->description,
-                'image' => asset('images/examportalonlineimage.png'),
+                'description' => strip_tags($quiz->description),
+                'image' => asset('assets/favicon-examportal.png'),
                 'url' => url()->current()
             ]
         ]);
