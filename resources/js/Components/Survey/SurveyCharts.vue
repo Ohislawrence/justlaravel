@@ -220,11 +220,20 @@ const totalSurveyTime = computed(() => {
   if (attempts.length === 0) return '0m';
   
   const totalSeconds = attempts.reduce((sum, attempt) => {
-    return sum + (attempt.time_spent || 0);
+    return sum + (Number(attempt.time_spent) || 0);
   }, 0);
   
-  const totalMinutes = Math.round(totalSeconds / 60);
-  return totalMinutes < 60 ? `${totalMinutes}m` : `${Math.round(totalMinutes / 60)}h`;
+  const totalHours = totalSeconds / 3600;
+  
+  if (totalHours < 1) {
+    // Less than 1 hour - show minutes
+    const minutes = Math.round(totalSeconds / 60);
+    return `${minutes}m`;
+  } else {
+    // 1 hour or more - show hours
+    const hours = Math.round(totalHours * 10) / 10; // 1 decimal place
+    return `${hours}h`;
+  }
 });
 
 const completionRate = computed(() => {

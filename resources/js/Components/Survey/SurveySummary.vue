@@ -61,11 +61,16 @@ const averageTime = computed(() => {
   if (attempts.length === 0) return '0m';
   
   const totalSeconds = attempts.reduce((sum, attempt) => {
-    return sum + (attempt.time_spent || 0);
+    return sum + (Number(attempt.time_spent) || 0);
   }, 0);
   
-  const avgMinutes = Math.round(totalSeconds / attempts.length / 60);
-  return `${avgMinutes}m`;
+  const averageSeconds = Math.round(totalSeconds / attempts.length);
+  const minutes = Math.floor(averageSeconds / 60);
+  const seconds = averageSeconds % 60;
+  
+  if (minutes === 0) return `${seconds}s`;
+  if (seconds === 0) return `${minutes}m`;
+  return `${minutes}m ${seconds}s`;
 });
 
 const uniqueRespondents = computed(() => {
