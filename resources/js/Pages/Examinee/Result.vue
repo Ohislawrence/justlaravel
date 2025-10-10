@@ -2,13 +2,64 @@
   <PublicLayout title="Quiz Results">
     <div v-if="attempt" class="py-12">
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <!--Scores Summary Card -->
+          <div v-if="showScores" class="space-y-10 mb-4">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+              <div class="p-6 bg-white border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ attempt.guest_name ? `Well done, ${attempt.guest_name}` : 'Test Completed' }} </h1>
+                    <p class="text-gray-600 mt-1">Result summary for "{{ quiz?.title }}"</p>
+                  </div>
+                  <span
+                    :class="[
+                      'px-3 py-1.5 rounded-full text-sm font-semibold',
+                      percentage >= quiz.passing_score ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                    ]"
+                  >
+                    {{ percentage >= quiz.passing_score ? 'Passed' : 'Failed' }}
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-center">
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Points</p>
+                    <p class="text-xl font-bold text-gray-900">{{ score }}<span class="text-base font-normal text-gray-600">/{{ totalPoints }}</span></p>
+                  </div>
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Percentage</p>
+                    <p class="text-xl font-bold text-gray-900">{{ percentage }}%</p>
+                  </div>
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Correct</p>
+                    <p class="text-xl font-bold text-gray-900">{{ correctCount }}<span class="text-base font-normal text-gray-600">/{{ questions.length }}</span></p>
+                  </div>
+                  <div v-if="completionTime" class="bg-gray-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-600">Time Taken</p>
+                    <p class="text-xl font-bold text-gray-900">{{ formatTime(completionTime) }}</p>
+                  </div>
+                </div>
+
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div
+                    class="bg-emerald-600 h-3 rounded-full transition-all duration-700 ease-out"
+                    :style="{ width: `${percentage}%` }"
+                  ></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         <!-- Survey Thank You Page -->
         <div v-if="quizType === 'survey'" class="bg-white rounded-lg shadow-md p-12 text-center mb-4">
           <svg class="mx-auto h-12 w-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <h3 class="mt-2 text-lg font-medium text-gray-900">Thank You!</h3>
-          <p class="mt-1 text-sm text-gray-500">We appreciate your feedback.</p>
           <p v-if="quiz?.survey_thank_you_message" class="mt-4 text-gray-700">
             {{ quiz.survey_thank_you_message }}
           </p>
@@ -57,59 +108,8 @@
           </button>
         </div>
 
-        <!--Scores Summary Card -->
-          <div v-if="showScores" class="space-y-10 mb-4">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-              <div class="p-6 bg-white border-b border-gray-200">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                  <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Test Completed</h1>
-                    <p class="text-gray-600 mt-1">Result summary for {{ quiz?.title }}</p>
-                  </div>
-                  <span
-                    :class="[
-                      'px-3 py-1.5 rounded-full text-sm font-semibold',
-                      percentage >= quiz.passing_score ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                    ]"
-                  >
-                    {{ percentage >= quiz.passing_score ? 'Passed' : 'Failed' }}
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-center">
-                  <div class="bg-gray-50 p-3 rounded-lg">
-                    <p class="text-sm text-gray-600">Points</p>
-                    <p class="text-xl font-bold text-gray-900">{{ score }}<span class="text-base font-normal text-gray-600">/{{ totalPoints }}</span></p>
-                  </div>
-                  <div class="bg-gray-50 p-3 rounded-lg">
-                    <p class="text-sm text-gray-600">Percentage</p>
-                    <p class="text-xl font-bold text-gray-900">{{ percentage }}%</p>
-                  </div>
-                  <div class="bg-gray-50 p-3 rounded-lg">
-                    <p class="text-sm text-gray-600">Correct</p>
-                    <p class="text-xl font-bold text-gray-900">{{ correctCount }}<span class="text-base font-normal text-gray-600">/{{ questions.length }}</span></p>
-                  </div>
-                  <div v-if="completionTime" class="bg-gray-50 p-3 rounded-lg">
-                    <p class="text-sm text-gray-600">Time Taken</p>
-                    <p class="text-xl font-bold text-gray-900">{{ formatTime(completionTime) }}</p>
-                  </div>
-                </div>
-
-                <div class="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    class="bg-emerald-600 h-3 rounded-full transition-all duration-700 ease-out"
-                    :style="{ width: `${percentage}%` }"
-                  ></div>
-                </div>
-                <div class="flex justify-between text-xs text-gray-500 mt-2">
-                  <span>0%</span>
-                  <span>100%</span>
-                </div>
-              </div>
-            </div>
           </div>
-          </div>
-
+        
         <!-- Test Results (default) -->
         
         <div v-if="reviewQuestions && quizType !== 'survey'" class="max-w-4xl mx-auto sm:px-6 lg:px-8">

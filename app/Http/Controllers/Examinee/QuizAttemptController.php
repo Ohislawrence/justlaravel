@@ -655,7 +655,7 @@ class QuizAttemptController extends Controller
             'quiz' => $quiz->only('id', 'title', 'passing_score','survey_thank_you_message','show_correct_answers','quiz_type','redirect_on_complete_url','settings'),
             'attempt' => $attempt->only([
                 'id', 'score', 'max_score', 'percentage',
-                'is_passed', 'completed_at', 'time_spent'
+                'is_passed', 'completed_at', 'time_spent','guest_name'
             ]),
             'questions' => $questions,
             'responses' => $responses,
