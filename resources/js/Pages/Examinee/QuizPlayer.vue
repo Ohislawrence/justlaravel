@@ -28,6 +28,7 @@
             'animate-pulse': questionTimeRemaining <= 10 
           }">
             Q: {{ formattedQuestionTimeRemaining }}
+            <span v-if="questionTimeRemaining <= 5" class="ml-1">(Submitting...)</span>
           </span>
         </div>
         
@@ -149,9 +150,9 @@
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
       <button
         @click="prevQuestion"
-        :disabled="currentQuestionIndex === 0 || perQuestionTiming"
-        class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-800 px-5 py-2 rounded-md font-medium transition-colors flex items-center justify-center"
-      >
+          :disabled="currentQuestionIndex === 0 || perQuestionTiming || showAutoSubmitNotification"
+          class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-800 px-5 py-2 rounded-md font-medium transition-colors flex items-center justify-center"
+        >
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
         </svg>
@@ -237,7 +238,7 @@
         <h3 class="text-lg font-bold text-center text-gray-900">Submit</h3>
         <div class="mt-4 text-center">
           <p class="text-sm text-gray-600 mb-5">
-            Are you sure you want to submit your quiz? This action cannot be undone.
+            Are you sure you want to submit this test? This action cannot be undone.
           </p>
           <div v-if="unansweredQuestions > 0" class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5">
             <p class="text-amber-800 text-sm font-semibold flex items-center justify-center">
@@ -278,6 +279,25 @@
       </div>
     </div>
   </div>
+  <!-- Auto Submit Notification Modal -->
+<div v-if="showAutoSubmitNotification" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+  <div class="relative w-full max-w-md bg-white rounded-xl shadow-xl transform transition-all">
+    <div class="px-6 pt-6 pb-4">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 mb-4">
+        <ClockIcon class="h-6 w-6 text-amber-600" />
+      </div>
+      <h3 class="text-lg font-bold text-center text-gray-900">Time's Up!</h3>
+      <div class="mt-4 text-center">
+        <p class="text-sm text-gray-600 mb-5">
+          Question time has expired. Your quiz will be submitted automatically.
+        </p>
+        <div class="text-center bg-amber-50 rounded-lg p-3 text-xs text-amber-700">
+          <p class="font-medium">Submitting in 2 seconds...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
   <div v-if="quiz.quiz_type != 'survey'">
     <div v-if="props.quiz.is_proctored">
       <Proctoring
@@ -349,6 +369,8 @@ const showImageModal = ref(false);
 const submitting = ref(false);
 const timeRemaining = ref(props.remainingTime ? props.remainingTime : (props.timeLimit ? props.timeLimit * 60 : 0));
 const timer = ref(null);
+const showAutoSubmitNotification = ref(false);
+const autoSubmitTimer = ref(null);
 
 // Computed properties - define these AFTER reactive state
 const currentQuestion = computed(() => {
@@ -608,17 +630,18 @@ function handleQuestionTimeUp() {
     saveProgressImmediate();
   }
   
-  // Show notification
-  if (currentQuestionIndex.value < props.questions.length - 1) {
-    // Move to next question if available
+  // Show auto-submit notification for per-question timing
+  if (perQuestionTiming.value) {
+    showAutoSubmitNotification.value = true;
+    
+    // Auto-submit after 2 seconds
     setTimeout(() => {
-      nextQuestion();
-    }, 1000);
+      showAutoSubmitNotification.value = false;
+      submitQuiz();
+    }, 2000);
   } else {
-    // If last question, submit quiz
-    setTimeout(() => {
-      confirmSubmit();
-    }, 1000);
+    // For quiz-level timing, use the existing confirmation modal
+    confirmSubmit();
   }
 }
 
@@ -745,6 +768,9 @@ onUnmounted(() => {
 
   if (periodicSaver.value) {
     clearInterval(periodicSaver.value);
+  }
+  if (autoSubmitTimer.value) {
+    clearTimeout(autoSubmitTimer.value);
   }
 });
 
